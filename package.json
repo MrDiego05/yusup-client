@@ -1,0 +1,47 @@
+{
+    "name": "Selvania-Launcher",
+    "preductname": "Selvania Launcher",
+    "version": "2.2.2",
+    "description": "Launcher Mincraft pour le serveur Selvania",
+    "main": "src/app.js",
+    "author": {
+        "name": "luuxis, Inc.",
+        "email": "contact@luuxis.fr",
+        "url": "https://github.com/luuxis"
+    },
+    "url": "http://luuxcraft.fr/api/user/bb8f5247-1d38-41bb-ab6d-3200471a06b2",
+    "scripts": {
+        "start": "cross-env-shell NODE_ENV=dev electron .",
+        "creator": "cross-env-shell NODE_ENV=dev CREATOR_MODE=true electron .",
+        "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
+        "build": "node build.js --obf=true --build=platform",
+        "icon": "node build.js --icon"
+    },
+    "license": "CCANC",
+    "nodemonConfig": {
+        "ext": "js,html,css",
+        "ignore": "**/test"
+    },
+    "dependencies": {
+        "crypto": "^1.0.1",
+        "electron-store": "^8.2.0",
+        "electron-updater": "^6.7.3",
+        "extract-zip": "^2.0.1",
+        "minecraft-java-core": "^4.2.5",
+        "node-fetch": "^2.7.0",
+        "xml-js": "^1.6.11"
+    },
+    "devDependencies": {
+        "cross-env": "^10.1.0",
+        "electron": "^40.0.0",
+        "electron-builder": "^26.0.12",
+        "javascript-obfuscator": "^5.1.0",
+        "jimp": "^1.6.0",
+        "nodemon": "^3.1.11",
+        "png2icons": "^2.0.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/luuxis/Selvania-Launcher.git"
+    }
+}
