@@ -431,6 +431,31 @@ document.getElementById('btn-select-git-dir').addEventListener('click', async ()
     }
 });
 
+// Obtener la URL de GitHub Pages a partir del Git Remote origin
+function getGitHubPagesUrl(gitDir) {
+    return new Promise((resolve) => {
+        exec('git remote get-url origin', { cwd: gitDir }, (err, stdout) => {
+            if (err || !stdout) {
+                resolve('https://usuario.github.io/repositorio');
+                return;
+            }
+            const remote = stdout.trim();
+            // Match git@github.com:username/repo.git o https://github.com/username/repo.git
+            const match = remote.match(/github\.com[:/]([^/]+)\/([^.]+)/);
+            if (match) {
+                const username = match[1];
+                let repo = match[2];
+                if (repo.endsWith('.git')) {
+                    repo = repo.slice(0, -4);
+                }
+                resolve(`https://${username}.github.io/${repo}`);
+            } else {
+                resolve('https://usuario.github.io/repositorio');
+            }
+        });
+    });
+}
+
 // Deploy / Push to GitHub Pages
 document.getElementById('btn-push-github').addEventListener('click', async () => {
     const pack = getSelectedPack();
@@ -451,23 +476,35 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
     try {
         log('[GitHub Pages] Iniciando proceso de publicación...', 'info');
         progressContainer.style.display = 'flex';
-        progressStatus.textContent = 'Copiando archivos al repositorio...';
+        progressStatus.textContent = 'Calculando URL de GitHub Pages...';
 
-        // 1. Copiar modpack.json y archivos al repositorio local git
+        const ghPagesUrl = await getGitHubPagesUrl(selectedGitLocation);
+        log(`[GitHub Pages] URL base detectada: ${ghPagesUrl}`, 'info');
+
+        // 1. Leer el modpack.json local
         const srcJson = path.join(pack.location, 'modpack.json');
         if (!fs.existsSync(srcJson)) {
             throw new Error('Primero debes COMPILAR el modpack antes de subirlo.');
         }
 
-        // Copiar modpack.json al repositorio git (puedes nombrarlo según el ID)
+        const localJsonContent = JSON.parse(fs.readFileSync(srcJson, 'utf8'));
+
+        // Modificar las URLs de descarga para apuntar a GitHub Pages
+        const finalJsonContent = localJsonContent.map(mod => {
+            return {
+                ...mod,
+                url: `${ghPagesUrl}/mods/${mod.name}`
+            };
+        });
+
+        // Guardar el modpack.json modificado en el repositorio local Git
         const targetJsonName = `${pack.id}.json`;
         const destJson = path.join(selectedGitLocation, targetJsonName);
-        fs.copyFileSync(srcJson, destJson);
-        log(`Copiado modpack.json a: ${destJson}`);
+        fs.writeFileSync(destJson, JSON.stringify(finalJsonContent, null, 4));
+        log(`Copiado y ajustado modpack.json en: ${destJson}`);
 
-        // Opcional: Copiar mods si es necesario (generalmente GitHub Pages tiene límites de archivos grandes,
-        // pero puedes subir archivos si son ligeros. Si no, solo el modpack.json).
-        // Copiamos también la carpeta mods
+        // Opcional: Copiar carpeta de mods
+        progressStatus.textContent = 'Copiando mods al repositorio...';
         const srcMods = path.join(pack.location, 'mods');
         const destMods = path.join(selectedGitLocation, 'mods');
         if (fs.existsSync(srcMods)) {
@@ -479,12 +516,68 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
             log('Copias de mods realizadas al repositorio git.');
         }
 
-        // 2. Modificar la URL del modpack.json para que apunte a las URLs de GitHub Pages
-        // Si el usuario tiene su GitHub Pages en: https://nombreusuario.github.io/repositorio/
-        // Podemos leer las URLs de los mods y cambiarlas dinámicamente si es necesario.
-        // Pero el json copiado al git ya es suficiente.
+        // 2. Leer o crear instances.json en el repositorio Git
+        const destInstancesPath = path.join(selectedGitLocation, 'instances.json');
+        let instancesObj = {};
+        if (fs.existsSync(destInstancesPath)) {
+            try {
+                instancesObj = JSON.parse(fs.readFileSync(destInstancesPath, 'utf8'));
+            } catch (e) {
+                instancesObj = {};
+            }
+        }
 
-        // 3. Ejecutar comandos GIT en la consola
+        // Agregar o actualizar el modpack en instances.json
+        instancesObj[pack.id] = {
+            name: pack.id,
+            title: pack.title,
+            status: "operationnel",
+            gameVersion: pack.gameVersion,
+            modpack_url: `${ghPagesUrl}/${pack.id}.json`,
+            loader: {
+                type: pack.loader,
+                build: pack.loaderVersion,
+                enable: pack.loader !== 'vanilla'
+            },
+            whitelistActive: false,
+            whitelist: []
+        };
+
+        fs.writeFileSync(destInstancesPath, JSON.stringify(instancesObj, null, 4));
+        log(`[GitHub Pages] Actualizado instances.json en el repositorio.`);
+
+        // 3. Crear config.json y articles.json por defecto en el repositorio si no existen
+        const destConfigPath = path.join(selectedGitLocation, 'config.json');
+        if (!fs.existsSync(destConfigPath)) {
+            const defaultConfig = {
+                rss: null,
+                status: {
+                    server: {
+                        ip: "127.0.0.1",
+                        port: 25565
+                    }
+                },
+                maintenance: false
+            };
+            fs.writeFileSync(destConfigPath, JSON.stringify(defaultConfig, null, 4));
+            log(`[GitHub Pages] Creado config.json por defecto.`);
+        }
+
+        const destArticlesPath = path.join(selectedGitLocation, 'articles.json');
+        if (!fs.existsSync(destArticlesPath)) {
+            const defaultArticles = [
+                {
+                    title: `¡Modpack ${pack.title} listo!`,
+                    content: `El modpack se ha actualizado y publicado exitosamente en GitHub Pages. ¡A jugar!`,
+                    author: "Yusup Creator Tools",
+                    publish_date: "Ahora"
+                }
+            ];
+            fs.writeFileSync(destArticlesPath, JSON.stringify(defaultArticles, null, 4));
+            log(`[GitHub Pages] Creado articles.json por defecto.`);
+        }
+
+        // 4. Ejecutar comandos GIT en la consola
         progressStatus.textContent = 'Ejecutando Git commands...';
         log('[Git] Ejecutando: git add .');
         

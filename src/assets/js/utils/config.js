@@ -8,8 +8,11 @@ const nodeFetch = require("node-fetch");
 const convert = require('xml-js');
 let url = pkg.user ? `${pkg.url}/${pkg.user}` : pkg.url
 
-let config = `${url}/config`;
-let articles = `${url}/articles`;
+// Si es un alojamiento estático (ej. GitHub Pages), añadimos la extensión .json
+const isStatic = url.includes('github.io') || url.includes('raw.githubusercontent.com') || url.includes('githack');
+
+let config = isStatic ? `${url}/config.json` : `${url}/config`;
+let articles = isStatic ? `${url}/articles.json` : `${url}/articles`;
 
 class Config {
     GetConfig() {
@@ -24,14 +27,15 @@ class Config {
     }
 
     async getInstanceList() {
-        let urlInstance = `${url}/instances`
+        let urlInstance = isStatic ? `${url}/instances.json` : `${url}/instances`
         let instances = await nodeFetch(urlInstance).then(res => res.json()).catch(err => err)
         let instancesList = []
-        instances = Object.entries(instances)
-
-        for (let [name, data] of instances) {
-            let instance = data
-            instancesList.push(instance)
+        if (instances && typeof instances === 'object' && !instances.error) {
+            instances = Object.entries(instances)
+            for (let [name, data] of instances) {
+                let instance = data
+                instancesList.push(instance)
+            }
         }
         return instancesList
     }
