@@ -1,0 +1,38 @@
+[
+    {
+        "name": "create-fabric-6.0.8.1+build.1744-mc1.20.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/create-fabric-6.0.8.1+build.1744-mc1.20.1.jar",
+        "md5": "0adc5619a8dc366b0185dc1e2f89d35e",
+        "path": "mods/create-fabric-6.0.8.1+build.1744-mc1.20.1.jar"
+    },
+    {
+        "name": "entityculling-fabric-1.10.1-mc1.20.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/entityculling-fabric-1.10.1-mc1.20.1.jar",
+        "md5": "4ab5260fb5dba769f4ee95d57b3aa356",
+        "path": "mods/entityculling-fabric-1.10.1-mc1.20.1.jar"
+    },
+    {
+        "name": "fabric-api-0.92.6+1.20.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/fabric-api-0.92.6+1.20.1.jar",
+        "md5": "3483560775f416a4c759535b898165a5",
+        "path": "mods/fabric-api-0.92.6+1.20.1.jar"
+    },
+    {
+        "name": "indium-1.0.36+mc1.20.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/indium-1.0.36+mc1.20.1.jar",
+        "md5": "21cefdaa742e1f31ded4f85f55a0f41c",
+        "path": "mods/indium-1.0.36+mc1.20.1.jar"
+    },
+    {
+        "name": "sodium-fabric-0.5.13+mc1.20.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/sodium-fabric-0.5.13+mc1.20.1.jar",
+        "md5": "76e0349865f91f315aae087a6e88a84a",
+        "path": "mods/sodium-fabric-0.5.13+mc1.20.1.jar"
+    },
+    {
+        "name": "xaerominimap-fabric-1.20.1-25.3.10.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/xaerominimap-fabric-1.20.1-25.3.10.jar",
+        "md5": "611c8024b1bf526ff2130d7c86b4a24f",
+        "path": "mods/xaerominimap-fabric-1.20.1-25.3.10.jar"
+    }
+]

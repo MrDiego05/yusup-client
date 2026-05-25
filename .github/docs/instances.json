@@ -1,0 +1,16 @@
+{
+    "chuckygames": {
+        "name": "chuckygames",
+        "title": "Chucky Games v1.0",
+        "status": "operationnel",
+        "gameVersion": "1.21.1",
+        "modpack_url": "https://MrDiego05.github.io/yusup-client/chuckygames.json",
+        "loader": {
+            "type": "fabric",
+            "build": "0.19.2",
+            "enable": true
+        },
+        "whitelistActive": false,
+        "whitelist": []
+    }
+}
