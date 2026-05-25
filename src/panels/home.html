@@ -1,46 +1,351 @@
-<div class=container>
-    <div class="status-server">
-        <img class="server-status-icon" src="assets/images/icon/icon.png">
-        <div class="server-status-infos">
-            <div class="server-status-name">Minecraft</div>
-            <div class="server-status-text">operationeel - 0 ms</div>
-        </div>
-        <div class="status-player-count">
-            <div class="player-count">0</div>
-        </div>
-    </div>
+<div class="launcher-dashboard">
 
-    <div class="home-bottom">
-        <div class="new-tab">
-            <div class="titre-tab-new">Actualités</div>
-            <div class="news-list content-scroll"></div>
-        </div>
-    </div>
-
-    <div class="sidebar">
-        <div class="player-options">
-            <div class="player-head"></div>
-        </div>
-
-        <div class="play-elements">
-            <div class="play-instance">
-                <button class="play-btn">Jouer</button>
-                <div class="instance-select icon-arrow"></div>
+    <div class="sidebar-left">
+        <!-- Top Section: Account & Dynamic Back Button -->
+        <div class="sidebar-top">
+            <div class="sidebar-btn" id="nav-btn-account" title="Configuración de Cuenta">
+                <div class="player-head-nav">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
             </div>
-            <div class="info-starting-game">
-                <div class="info-starting-game-text">Connexion...</div>
-                <progress value="0" max="0" class="progress-bar"></progress>
+            <!-- Floating Back Button (shown only inside modpack details view) -->
+            <div class="sidebar-circle-btn back-btn" id="sidebar-back-btn" style="display: none;"
+                title="Volver a Instancias">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
             </div>
         </div>
 
-        <div class="settings-btn icon-settings"></div>
+        <!-- Center Section: Home & Instances -->
+        <div class="sidebar-center">
+            <div class="sidebar-circle-btn nav-btn active" id="nav-btn-home" title="Inicio / Actualizaciones">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </div>
+            <div class="sidebar-circle-btn nav-btn" id="nav-btn-instances" title="Instancias / Modpacks">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Settings Gear -->
+        <div class="sidebar-bottom">
+            <div class="sidebar-circle-btn nav-btn" id="nav-btn-settings" title="Ajustes del Launcher">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+            </div>
+        </div>
     </div>
 
-    <div class="instance-popup">
-        <div class="instances-tab">
-            <div class="close-popup icon-close"></div>
-            <p>Choisissez votre instance...</p>
-            <div class="instances-List"></div>
+    <!-- 2. MAIN CONTENT VIEWPORT -->
+    <div class="dashboard-content">
+        <div class="main-card-viewport">
+
+            <!-- ==================== VIEW 1: ACCOUNT SETTINGS ==================== -->
+            <div class="dashboard-view" id="view-account">
+                <h1 class="view-title">Configuración de Cuenta</h1>
+
+                <div class="account-grid-layout content-scroll">
+                    <!-- Col 1: Active Account info & Switcher -->
+                    <div class="account-card-col">
+                        <div class="glass-section-card active-profile-box">
+                            <div class="active-profile-header">
+                                <div class="player-big-head" id="acc-active-avatar"></div>
+                                <div class="active-profile-details">
+                                    <div class="active-profile-name" id="acc-active-name">Cargando...</div>
+                                    <div class="active-profile-uuid" id="acc-active-uuid">UUID: -</div>
+                                    <span class="active-profile-type-badge" id="acc-active-type">Offline</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-section-card accounts-list-box">
+                            <h3 class="section-card-title">Cambiar Cuenta</h3>
+                            <div class="accounts-grid-scroller" id="account-selection-container">
+                                <!-- Loaded dynamically in home.js -->
+                            </div>
+                            <button class="premium-action-btn add-acc-btn" id="acc-btn-add-account">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" style="margin-right: 6px;">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Agregar Cuenta
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Col 2: Friends list -->
+                    <div class="account-card-col">
+                        <div class="glass-section-card friends-box">
+                            <h3 class="section-card-title">Lista de Amigos</h3>
+                            <div class="friends-list content-scroll" id="friends-list-container">
+                                <!-- Loaded dynamically in home.js -->
+                            </div>
+
+                            <div class="add-friend-form">
+                                <input type="text" class="friend-input" id="add-friend-username"
+                                    placeholder="Nombre de usuario del amigo">
+                                <button class="premium-action-btn" id="add-friend-btn">Agregar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW 2: HOME / UPDATES ==================== -->
+            <div class="dashboard-view active" id="view-home">
+                <h1 class="view-title">Home</h1>
+                <h2 class="view-subtitle">Ultimas actualizaciones</h2>
+
+                <div class="news-list content-scroll">
+                    <!-- News blocks loaded dynamically in home.js -->
+                </div>
+            </div>
+
+            <!-- ==================== VIEW 3: INSTANCES CATALOG ==================== -->
+            <div class="dashboard-view" id="view-instances">
+                <h1 class="view-title">Instancias</h1>
+
+                <div class="instances-viewport-scroll content-scroll">
+                    <!-- Admin Section: Creados (Creator Tools) -->
+                    <div class="instances-section" id="instances-admin-section" style="display: none;">
+                        <h2 class="instances-section-title">Creados en Creator Tools</h2>
+                        <div class="instances-grid" id="instances-grid-creator">
+                            <!-- Dynamically loaded in home.js -->
+                        </div>
+                    </div>
+
+                    <!-- Standard Section: Instalados -->
+                    <div class="instances-section">
+                        <h2 class="instances-section-title">Instalados</h2>
+                        <div class="instances-grid" id="instances-grid-installed">
+                            <!-- Dynamically loaded in home.js -->
+                        </div>
+                    </div>
+
+                    <!-- Standard Section: Todas las instancias -->
+                    <div class="instances-section">
+                        <h2 class="instances-section-title">Todas las instancias</h2>
+                        <div class="instances-grid" id="instances-grid-all">
+                            <!-- Dynamically loaded in home.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW 4: MODPACK DETAILS ==================== -->
+            <div class="dashboard-view" id="view-detail">
+                <!-- Selected Modpack Screen details -->
+                <div class="detail-pack-screen">
+                    <h1 class="detail-pack-name" id="detail-title">Cargando...</h1>
+
+                    <div class="detail-pack-actions-bar">
+                        <!-- Play / Download Capsule Button -->
+                        <button class="detail-play-btn" id="detail-play-btn">
+                            <span class="detail-play-btn-content" id="detail-play-btn-content">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                <span>Play</span>
+                            </span>
+                            <div class="play-btn-spinner" id="detail-play-btn-spinner" style="display: none;">
+                                <svg class="spinner-svg" viewBox="0 0 50 50">
+                                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                                </svg>
+                            </div>
+                        </button>
+
+                        <!-- Options Three Dots Button -->
+                        <button class="detail-options-trigger-btn" id="detail-options-btn" title="Accesos Rápidos">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <circle cx="12" cy="5" r="1.5"></circle>
+                                <circle cx="12" cy="12" r="1.5"></circle>
+                                <circle cx="12" cy="19" r="1.5"></circle>
+                            </svg>
+                        </button>
+
+                        <!-- Absolute Glassmorphic Options Dropdown Menu -->
+                        <div class="detail-glass-dropdown" id="detail-options-dropdown" style="display: none;">
+                            <div class="detail-dropdown-item" id="opt-btn-worlds">
+                                <span class="dropdown-item-icon">🌍</span>
+                                <span>Mundos / Saves</span>
+                            </div>
+                            <div class="detail-dropdown-item" id="opt-btn-resourcepacks">
+                                <span class="dropdown-item-icon">🎨</span>
+                                <span>Resourcepacks</span>
+                            </div>
+                            <div class="detail-dropdown-item" id="opt-btn-screenshots">
+                                <span class="dropdown-item-icon">📸</span>
+                                <span>Screenshots</span>
+                            </div>
+                            <hr class="dropdown-divider">
+                            <div class="detail-dropdown-item danger-item" id="opt-btn-reinstall">
+                                <span class="dropdown-item-icon">🗑️</span>
+                                <span>Eliminar Instancia</span>
+                            </div>
+                            <div class="detail-dropdown-item warning-item" id="opt-btn-kill">
+                                <span class="dropdown-item-icon">🛑</span>
+                                <span>Forzar Cierre</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags list -->
+                    <div class="detail-pack-tags" id="detail-tags">
+                        <span>Forge</span>
+                        <span>Terror</span>
+                        <span>Amistad</span>
+                    </div>
+
+                    <!-- Metadata details -->
+                    <div class="detail-pack-meta-box">
+                        <div class="meta-item-badge">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+                                stroke-width="2.5" style="margin-right: 5px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>Jugado: <span id="detail-playtime">0.0h</span></span>
+                        </div>
+                        <div class="meta-item-badge">
+                            <span>Versión: <span id="detail-version">1.20.1</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Text information -->
+                    <div class="detail-pack-description-container content-scroll">
+                        <h3 class="detail-info-heading">Información</h3>
+                        <p class="detail-pack-description-text" id="detail-desc">
+                            Cargando descripción...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Download/Installation Progress Card (styled inline on the bottom right) -->
+                <div class="detail-progress-overlay-card" id="detail-progress" style="display: none;">
+                    <div class="progress-status-container">
+                        <div class="progress-status-text" id="detail-progress-text">Descargando recursos...</div>
+                        <div class="progress-percent" id="detail-progress-pct">0%</div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill-wavy" id="detail-progress-wavy" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW 5: GENERAL LAUNCHER SETTINGS ==================== -->
+            <div class="dashboard-view" id="view-settings">
+                <h1 class="view-title">Configuración del Launcher</h1>
+
+                <div class="settings-content-wrapper content-scroll">
+                    <!-- Tab 1: RAM & JAVA -->
+                    <div class="glass-section-card settings-glass-section">
+                        <h3 class="section-card-title">Asignación de RAM</h3>
+                        <p class="section-card-description">
+                            Ajusta la memoria RAM asignada al juego para optimizar su rendimiento. Se recomienda no
+                            superar el 50% de la RAM física de tu equipo.
+                        </p>
+
+                        <div class="slider-block-container">
+                            <div class="memory-slider" min="0.5" max="8" step="0.5">
+                                <div class="slider-touch-left">
+                                    <span value="0 Go"></span>
+                                </div>
+                                <div class="slider-touch-right">
+                                    <span value="0 Go"></span>
+                                </div>
+                                <div class="slider-line">
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="ram-details-badge">
+                                <div>Total: <span id="total-ram" class="badge-accent">0 GB</span></div>
+                                <div>Libre: <span id="free-ram" class="badge-accent">0 GB</span></div>
+                            </div>
+                        </div>
+
+                        <h3 class="section-card-title" style="margin-top: 24px;">Ruta de Ejecutable Java</h3>
+                        <p class="section-card-description">
+                            El launcher incluye y ejecuta una versión de Java por defecto en el siguiente
+                            directorio:<br>
+                            <code class="java-path-txt">Cargando...</code>
+                        </p>
+                        <div class="java-inputs-row">
+                            <input type="text" class="java-path-input-text input-field-design" disabled>
+                            <input type="file" class="java-path-input-file" accept="application/octet-stream"
+                                style="display: none;" />
+                            <div class="java-btn-actions">
+                                <button class="premium-action-btn java-path-set">Examinar</button>
+                                <button class="premium-action-btn neutral-btn java-path-reset">Por defecto</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: MINECRAFT RESOLUTION -->
+                    <div class="glass-section-card settings-glass-section">
+                        <h3 class="section-card-title">Resolución de Pantalla</h3>
+                        <p class="section-card-description">
+                            Define las dimensiones de la pantalla de inicio de Minecraft.
+                        </p>
+                        <div class="resolution-inputs-row">
+                            <div class="input-resolution-box">
+                                <input type="number" class="width-size input-field-design" placeholder="Ancho">
+                                <span class="res-cross">x</span>
+                                <input type="number" class="height-size input-field-design" placeholder="Alto">
+                            </div>
+                            <button class="premium-action-btn neutral-btn size-reset">Por defecto</button>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: LAUNCHER DOWNLOADS, THEME & BEHAVIORS -->
+                    <div class="glass-section-card settings-glass-section">
+                        <h3 class="section-card-title">Descargas Paralelas</h3>
+                        <p class="section-card-description">
+                            Cantidad máxima de descargas simultáneas de archivos de recursos durante las instalaciones.
+                        </p>
+                        <div class="downloads-row">
+                            <input type="number" class="max-files input-field-design"
+                                style="width: 80px; text-align: center;">
+                            <span class="downloads-label">Descargas Simultáneas</span>
+                            <button class="premium-action-btn neutral-btn max-files-reset">Por defecto</button>
+                        </div>
+
+                        <h3 class="section-card-title" style="margin-top: 24px;">Tema Visual</h3>
+                        <p class="section-card-description">Personaliza la interfaz principal del launcher.</p>
+                        <div class="theme-selection-grid theme-box">
+                            <button class="theme-btn theme-btn-clair">Claro</button>
+                            <button class="theme-btn theme-btn-sombre">Oscuro</button>
+                            <button class="theme-btn theme-btn-auto">Automático</button>
+                        </div>
+
+                        <h3 class="section-card-title" style="margin-top: 24px;">Comportamiento al Iniciar</h3>
+                        <p class="section-card-description">Selecciona qué acción debe tomar el launcher cuando
+                            Minecraft se inicie.</p>
+                        <div class="behavior-selection-list close-box">
+                            <button class="behavior-btn close-launcher">Cerrar launcher tras inicio</button>
+                            <button class="behavior-btn close-none">Mantener launcher abierto</button>
+                            <button class="behavior-btn close-all">Cerrar juego si el launcher cierra</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

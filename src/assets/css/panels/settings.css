@@ -1,22 +1,74 @@
+/* ==========================================================================
+   Yusup Launcher Redesigned Settings Panel (Premium Glassmorphic Layout)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+
+.settings {
+    height: 100%;
+    font-family: 'Google Sans', sans-serif;
+}
+
 .settings .container {
     display: flex;
-    height: 100%;
-}
-
-.nav-settings {
-    width: 20%;
-    height: 100%;
-    background: var(--background);
-    display: flex;
     align-items: center;
-    flex-direction: column;
     justify-content: center;
-    font-size: 2.5rem;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 14, 11, 0.4);
+    backdrop-filter: blur(28px) saturate(1.2);
+    box-sizing: border-box;
 }
 
-.nav-settings p {
-    font-size: 60%;
-    margin-top: 80px;
+/* Float Center Glass Card Container */
+.settings-glass-card {
+    display: flex;
+    background: rgba(30, 27, 24, 0.72);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 40px;
+    backdrop-filter: blur(16px);
+    width: 780px;
+    height: 520px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    animation: settings-pop-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-sizing: border-box;
+}
+
+@keyframes settings-pop-up {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Left Sidebar Settings Nav */
+.nav-settings {
+    width: 28%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 1.5px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 30px 16px;
+    box-sizing: border-box;
+}
+
+.settings-title {
+    color: #f7ebe1;
+    font-size: 1.4em;
+    font-weight: 900;
+    margin: 10px 0 32px 0;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-family: 'Google Sans', sans-serif;
+    user-select: none;
 }
 
 .nav-box {
@@ -24,74 +76,110 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.nav-box #save {
-    border: solid 4px var(--background-element);
-    margin: 3rem;
+    gap: 8px;
+    height: 100%;
 }
 
 .nav-settings-btn {
-    font-size: 50%;
-    border: solid 4px var(--element-color);
-    padding: 5px 10px;
-    border-radius: 10px;
-    width: 70%;
+    font-size: 0.85em;
+    font-weight: 800;
+    padding: 12px 16px;
+    border-radius: 20px;
+    width: 90%;
     text-align: center;
-    margin: 0.5rem 0;
     cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #ede0d4;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    user-select: none;
 }
 
+.nav-settings-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+/* Active Highlight tab */
 .active-settings-BTN {
-    background: var(--element-color);
+    background: #f5ebe0 !important;
+    color: #3c2a21 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.close-main-btn {
+    background: rgba(226, 74, 59, 0.15) !important;
+    color: #e24a3b !important;
+    border: 1.2px solid rgba(226, 74, 59, 0.25) !important;
+    margin-top: auto !important;
+}
+
+.close-main-btn:hover {
+    background: rgba(226, 74, 59, 0.22) !important;
+    color: #ef4444 !important;
+}
+
+/* Right Viewport Settings Area */
+.settings-viewport {
+    width: 72%;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
 }
 
 .container-settings {
     position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    right: 0;
-    width: 80%;
-    height: calc(100% - 26px);
+    width: 100%;
+    height: 100%;
+    padding: 30px 36px;
+    box-sizing: border-box;
     opacity: 0;
     pointer-events: none;
-
-}
-
-.settings-elements-box {
-    background: var(--background-element);
-    width: 80%;
-    border-radius: 10px;
-    padding: 1.5rem 2rem;
-    margin: 0.5rem;
-}
-
-.setting-text {
-    font-size: 0.8rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: opacity 0.25s ease-out;
 }
 
 .active-container-settings {
     opacity: 1;
-    z-index: 1;
     pointer-events: all;
+    z-index: 5;
 }
 
 .titre-tab {
+    font-size: 1.1em;
+    font-weight: 800;
+    color: #f7ebe1;
+    margin: 12px 0 2px 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    border-left: 3.5px solid #e24a3b;
+    padding-left: 10px;
+    width: fit-content;
+    box-sizing: border-box;
+}
+
+.settings-elements-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.2px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    margin: 1.5rem 0;
-    padding: 0.5rem 2rem;
-    border-radius: 2rem;
-    text-align: center;
-    background: var(--background-transparent);
-    color: var(--color);
+    flex-direction: column;
+    gap: 14px;
+}
+
+.setting-text {
+    font-size: 0.8em;
+    line-height: 1.5;
+    color: #ede0d4;
 }
 
 .settings-elements {
-    margin-top: 1.5rem;
     display: flex;
     align-items: center;
     width: 100%;
@@ -99,123 +187,150 @@
 
 .content-center {
     justify-content: center;
+    gap: 12px;
 }
 
 .content-evenly {
-    justify-content: space-evenly;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
 }
 
-/*******************************************************************************
- *                                                                             *
- * account tab                                                                 *
- *                                                                             *
- ******************************************************************************/
+/* ==========================================================================
+   ACCOUNTS TAB
+   ========================================================================== */
 .accounts-list {
-    max-height: 90%;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
 }
 
 .account {
-    background: var(--background-element);
-    border: solid 4px var(--background-element);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
     display: flex;
-    justify-content: space-around;
     align-items: center;
-    width: calc(400px - 8px);
-    height: calc(100px - 8px);
-    margin: 1rem;
-    border-radius: 15px;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-radius: 20px;
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.account:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .account-select {
-    border: solid 4px var(--element-color);
-}
-
-.accounts-list #add {
-    justify-content: center;
-    cursor: pointer;
-}
-
-.add-profile {
-    width: 70px;
-    height: 70px;
-    font-size: 3rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-}
-
-.add-text-profile {
-    font-size: 1.5rem;
-    pointer-events: none;
+    border-color: #e24a3b !important;
+    background: rgba(226, 74, 59, 0.08) !important;
 }
 
 .profile-image {
-    width: 70px;
-    height: 70px;
-    background: url(../../images/default/setve.png);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
     background-size: cover;
-    border-radius: 15px;
-    pointer-events: none;
+    background-position: center;
     image-rendering: pixelated;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    pointer-events: none;
 }
 
 .profile-infos {
-    text-align: center;
-    width: 10rem;
+    flex: 1;
+    margin-left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
     pointer-events: none;
-
 }
 
 .profile-pseudo {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 1.5rem;
+    font-size: 1.05em;
+    font-weight: 800;
+    color: #ffffff;
     pointer-events: none;
-
 }
 
 .profile-uuid {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 0.7em;
+    color: rgba(255, 255, 255, 0.4);
     pointer-events: none;
-
 }
 
 .delete-profile {
-    width: 70px;
-    height: 70px;
-    background: var(--background-transparent);
-    border-radius: 15px;
-    font-size: 3rem;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     display: flex;
-    justify-content: center;
     align-items: center;
-    color: #ff2c2c;
+    justify-content: center;
     cursor: pointer;
+    font-weight: 900;
+    font-size: 1.1em;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.delete-profile:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ff3b30;
+    transform: scale(1.05);
 }
 
 .delete-profile-icon {
     pointer-events: none;
 }
 
-/*******************************************************************************
- *                                                                             *
- * java tab                                                                    *
- *                                                                             *
- ******************************************************************************/
+.accounts-list #add {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    background: transparent;
+    justify-content: center;
+    cursor: pointer;
+    padding: 16px;
+}
 
+.accounts-list #add:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.add-profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 1.1em;
+    font-weight: 900;
+    margin-right: 12px;
+}
+
+.add-text-profile {
+    font-size: 0.95em;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   RAM & JAVA TAB
+   ========================================================================== */
 .memory-slider {
     position: relative;
-    margin: 0 1.5rem 0 0;
-    height: 18px;
-    width: 50%;
+    height: 12px;
+    width: 55%;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
     user-select: none;
 }
 
@@ -227,30 +342,34 @@
     height: 18px;
     width: 18px;
     z-index: 2;
+    top: -3px;
 }
 
 .slider-touch-left span,
 .slider-touch-right span {
     display: block;
     width: 20px;
-    height: 10px;
-    background: #bbb;
-    border: 4px solid var(--element-color);
-    transition: background-color .2s, border .2s;
-    border-radius: 18px;
+    height: 20px;
+    background: #f5ebe0;
+    border: 4px solid #e24a3b;
+    border-radius: 50%;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    transition: background-color .2s;
+    box-sizing: border-box;
 }
 
 .slider-touch-left span:after,
 .slider-touch-right span:after {
     content: attr(value);
-    color: var(--element-color);
-    font: normal normal bold 12px/18px Poppins;
+    color: #f7ebe1;
+    font-size: 11px;
+    font-weight: 800;
     white-space: nowrap;
     pointer-events: none;
     position: absolute;
-    top: -20px;
-    left: 83%;
+    top: -24px;
+    left: 50%;
     transform: translate(-50%);
 }
 
@@ -259,11 +378,10 @@
     position: absolute;
     width: calc(100% - 18px);
     left: 9px;
-    top: 7px;
-    height: 4px;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-    transition: background-color .2s;
+    top: 0px;
+    height: 100%;
+    border-radius: 6px;
+    background-color: transparent;
     z-index: 0;
     overflow: hidden;
 }
@@ -271,23 +389,26 @@
 .slider-line span {
     display: block;
     height: 100%;
-    width: 0%;
-    background: var(--element-color);
-    transition: background-color .2s;
+    background: #e24a3b;
 }
 
 .ram-info-block {
-    font-size: 0.9rem;
-    color: var(--color);
+    font-size: 0.85em;
+    color: #ede0d4;
+    line-height: 1.5;
 }
 
 .java-path-input-text {
-    background: var(--shadow);
-    border: none;
-    color: var(--color);
-    padding: 0.5rem 1rem;
-    border-radius: 15px;
-    width: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 14px;
+    width: 55%;
+    outline: none;
+    font-weight: 700;
+    font-family: inherit;
+    font-size: 0.85em;
 }
 
 .java-path-input-file {
@@ -297,117 +418,209 @@
 .java-path-box {
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 
 .java-path-btn {
-    padding: 0.3rem 1rem;
-    background: var(--element-color);
-    border-radius: 15px;
-    margin: 0 1rem;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.8em;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
-/*******************************************************************************
- *                                                                             *
- * resolution tab                                                              *
- *                                                                             *
- ******************************************************************************/
+.java-path-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.java-path-reset {
+    background: rgba(226, 74, 59, 0.1) !important;
+    color: #e24a3b !important;
+    border-color: rgba(226, 74, 59, 0.15) !important;
+}
+
+.java-path-reset:hover {
+    background: rgba(226, 74, 59, 0.15) !important;
+}
+
+/* ==========================================================================
+   RESOLUTION TAB
+   ========================================================================== */
 .input-size-element {
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 
 .input-resolution {
-    background: var(--shadow);
-    border: none;
-    color: var(--color);
-    padding: 0.5rem 1rem;
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 14px;
     text-align: center;
-    width: 6rem;
+    width: 6.5rem;
+    outline: none;
+    font-weight: 700;
+    font-family: inherit;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.input-resolution:focus {
+    border-color: #e24a3b;
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .size-cross {
-    margin: 0 0.5rem;
-}
-
-.size-cross:before {
-    font: normal normal bold 20px Icons;
-    content: "\e90e";
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 800;
+    font-size: 1.1em;
 }
 
 .size-btn {
-    padding: 0.3rem 1rem;
-    background: var(--element-color);
-    border-radius: 15px;
-    margin: 0 1rem;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.85em;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
-/*******************************************************************************
- *                                                                             *
- * Launcher tab                                                                *
- *                                                                             *
- ******************************************************************************/
+.size-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
 
+/* ==========================================================================
+   LAUNCHER CONFIGS TAB
+   ========================================================================== */
 .input-max-files {
-    background: var(--shadow);
-    border: none;
-    color: var(--color);
-    padding: 0.5rem 1rem;
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 14px;
     text-align: center;
-    width: 4rem;
-    margin-right: 1rem;
+    width: 5rem;
+    outline: none;
+    font-weight: 700;
+    font-family: inherit;
+    font-size: 0.9em;
+}
+
+.input-max-files:focus {
+    border-color: #e24a3b;
+}
+
+.files-label {
+    color: #ede0d4;
+    font-weight: 700;
+    font-size: 0.85em;
 }
 
 .max-files-btn {
-    padding: 0.3rem 1rem;
-    background: var(--element-color);
-    border-radius: 15px;
-    margin: 0 1rem;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.85em;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
+.max-files-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Visual Theme Capsules */
 .theme-btn {
-    margin: 0 1rem;
-    padding: calc(0.1rem + 4px) calc(1.5rem + 4px);
-    border-radius: 15px;
+    padding: 10px 20px;
+    border-radius: 16px;
     cursor: pointer;
+    font-weight: 800;
+    font-size: 0.85em;
+    transition: all 0.25s ease;
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    box-sizing: border-box;
+    text-align: center;
 }
 
 .theme-btn-clair {
-    background: var(--light-color);
-    color: var(--dark-color);
-    border: 2px solid var(--dark-color);
+    background: #ffffff;
+    color: #0f172a;
 }
 
 .theme-btn-sombre {
-    background: var(--dark-color);
-    color: var(--light-color);
-    border: 2px solid var(--color);
+    background: #0f172a;
+    color: #ffffff;
 }
 
 .theme-btn-auto {
-    background: var(--background);
-    color: var(--color);
-    border: 2px solid var(--color);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
 }
 
 .active-theme {
-    border: 4px solid var(--element-color);
+    border-color: #e24a3b !important;
+    box-shadow: 0 4px 15px rgba(226, 74, 59, 0.2);
 }
 
+/* Launcher Startup actions buttons */
 .close-btn {
-    font-size: 0.95rem;
-    width: 200px;
+    font-size: 0.8em !important;
+    width: 30% !important;
     text-align: center;
-    border: 4px solid var(--color);
-    border-radius: 15px;
-    padding: 1rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: #ede0d4 !important;
+    border-radius: 16px !important;
+    padding: 12px 8px !important;
     cursor: pointer;
+    transition: all 0.25s ease !important;
+    box-sizing: border-box;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
 }
 
 .active-close {
-    border: 4px solid var(--element-color);
+    border-color: #e24a3b !important;
+    background: rgba(226, 74, 59, 0.08) !important;
+    color: #e24a3b !important;
+    box-shadow: 0 4px 12px rgba(226, 74, 59, 0.15);
+}
+
+/* Custom Scrollbar for Right settings Viewports */
+.content-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.content-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

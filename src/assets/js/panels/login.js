@@ -13,41 +13,42 @@ class Login {
         this.config = config;
         this.db = new database();
 
-        // Inicializar ambos si la configuración es boolean (Premium/Cracked)
-        if (typeof this.config.online == 'boolean') {
+        // Determinar si usa AZauth (URL string) o el modo Dual (Premium/Offline)
+        const isAZauth = typeof this.config.online === 'string' && this.config.online.match(/^(http|https):\/\/[^ "]+$/);
+
+        if (!isAZauth) {
             this.getMicrosoft();
             this.getCrack();
 
-            // Ocultar el que no sea el predeterminado al inicio
             const loginHome = document.querySelector('.login-home');
             const loginOffline = document.querySelector('.login-offline');
-            if (this.config.online) {
-                loginHome.style.display = 'block';
-                loginOffline.style.display = 'none';
+            
+            // Por defecto, mostrar Premium a menos que la config de online sea estrictamente false
+            if (this.config.online !== false) {
+                if (loginHome) loginHome.style.display = 'block';
+                if (loginOffline) loginOffline.style.display = 'none';
             } else {
-                loginHome.style.display = 'none';
-                loginOffline.style.display = 'block';
+                if (loginHome) loginHome.style.display = 'none';
+                if (loginOffline) loginOffline.style.display = 'block';
             }
 
-            // Listeners para alternar vistas
-            document.querySelector('.switch-to-offline').addEventListener('click', () => {
-                loginHome.style.display = 'none';
-                loginOffline.style.display = 'block';
+            // Listeners para alternar vistas entre Online (Microsoft) y Offline (No Premium)
+            document.querySelector('.switch-to-offline')?.addEventListener('click', () => {
+                if (loginHome) loginHome.style.display = 'none';
+                if (loginOffline) loginOffline.style.display = 'block';
             });
 
-            document.querySelector('.switch-to-online').addEventListener('click', () => {
-                loginOffline.style.display = 'none';
-                loginHome.style.display = 'block';
+            document.querySelector('.switch-to-online')?.addEventListener('click', () => {
+                if (loginOffline) loginOffline.style.display = 'none';
+                if (loginHome) loginHome.style.display = 'block';
             });
-        } else if (typeof this.config.online == 'string') {
-            if (this.config.online.match(/^(http|https):\/\/[^ "]+$/)) {
-                this.getAZauth();
-            }
+        } else {
+            this.getAZauth();
         }
         
         document.querySelector('.cancel-home').addEventListener('click', () => {
             document.querySelector('.cancel-home').style.display = 'none'
-            changePanel('settings')
+            changePanel('home')
         })
     }
 
@@ -58,6 +59,15 @@ class Login {
         let microsoftBtn = document.querySelector('.connect-home');
 
         microsoftBtn.addEventListener("click", () => {
+            if (!this.config.client_id || this.config.client_id === '00000000-0000-0000-0000-000000000000') {
+                popupLogin.openPopup({
+                    title: 'Error de Configuración',
+                    content: 'El cliente de Microsoft no está configurado. El administrador debe registrar una aplicación en Azure Portal y colocar el client_id en config.json del repositorio GitHub Pages.',
+                    options: true
+                });
+                return;
+            }
+
             popupLogin.openPopup({
                 title: 'Conexión',
                 content: 'Por favor, espera...',
@@ -119,6 +129,9 @@ class Login {
                     options: true
                 });
                 return;
+            }
+            if (MojangConnect.meta) {
+                MojangConnect.meta.type = 'Offline';
             }
             await this.saveData(MojangConnect)
             popupLogin.closePopup();

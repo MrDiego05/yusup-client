@@ -1,0 +1,8 @@
+[
+    {
+        "title": "¡Bienvenido a Yusup Client!",
+        "content": "El launcher está listo para usar. Configura tu cliente_id de Azure en config.json para habilitar el inicio de sesión con Microsoft.",
+        "author": "Yusup Client",
+        "publish_date": "2025-01-01T00:00:00Z"
+    }
+]

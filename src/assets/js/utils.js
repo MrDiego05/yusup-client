@@ -24,27 +24,17 @@ async function setBackground(theme) {
         theme = configClient?.launcher_config?.theme || "auto"
         theme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
     }
-    let background
     let body = document.body;
     body.className = theme ? 'dark global' : 'light global';
-    if (fs.existsSync(`${__dirname}/assets/images/background/easterEgg`) && Math.random() < 0.005) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/easterEgg`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `url(./assets/images/background/easterEgg/${Background})`;
-    } else if (fs.existsSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`)) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${theme ? 'dark' : 'light'}/${Background})`;
-    }
-    body.style.backgroundImage = background ? background : theme ? '#000' : '#fff';
-    body.style.backgroundSize = 'cover';
+    body.style.backgroundImage = 'none';
+    body.style.backgroundColor = theme ? '#0b0f19' : '#f8fafc';
 }
 
 async function changePanel(id) {
-    let panel = document.querySelector(`.${id}`);
-    let active = document.querySelector(`.active`)
-    if (active) active.classList.toggle("active");
-    panel.classList.add("active");
+    let panel = document.querySelector(`.panel.${id}`);
+    let active = document.querySelector(`.panel.active`);
+    if (active) active.classList.remove("active");
+    if (panel) panel.classList.add("active");
 }
 
 async function appdata() {
@@ -67,21 +57,44 @@ async function addAccount(data) {
             <div class="icon-account-delete delete-profile-icon"></div>
         </div>
     `
-    return document.querySelector('.accounts-list').appendChild(div);
+    // Try all possible account list containers (legacy & new UI)
+    let container = document.querySelector('.accounts-list')
+        || document.getElementById('accounts-buttons-container')
+        || document.getElementById('account-selection-container');
+    if (container) {
+        container.appendChild(div);
+    }
 }
 
 async function accountSelect(data) {
-    let account = document.getElementById(`${data.ID}`);
+    if (!data) return;
+    
+    let accountData = data;
+    if (typeof data === 'string' || typeof data === 'number') {
+        let db = new database();
+        accountData = await db.readData('accounts', data);
+        if (!accountData) return;
+    }
+
+    let accountElement = document.getElementById(`${accountData.ID}`);
     let activeAccount = document.querySelector('.account-select')
 
-    if (activeAccount) activeAccount.classList.toggle('account-select');
-    account.classList.add('account-select');
-    if (data?.profile?.skins[0]?.base64) headplayer(data.profile.skins[0].base64);
+    if (activeAccount) activeAccount.classList.remove('account-select');
+    if (accountElement) accountElement.classList.add('account-select');
+    
+    // Update player head: try both legacy .player-head and new UI .player-head-nav
+    const playerHeadEl = document.querySelector(".player-head") || document.querySelector(".player-head-nav");
+    if (accountData?.profile?.skins && accountData.profile.skins[0] && accountData.profile.skins[0].base64) {
+        if (playerHeadEl) headplayer(accountData.profile.skins[0].base64, playerHeadEl);
+    } else {
+        if (playerHeadEl) playerHeadEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
+    }
 }
 
-async function headplayer(skinBase64) {
+async function headplayer(skinBase64, targetEl) {
     let skin = await new skin2D().creatHeadTexture(skinBase64);
-    document.querySelector(".player-head").style.backgroundImage = `url(${skin})`;
+    let el = targetEl || document.querySelector(".player-head") || document.querySelector(".player-head-nav");
+    if (el) el.style.backgroundImage = `url(${skin})`;
 }
 
 async function setStatus(opt) {

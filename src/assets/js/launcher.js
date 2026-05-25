@@ -43,8 +43,13 @@ class Launcher {
 
     shortcut() {
         document.addEventListener('keydown', e => {
+            // Ctrl + W to close window
             if (e.ctrlKey && e.keyCode == 87) {
                 ipcRenderer.send('main-window-close');
+            }
+            // Ctrl + R or F5 to Hot Reload CSS/HTML instantly
+            if ((e.ctrlKey && (e.key === 'r' || e.key === 'R')) || e.key === 'F5') {
+                window.location.reload();
             }
         })
     }
@@ -62,27 +67,42 @@ class Launcher {
 
     initFrame() {
         console.log('Initializing Frame...')
-        const platform = os.platform() === 'darwin' ? "darwin" : "other";
+        let platform = os.platform() === 'darwin' ? "darwin" : "other";
+        let frameEl = document.querySelector(`.${platform} .frame`);
+        
+        if (!frameEl) {
+            platform = "other";
+            frameEl = document.querySelector(`.${platform} .frame`);
+        }
 
-        document.querySelector(`.${platform} .frame`).classList.toggle('hide')
+        if (frameEl) {
+            frameEl.style.display = 'flex';
+        }
 
-        document.querySelector(`.${platform} .frame #minimize`).addEventListener('click', () => {
-            ipcRenderer.send('main-window-minimize');
-        });
+        const minimizeBtn = document.querySelector(`.${platform} .frame #minimize`);
+        if (minimizeBtn) {
+            minimizeBtn.addEventListener('click', () => {
+                ipcRenderer.send('main-window-minimize');
+            });
+        }
 
         let maximized = false;
         let maximize = document.querySelector(`.${platform} .frame #maximize`);
-        maximize.addEventListener('click', () => {
-            if (maximized) ipcRenderer.send('main-window-maximize')
-            else ipcRenderer.send('main-window-maximize');
-            maximized = !maximized
-            maximize.classList.toggle('icon-maximize')
-            maximize.classList.toggle('icon-restore-down')
-        });
+        if (maximize) {
+            maximize.addEventListener('click', () => {
+                ipcRenderer.send('main-window-maximize');
+                maximized = !maximized
+                maximize.classList.toggle('icon-maximize')
+                maximize.classList.toggle('icon-restore-down')
+            });
+        }
 
-        document.querySelector(`.${platform} .frame #close`).addEventListener('click', () => {
-            ipcRenderer.send('main-window-close');
-        })
+        const closeBtn = document.querySelector(`.${platform} .frame #close`);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                ipcRenderer.send('main-window-close');
+            });
+        }
     }
 
     async initConfigClient() {
@@ -141,6 +161,13 @@ class Launcher {
                     await this.db.deleteData('accounts', account_ID)
                     continue
                 }
+                
+                // Migración automática de cuentas offline antiguas de Mojang -> Offline
+                if (account.meta && account.meta.type === 'Mojang' && account.meta.online === false) {
+                    account.meta.type = 'Offline';
+                    await this.db.updateData('accounts', account, account_ID);
+                }
+
                 if (account.meta.type === 'Xbox') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
                     popupRefresh.openPopup({
@@ -190,6 +217,23 @@ class Launcher {
                     this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
+                } else if (account.meta.type === 'Offline') {
+                    console.log(`Account Type: Offline | Username: ${account.name}`);
+                    popupRefresh.openPopup({
+                        title: 'Conexión',
+                        content: `Actualizando cuenta Tipo: Offline | Usuario: ${account.name}`,
+                        color: 'var(--color)',
+                        background: false
+                    });
+                    let refresh_accounts = await Mojang.login(account.name);
+                    if (refresh_accounts.meta) {
+                        refresh_accounts.meta.type = 'Offline';
+                    }
+
+                    refresh_accounts.ID = account_ID
+                    await addAccount(refresh_accounts)
+                    await this.db.updateData('accounts', refresh_accounts, account_ID)
+                    if (account_ID == account_selected) accountSelect(refresh_accounts)
                 } else if (account.meta.type == 'Mojang') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
                     popupRefresh.openPopup({
@@ -198,15 +242,6 @@ class Launcher {
                         color: 'var(--color)',
                         background: false
                     });
-                    if (account.meta.online == false) {
-                        let refresh_accounts = await Mojang.login(account.name);
-
-                        refresh_accounts.ID = account_ID
-                        await addAccount(refresh_accounts)
-                        this.db.updateData('accounts', refresh_accounts, account_ID)
-                        if (account_ID == account_selected) accountSelect(refresh_accounts)
-                        continue;
-                    }
 
                     let refresh_accounts = await Mojang.refresh(account);
 

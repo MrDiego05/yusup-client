@@ -1,0 +1,465 @@
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'addEventListener')
+TypeError: Cannot read properties of null (reading 'addEventListener')
+    at Launcher.initFrame (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:80:18)
+    at Launcher.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:25:14)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'addEventListener')
+TypeError: Cannot read properties of null (reading 'addEventListener')
+    at Launcher.initFrame (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:80:18)
+    at Launcher.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:25:14)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'appendChild')
+TypeError: Cannot read properties of null (reading 'appendChild')
+    at addAccount (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/utils.js:60:52)
+    at async Launcher.startLauncher (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:174:21)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'appendChild')
+TypeError: Cannot read properties of null (reading 'appendChild')
+    at addAccount (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/utils.js:60:52)
+    at async Launcher.startLauncher (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:174:21)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'appendChild')
+TypeError: Cannot read properties of null (reading 'appendChild')
+    at addAccount (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/utils.js:60:52)
+    at async Launcher.startLauncher (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:174:21)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'appendChild')
+TypeError: Cannot read properties of null (reading 'appendChild')
+    at addAccount (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/utils.js:60:52)
+    at async Launcher.startLauncher (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:174:21)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+Error: Cannot find module '../utils.js'
+Require stack:
+- C:\Users\Diego\Documents\Proyects\yusup-client\src\launcher.html
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1428:15)
+    at a._resolveFilename (node:electron/js2c/renderer_init:2:4859)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:37)
+    at c._load (node:electron/js2c/node_init:2:17999)
+    at s._load (node:electron/js2c/renderer_init:2:35895)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:252:24)
+    at Module.require (node:internal/modules/cjs/loader:1511:12)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'style')
+TypeError: Cannot read properties of null (reading 'style')
+    at accountSelect (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/utils.js:85:47)
+
+[UNHANDLED REJECTION] TypeError: Cannot read properties of null (reading 'style')
+TypeError: Cannot read properties of null (reading 'style')
+    at accountSelect (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/utils.js:85:47)
+    at HTMLDivElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:336:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+

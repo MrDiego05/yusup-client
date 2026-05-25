@@ -1,7 +1,3 @@
-/**
- * @author Luuxis
- * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
- */
 
 import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground } from '../utils.js'
 const { ipcRenderer } = require('electron');
@@ -13,7 +9,6 @@ class Settings {
         this.config = config;
         this.db = new database();
         this.navBTN()
-        this.accounts()
         this.ram()
         this.javaPath()
         this.resolution()
@@ -30,10 +25,10 @@ class Settings {
 
                 if (id == 'save') {
                     if (activeSettingsBTN) activeSettingsBTN.classList.toggle('active-settings-BTN');
-                    document.querySelector('#account').classList.add('active-settings-BTN');
+                    document.querySelector('#java').classList.add('active-settings-BTN');
 
                     if (activeContainerSettings) activeContainerSettings.classList.toggle('active-container-settings');
-                    document.querySelector(`#account-tab`).classList.add('active-container-settings');
+                    document.querySelector(`#java-tab`).classList.add('active-container-settings');
                     return changePanel('home')
                 }
 
@@ -42,62 +37,6 @@ class Settings {
 
                 if (activeContainerSettings) activeContainerSettings.classList.toggle('active-container-settings');
                 document.querySelector(`#${id}-tab`).classList.add('active-container-settings');
-            }
-        })
-    }
-
-    accounts() {
-        document.querySelector('.accounts-list').addEventListener('click', async e => {
-            let popupAccount = new popup()
-            try {
-                let id = e.target.id
-                if (e.target.classList.contains('account')) {
-                    popupAccount.openPopup({
-                        title: 'Connexion',
-                        content: 'Veuillez patienter...',
-                        color: 'var(--color)'
-                    })
-
-                    if (id == 'add') {
-                        document.querySelector('.cancel-home').style.display = 'inline'
-                        return changePanel('login')
-                    }
-
-                    let account = await this.db.readData('accounts', id);
-                    let configClient = await this.setInstance(account);
-                    await accountSelect(account);
-                    configClient.account_selected = account.ID;
-                    return await this.db.updateData('configClient', configClient);
-                }
-
-                if (e.target.classList.contains("delete-profile")) {
-                    popupAccount.openPopup({
-                        title: 'Connexion',
-                        content: 'Veuillez patienter...',
-                        color: 'var(--color)'
-                    })
-                    await this.db.deleteData('accounts', id);
-                    let deleteProfile = document.getElementById(`${id}`);
-                    let accountListElement = document.querySelector('.accounts-list');
-                    accountListElement.removeChild(deleteProfile);
-
-                    if (accountListElement.children.length == 1) return changePanel('login');
-
-                    let configClient = await this.db.readData('configClient');
-
-                    if (configClient.account_selected == id) {
-                        let allAccounts = await this.db.readAllData('accounts');
-                        configClient.account_selected = allAccounts[0].ID
-                        accountSelect(allAccounts[0]);
-                        let newInstanceSelect = await this.setInstance(allAccounts[0]);
-                        configClient.instance_select = newInstanceSelect.instance_select
-                        return await this.db.updateData('configClient', configClient);
-                    }
-                }
-            } catch (err) {
-                console.error(err)
-            } finally {
-                popupAccount.closePopup();
             }
         })
     }

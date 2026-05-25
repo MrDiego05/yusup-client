@@ -1,0 +1,14 @@
+{
+    "client_id": "REEMPLAZA_ESTO_CON_TU_CLIENT_ID_DE_AZURE",
+    "online": false,
+    "dataDirectory": "yusup",
+    "maintenance": false,
+    "rss": null,
+    "status": {
+        "server": {
+            "ip": "127.0.0.1",
+            "port": 25565,
+            "nameServer": "Yusup Server"
+        }
+    }
+}
