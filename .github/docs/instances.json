@@ -21,5 +21,32 @@
         "playTime": "0.0h",
         "whitelistActive": false,
         "whitelist": []
+    },
+    "desafiomine": {
+        "name": "desafiomine",
+        "title": "DesafioMine v1.0",
+        "description": "Un nuebo modpacl wuncojncos",
+        "tags": [
+            "terror",
+            "cooperativo",
+            "superviviecnia"
+        ],
+        "status": "operationnel",
+        "gameVersion": "1.20.1",
+        "modpack_url": "https://MrDiego05.github.io/yusup-client/desafiomine.json",
+        "loader": {
+            "type": "forge",
+            "build": "47.4.10",
+            "enable": true,
+            "loader_type": "forge",
+            "loader_version": "47.4.10",
+            "minecraft_version": "1.20.1"
+        },
+        "verify": true,
+        "ignored": [],
+        "themeColor": "lime",
+        "playTime": "0.0h",
+        "whitelistActive": false,
+        "whitelist": []
     }
 }

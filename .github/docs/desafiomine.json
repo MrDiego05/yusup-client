@@ -1,0 +1,308 @@
+[
+    {
+        "name": "alexscaves-2.0.10.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/alexscaves-2.0.10.jar",
+        "md5": "74665c33ea59098145597e1aee139526",
+        "path": "mods/alexscaves-2.0.10.jar"
+    },
+    {
+        "name": "amendments-1.21-2.0.15-neoforge.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/amendments-1.21-2.0.15-neoforge.jar",
+        "md5": "72d35a860a4a113249ade7342f0600ed",
+        "path": "mods/amendments-1.21-2.0.15-neoforge.jar"
+    },
+    {
+        "name": "appleskin-neoforge-mc1.21-3.0.9.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/appleskin-neoforge-mc1.21-3.0.9.jar",
+        "md5": "db5fe7619d502cf5b9bc972a955cd3bc",
+        "path": "mods/appleskin-neoforge-mc1.21-3.0.9.jar"
+    },
+    {
+        "name": "architectury-13.0.8-neoforge.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/architectury-13.0.8-neoforge.jar",
+        "md5": "7a45a948b525c031ca85d221dfdbed85",
+        "path": "mods/architectury-13.0.8-neoforge.jar"
+    },
+    {
+        "name": "artifacts-neoforge-13.2.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/artifacts-neoforge-13.2.1.jar",
+        "md5": "fc38eab4a40582c383e6dbd118d49ef4",
+        "path": "mods/artifacts-neoforge-13.2.1.jar"
+    },
+    {
+        "name": "arts_and_crafts-neoforge-1.21.1-1.5.3.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/arts_and_crafts-neoforge-1.21.1-1.5.3.jar",
+        "md5": "d9a786a1c93a94c1b73f7885a46f9867",
+        "path": "mods/arts_and_crafts-neoforge-1.21.1-1.5.3.jar"
+    },
+    {
+        "name": "athena-neoforge-1.21-4.0.4.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/athena-neoforge-1.21-4.0.4.jar",
+        "md5": "9758a7bab18f322d333c67fba78f75f8",
+        "path": "mods/athena-neoforge-1.21-4.0.4.jar"
+    },
+    {
+        "name": "balm-neoforge-1.21.1-21.0.57.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/balm-neoforge-1.21.1-21.0.57.jar",
+        "md5": "179ddfa1dc036c7009651778df40ae58",
+        "path": "mods/balm-neoforge-1.21.1-21.0.57.jar"
+    },
+    {
+        "name": "bettercombat-neoforge-2.3.2+1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/bettercombat-neoforge-2.3.2+1.21.1.jar",
+        "md5": "c474bddc1a32e216eb6b0986b8a1eb51",
+        "path": "mods/bettercombat-neoforge-2.3.2+1.21.1.jar"
+    },
+    {
+        "name": "BiomesOPlenty-neoforge-1.21.1-21.1.0.13.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/BiomesOPlenty-neoforge-1.21.1-21.1.0.13.jar",
+        "md5": "fccfdf96fdc9b505c9678e0c89371546",
+        "path": "mods/BiomesOPlenty-neoforge-1.21.1-21.1.0.13.jar"
+    },
+    {
+        "name": "carryon-neoforge-1.21.1-2.2.4.4.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/carryon-neoforge-1.21.1-2.2.4.4.jar",
+        "md5": "116381c8900494997eac5a2c1bf42348",
+        "path": "mods/carryon-neoforge-1.21.1-2.2.4.4.jar"
+    },
+    {
+        "name": "citadel-1.21.1-2.7.6.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/citadel-1.21.1-2.7.6.jar",
+        "md5": "f489330f610335c782c61ce8815b16f1",
+        "path": "mods/citadel-1.21.1-2.7.6.jar"
+    },
+    {
+        "name": "cloth-config-15.0.140-neoforge.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/cloth-config-15.0.140-neoforge.jar",
+        "md5": "4c3757160403fcccb8ad468c2ea22862",
+        "path": "mods/cloth-config-15.0.140-neoforge.jar"
+    },
+    {
+        "name": "Clumps-neoforge-1.21.1-19.0.0.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/Clumps-neoforge-1.21.1-19.0.0.1.jar",
+        "md5": "8b42a9d7a72bde90fa061d17e2859e7b",
+        "path": "mods/Clumps-neoforge-1.21.1-19.0.0.1.jar"
+    },
+    {
+        "name": "comforts-neoforge-9.0.5+1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/comforts-neoforge-9.0.5+1.21.1.jar",
+        "md5": "ba7a318dcf4190a27e017eacac47427e",
+        "path": "mods/comforts-neoforge-9.0.5+1.21.1.jar"
+    },
+    {
+        "name": "coroutil-neoforge-1.21.0-1.3.8.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/coroutil-neoforge-1.21.0-1.3.8.jar",
+        "md5": "9d410a84fe0216ce18568993afb4f8e5",
+        "path": "mods/coroutil-neoforge-1.21.0-1.3.8.jar"
+    },
+    {
+        "name": "create-1.21.1-6.0.10.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/create-1.21.1-6.0.10.jar",
+        "md5": "179189c52b45a469e683570be4e77188",
+        "path": "mods/create-1.21.1-6.0.10.jar"
+    },
+    {
+        "name": "create-aeronautics-bundled-1.21.1-1.2.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/create-aeronautics-bundled-1.21.1-1.2.1.jar",
+        "md5": "dcd6c7da658aecb5bb1fcef501e7f517",
+        "path": "mods/create-aeronautics-bundled-1.21.1-1.2.1.jar"
+    },
+    {
+        "name": "createaddition-1.5.10.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/createaddition-1.5.10.jar",
+        "md5": "7f5703ccd9fce093e5501f64986028c7",
+        "path": "mods/createaddition-1.5.10.jar"
+    },
+    {
+        "name": "createbigcannons-5.11.3+mc.1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/createbigcannons-5.11.3+mc.1.21.1.jar",
+        "md5": "5d8b29a2e9bd78d8540eab3e7c5b0048",
+        "path": "mods/createbigcannons-5.11.3+mc.1.21.1.jar"
+    },
+    {
+        "name": "createdeco-2.1.3.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/createdeco-2.1.3.jar",
+        "md5": "16d5818298f6332038528cd13bd4ff1a",
+        "path": "mods/createdeco-2.1.3.jar"
+    },
+    {
+        "name": "DnDesires-1.21.1-2.2d-BETA.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/DnDesires-1.21.1-2.2d-BETA.jar",
+        "md5": "0d86711f73f119a1b244f972af564238",
+        "path": "mods/DnDesires-1.21.1-2.2d-BETA.jar"
+    },
+    {
+        "name": "dungeons-and-taverns-v4.4.4.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/dungeons-and-taverns-v4.4.4.jar",
+        "md5": "8360a41ea1d5ee450c9018a693f0e6f3",
+        "path": "mods/dungeons-and-taverns-v4.4.4.jar"
+    },
+    {
+        "name": "e4mc-neoforge-6.1.0.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/e4mc-neoforge-6.1.0.jar",
+        "md5": "9fc974183fc6338aaea6598dd89257a9",
+        "path": "mods/e4mc-neoforge-6.1.0.jar"
+    },
+    {
+        "name": "entityculling-neoforge-1.10.1-mc1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/entityculling-neoforge-1.10.1-mc1.21.1.jar",
+        "md5": "b292ed11f758bae7f778ca0bbfd137ff",
+        "path": "mods/entityculling-neoforge-1.10.1-mc1.21.1.jar"
+    },
+    {
+        "name": "exposure-neoforge-1.21.1-1.9.16.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/exposure-neoforge-1.21.1-1.9.16.jar",
+        "md5": "9a1e2fd4cb76452392509b07e01ce08d",
+        "path": "mods/exposure-neoforge-1.21.1-1.9.16.jar"
+    },
+    {
+        "name": "exposure_polaroid-neoforge-1.21.1-1.1.3.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/exposure_polaroid-neoforge-1.21.1-1.1.3.jar",
+        "md5": "763ea3e861c2a1dfed0a662d5ad1c8ba",
+        "path": "mods/exposure_polaroid-neoforge-1.21.1-1.1.3.jar"
+    },
+    {
+        "name": "fabric-api-0.116.11+1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/fabric-api-0.116.11+1.21.1.jar",
+        "md5": "0781e1b8e876e8a0353d8b0cf86eaaf7",
+        "path": "mods/fabric-api-0.116.11+1.21.1.jar"
+    },
+    {
+        "name": "geckolib-neoforge-1.21.1-4.8.4.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/geckolib-neoforge-1.21.1-4.8.4.jar",
+        "md5": "f68322025b603faaaaa5a1b3c52dc2ae",
+        "path": "mods/geckolib-neoforge-1.21.1-4.8.4.jar"
+    },
+    {
+        "name": "GlitchCore-neoforge-1.21.1-2.1.0.0.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/GlitchCore-neoforge-1.21.1-2.1.0.0.jar",
+        "md5": "219837027ebd44853c2fde989ceae654",
+        "path": "mods/GlitchCore-neoforge-1.21.1-2.1.0.0.jar"
+    },
+    {
+        "name": "iris-neoforge-1.8.12+mc1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/iris-neoforge-1.8.12+mc1.21.1.jar",
+        "md5": "6c1122aa7c2b1a4f24831e394c5b513f",
+        "path": "mods/iris-neoforge-1.8.12+mc1.21.1.jar"
+    },
+    {
+        "name": "jei-1.21.1-neoforge-19.27.0.340.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/jei-1.21.1-neoforge-19.27.0.340.jar",
+        "md5": "6c7cf71d0f92c30d2e8e0cf3fd94a8bf",
+        "path": "mods/jei-1.21.1-neoforge-19.27.0.340.jar"
+    },
+    {
+        "name": "jinxedlib-neoforge-1.21.1-1.0.4.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/jinxedlib-neoforge-1.21.1-1.0.4.jar",
+        "md5": "e287587298dc0d8de40fc82ea10750b0",
+        "path": "mods/jinxedlib-neoforge-1.21.1-1.0.4.jar"
+    },
+    {
+        "name": "Kiwi-1.21.1-NeoForge-15.8.3.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/Kiwi-1.21.1-NeoForge-15.8.3.jar",
+        "md5": "3bf01c9a407dc128a058124863d83dee",
+        "path": "mods/Kiwi-1.21.1-NeoForge-15.8.3.jar"
+    },
+    {
+        "name": "lithium-neoforge-0.15.3+mc1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/lithium-neoforge-0.15.3+mc1.21.1.jar",
+        "md5": "8207aaae8fea906c7eb2447da40b8c83",
+        "path": "mods/lithium-neoforge-0.15.3+mc1.21.1.jar"
+    },
+    {
+        "name": "moonlight-1.21-2.29.33-neoforge.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/moonlight-1.21-2.29.33-neoforge.jar",
+        "md5": "6f0a35d8e761509ed9f8239d6723b2d7",
+        "path": "mods/moonlight-1.21-2.29.33-neoforge.jar"
+    },
+    {
+        "name": "oritech-neoforge-1.21.1-1.2.5.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/oritech-neoforge-1.21.1-1.2.5.jar",
+        "md5": "f3e35897abc0b29d5fd39f5b24c9c341",
+        "path": "mods/oritech-neoforge-1.21.1-1.2.5.jar"
+    },
+    {
+        "name": "player-animation-lib-forge-2.0.4+1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/player-animation-lib-forge-2.0.4+1.21.1.jar",
+        "md5": "ecb81c9479605db12a77bea774b88406",
+        "path": "mods/player-animation-lib-forge-2.0.4+1.21.1.jar"
+    },
+    {
+        "name": "Quark-4.1-477.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/Quark-4.1-477.jar",
+        "md5": "df745ba70f1dfde1063846509f4d2a95",
+        "path": "mods/Quark-4.1-477.jar"
+    },
+    {
+        "name": "ritchiesprojectilelib-2.1.2+mc.1.21.1-neoforge.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/ritchiesprojectilelib-2.1.2+mc.1.21.1-neoforge.jar",
+        "md5": "1772f7d2ef79cdb3e77ff0335fe7f3f8",
+        "path": "mods/ritchiesprojectilelib-2.1.2+mc.1.21.1-neoforge.jar"
+    },
+    {
+        "name": "sable-neoforge-1.21.1-1.2.2.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/sable-neoforge-1.21.1-1.2.2.jar",
+        "md5": "1704d138ecf22c2f0db3ce9f9bf6207b",
+        "path": "mods/sable-neoforge-1.21.1-1.2.2.jar"
+    },
+    {
+        "name": "sodium-extra-neoforge-0.6.0+mc1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/sodium-extra-neoforge-0.6.0+mc1.21.1.jar",
+        "md5": "3e5a992421977674549a05015aeac809",
+        "path": "mods/sodium-extra-neoforge-0.6.0+mc1.21.1.jar"
+    },
+    {
+        "name": "sodium-neoforge-0.6.13+mc1.21.1.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/sodium-neoforge-0.6.13+mc1.21.1.jar",
+        "md5": "e5018c782d851fea76be0205b7616e5d",
+        "path": "mods/sodium-neoforge-0.6.13+mc1.21.1.jar"
+    },
+    {
+        "name": "sophisticatedbackpacks-1.21.1-3.25.42.1709.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/sophisticatedbackpacks-1.21.1-3.25.42.1709.jar",
+        "md5": "b63dc75ad84ceba83e2bfd12d17f2865",
+        "path": "mods/sophisticatedbackpacks-1.21.1-3.25.42.1709.jar"
+    },
+    {
+        "name": "sophisticatedcore-1.21.1-1.4.33.1808.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/sophisticatedcore-1.21.1-1.4.33.1808.jar",
+        "md5": "78b2eed35dafeb54b82b40df52c34ff2",
+        "path": "mods/sophisticatedcore-1.21.1-1.4.33.1808.jar"
+    },
+    {
+        "name": "supplementaries-1.21-3.5.34-neoforge.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/supplementaries-1.21-3.5.34-neoforge.jar",
+        "md5": "9ed38b8ed1e77756cdee338b086c8479",
+        "path": "mods/supplementaries-1.21-3.5.34-neoforge.jar"
+    },
+    {
+        "name": "TerraBlender-neoforge-1.21.1-4.1.0.8.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/TerraBlender-neoforge-1.21.1-4.1.0.8.jar",
+        "md5": "66fc7a85676199608348681d006d8c2e",
+        "path": "mods/TerraBlender-neoforge-1.21.1-4.1.0.8.jar"
+    },
+    {
+        "name": "watut-neoforge-1.21.0-1.2.7.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/watut-neoforge-1.21.0-1.2.7.jar",
+        "md5": "31cfc24b7997dbf6ed84cd844de37d7d",
+        "path": "mods/watut-neoforge-1.21.0-1.2.7.jar"
+    },
+    {
+        "name": "waystones-neoforge-1.21.1-21.1.30.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/waystones-neoforge-1.21.1-21.1.30.jar",
+        "md5": "6f1a97fd30ca9cf0f74110308d1dacfc",
+        "path": "mods/waystones-neoforge-1.21.1-21.1.30.jar"
+    },
+    {
+        "name": "xaerominimap-neoforge-1.21.1-25.3.10.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/xaerominimap-neoforge-1.21.1-25.3.10.jar",
+        "md5": "bb44c90c8bc60cac6caa07f504f5cf9f",
+        "path": "mods/xaerominimap-neoforge-1.21.1-25.3.10.jar"
+    },
+    {
+        "name": "Zeta-1.1-40.jar",
+        "url": "https://MrDiego05.github.io/yusup-client/mods/Zeta-1.1-40.jar",
+        "md5": "cc0d6e584cfca1f1383c9f120c035c22",
+        "path": "mods/Zeta-1.1-40.jar"
+    }
+]
