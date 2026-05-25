@@ -2,14 +2,23 @@
     "chuckygames": {
         "name": "chuckygames",
         "title": "Chucky Games v1.0",
+        "description": "",
+        "tags": [],
         "status": "operationnel",
         "gameVersion": "1.21.1",
         "modpack_url": "https://MrDiego05.github.io/yusup-client/chuckygames.json",
         "loader": {
             "type": "fabric",
             "build": "0.19.2",
-            "enable": true
+            "enable": true,
+            "loader_type": "fabric",
+            "loader_version": "0.19.2",
+            "minecraft_version": "1.21.1"
         },
+        "verify": true,
+        "ignored": [],
+        "themeColor": "lime",
+        "playTime": "0.0h",
         "whitelistActive": false,
         "whitelist": []
     }
