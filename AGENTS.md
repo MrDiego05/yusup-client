@@ -51,7 +51,7 @@ Play sessions are tracked locally in `electron-store` under the `sessions` table
 - `renderer-error.log` shows repeated `Cannot find module '../utils.js'` in `launcher.html` — stale/unfixed import resolution failure; renderer continues loading via import map in `src/assets/js/launcher.js`
 - `addAccount` fails with `Cannot read properties of null (reading 'appendChild')` when account list container elements are missing from the DOM
 - `initFrame` fails when platform-specific `.frame` element not found in `launcher.html`
-- Microsoft login requires a valid Azure App client_id in the remote `config.json` — the default (`00000000-0000-0000-0000-000000000000`) is a placeholder and will be rejected
+- Microsoft login falls back to `minecraft-java-core`'s default client_id (`00000000402b5328`) when config has empty/placeholder client_id — works without remote config
 - Admin rank toggle has been removed — the creator tools section in instances view is now always shown (if creator-modpacks.json exists)
 
 ## Build

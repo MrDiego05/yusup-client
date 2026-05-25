@@ -1085,48 +1085,6 @@ class Home {
             await this.db.updateData('configClient', currentConfig);
         });
 
-        let themeBox = document.querySelector(".theme-box");
-        let theme = configClient?.launcher_config?.theme || "auto";
-
-        // Remove old active classes
-        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
-
-        if (theme == "auto") {
-            document.querySelector('.theme-btn-auto')?.classList.add('active-theme');
-        } else if (theme == "dark") {
-            document.querySelector('.theme-btn-sombre')?.classList.add('active-theme');
-        } else if (theme == "light") {
-            document.querySelector('.theme-btn-clair')?.classList.add('active-theme');
-        }
-
-        themeBox?.replaceWith(themeBox.cloneNode(true));
-        const newThemeBox = document.querySelector(".theme-box");
-        newThemeBox?.addEventListener("click", async e => {
-            if (e.target.classList.contains('theme-btn')) {
-                let activeTheme = document.querySelector('.active-theme');
-                if (e.target.classList.contains('active-theme')) return;
-                activeTheme?.classList.remove('active-theme');
-
-                if (e.target.classList.contains('theme-btn-auto')) {
-                    await this.setBackground();
-                    theme = "auto";
-                    e.target.classList.add('active-theme');
-                } else if (e.target.classList.contains('theme-btn-sombre')) {
-                    await this.setBackground(true);
-                    theme = "dark";
-                    e.target.classList.add('active-theme');
-                } else if (e.target.classList.contains('theme-btn-clair')) {
-                    await this.setBackground(false);
-                    theme = "light";
-                    e.target.classList.add('active-theme');
-                }
-
-                let currentConfig = await this.db.readData('configClient');
-                currentConfig.launcher_config.theme = theme;
-                await this.db.updateData('configClient', currentConfig);
-            }
-        });
-
         let closeBox = document.querySelector(".close-box");
         let closeLauncher = configClient?.launcher_config?.closeLauncher || "close-launcher";
 
@@ -1175,8 +1133,6 @@ class Home {
         }
         let body = document.body;
         body.className = theme ? 'dark global' : 'light global';
-        body.style.backgroundImage = 'none';
-        body.style.backgroundColor = theme ? '#05070c' : '#f8fafc';
     }
 
     getdate(e) {

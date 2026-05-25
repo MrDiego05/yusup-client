@@ -139,10 +139,19 @@ function calculateMD5(filePath) {
 }
 
 // --- TOOLBAR & DIALOG ACTIONS ---
+let editingPackId = null;
 
 // New Pack Modal
 const modalNewPack = document.getElementById('modal-new-pack');
 document.getElementById('btn-new-pack').addEventListener('click', () => {
+    editingPackId = null;
+    document.getElementById('new-id').value = '';
+    document.getElementById('new-title').value = '';
+    document.getElementById('new-game-version').value = '1.20.1';
+    document.getElementById('new-loader').value = 'neoforge';
+    document.getElementById('new-loader-version').value = '20.4.80';
+    selectedNewLocation = null;
+    document.getElementById('new-location-path').textContent = 'No seleccionada';
     modalNewPack.style.display = 'flex';
 });
 
@@ -180,18 +189,29 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
         location: selectedNewLocation
     };
 
-    modpacks.push(newPack);
+    if (editingPackId) {
+        // Modo edición: reemplazar el existente
+        const idx = modpacks.findIndex(m => m.id === editingPackId);
+        if (idx >= 0) {
+            modpacks[idx] = newPack;
+        }
+        editingPackId = null;
+        log(`Modpack actualizado: ${title}`, 'success');
+    } else {
+        // Modo creación: agregar nuevo
+        modpacks.push(newPack);
+        log(`Modpack guardado: ${title}`, 'success');
+        // Crear carpeta si no existe
+        if (!fs.existsSync(selectedNewLocation)) {
+            fs.mkdirSync(selectedNewLocation, { recursive: true });
+            fs.mkdirSync(path.join(selectedNewLocation, 'mods'), { recursive: true });
+        }
+    }
+
     saveDb();
     renderModpacks();
     
     modalNewPack.style.display = 'none';
-    log(`Modpack guardado: ${title}`, 'success');
-
-    // Crear carpeta si no existe
-    if (!fs.existsSync(selectedNewLocation)) {
-        fs.mkdirSync(selectedNewLocation, { recursive: true });
-        fs.mkdirSync(path.join(selectedNewLocation, 'mods'), { recursive: true });
-    }
 });
 
 // Add Existing
@@ -224,7 +244,7 @@ document.getElementById('btn-modify').addEventListener('click', () => {
         log('Error: Selecciona un modpack para modificar.', 'error');
         return;
     }
-    // Set form to edit
+    editingPackId = pack.id;
     document.getElementById('new-id').value = pack.id;
     document.getElementById('new-title').value = pack.title;
     document.getElementById('new-game-version').value = pack.gameVersion;
@@ -232,7 +252,7 @@ document.getElementById('btn-modify').addEventListener('click', () => {
     document.getElementById('new-loader-version').value = pack.loaderVersion;
     selectedNewLocation = pack.location;
     document.getElementById('new-location-path').textContent = pack.location;
-    
+
     modalNewPack.style.display = 'flex';
 });
 
@@ -249,6 +269,21 @@ document.getElementById('btn-open-folder').addEventListener('click', () => {
     } else {
         log(`Error: La carpeta no existe: ${pack.location}`, 'error');
     }
+});
+
+// Delete Modpack
+document.getElementById('btn-delete-pack').addEventListener('click', () => {
+    const pack = getSelectedPack();
+    if (!pack) {
+        log('Error: Selecciona un modpack para eliminar.', 'error');
+        return;
+    }
+    if (!confirm(`¿Eliminar "${pack.title}" de la lista? Los archivos locales no se borrarán.`)) return;
+    modpacks = modpacks.filter(m => m.id !== pack.id);
+    saveDb();
+    if (selectedPackId === pack.id) selectedPackId = null;
+    renderModpacks();
+    log(`Modpack eliminado: ${pack.title}`, 'success');
 });
 
 // Check Modpack
@@ -303,14 +338,17 @@ document.getElementById('btn-test').addEventListener('click', async () => {
                 }
             },
             timeout: 10000,
-            gameDirectory: pack.location,
+            path: path.dirname(pack.location),
+            instance: path.basename(pack.location),
             version: pack.gameVersion,
             loader: {
                 type: pack.loader,
                 build: pack.loaderVersion,
                 enable: pack.loader !== 'vanilla'
             },
-            javaPath: 'java',
+            java: {
+                path: 'java'
+            },
             memory: {
                 max: '4096M',
                 min: '2048M'
@@ -481,6 +519,12 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
         const ghPagesUrl = await getGitHubPagesUrl(selectedGitLocation);
         log(`[GitHub Pages] URL base detectada: ${ghPagesUrl}`, 'info');
 
+        // Los archivos se escriben en docs/ porque el Pages está configurado desde /docs
+        const pagesDir = path.join(selectedGitLocation, 'docs');
+        if (!fs.existsSync(pagesDir)) {
+            fs.mkdirSync(pagesDir, { recursive: true });
+        }
+
         // 1. Leer el modpack.json local
         const srcJson = path.join(pack.location, 'modpack.json');
         if (!fs.existsSync(srcJson)) {
@@ -497,27 +541,27 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
             };
         });
 
-        // Guardar el modpack.json modificado en el repositorio local Git
+        // Guardar el modpack.json modificado en docs/
         const targetJsonName = `${pack.id}.json`;
-        const destJson = path.join(selectedGitLocation, targetJsonName);
+        const destJson = path.join(pagesDir, targetJsonName);
         fs.writeFileSync(destJson, JSON.stringify(finalJsonContent, null, 4));
         log(`Copiado y ajustado modpack.json en: ${destJson}`);
 
-        // Opcional: Copiar carpeta de mods
+        // Copiar carpeta de mods a docs/mods/
         progressStatus.textContent = 'Copiando mods al repositorio...';
         const srcMods = path.join(pack.location, 'mods');
-        const destMods = path.join(selectedGitLocation, 'mods');
+        const destMods = path.join(pagesDir, 'mods');
         if (fs.existsSync(srcMods)) {
             if (!fs.existsSync(destMods)) fs.mkdirSync(destMods, { recursive: true });
             const mods = fs.readdirSync(srcMods);
             mods.forEach(mod => {
                 fs.copyFileSync(path.join(srcMods, mod), path.join(destMods, mod));
             });
-            log('Copias de mods realizadas al repositorio git.');
+            log('Copias de mods realizadas al repositorio git en docs/mods/.');
         }
 
-        // 2. Leer o crear instances.json en el repositorio Git
-        const destInstancesPath = path.join(selectedGitLocation, 'instances.json');
+        // 2. Leer o crear docs/instances.json
+        const destInstancesPath = path.join(pagesDir, 'instances.json');
         let instancesObj = {};
         if (fs.existsSync(destInstancesPath)) {
             try {
@@ -544,10 +588,10 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
         };
 
         fs.writeFileSync(destInstancesPath, JSON.stringify(instancesObj, null, 4));
-        log(`[GitHub Pages] Actualizado instances.json en el repositorio.`);
+        log(`[GitHub Pages] Actualizado docs/instances.json en el repositorio.`);
 
-        // 3. Crear config.json y articles.json por defecto en el repositorio si no existen
-        const destConfigPath = path.join(selectedGitLocation, 'config.json');
+        // 3. Crear docs/config.json y docs/articles.json si no existen
+        const destConfigPath = path.join(pagesDir, 'config.json');
         if (!fs.existsSync(destConfigPath)) {
             const defaultConfig = {
                 rss: null,
@@ -560,10 +604,10 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
                 maintenance: false
             };
             fs.writeFileSync(destConfigPath, JSON.stringify(defaultConfig, null, 4));
-            log(`[GitHub Pages] Creado config.json por defecto.`);
+            log(`[GitHub Pages] Creado docs/config.json por defecto.`);
         }
 
-        const destArticlesPath = path.join(selectedGitLocation, 'articles.json');
+        const destArticlesPath = path.join(pagesDir, 'articles.json');
         if (!fs.existsSync(destArticlesPath)) {
             const defaultArticles = [
                 {
@@ -594,7 +638,10 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
                         log(`[Git Error] Push failed: ${err.message}. Verifica que tengas permisos y acceso ssh/https configurados.`, 'error');
                     } else {
                         log('[GitHub Pages] ¡Publicado con éxito!', 'success');
-                        log(`El archivo modpack.json ya está disponible de forma pública en tu repositorio de GitHub Pages.`, 'success');
+                        log(`El modpack "${pack.title}" ya está disponible públicamente.`, 'success');
+                        log(`📋 Para que el launcher lo vea, edita package.json y cambia "url" a:`, 'success');
+                        log(`   "${ghPagesUrl}"`, 'success');
+                        log(`Luego reinicia el launcher para que cargue las nuevas instancias.`, 'info');
                         progressStatus.textContent = '¡GitHub Pages Actualizado!';
                     }
                     modalGithub.style.display = 'none';
@@ -608,8 +655,143 @@ document.getElementById('btn-push-github').addEventListener('click', async () =>
     }
 });
 
+document.getElementById('btn-install-launcher').addEventListener('click', async () => {
+    const pack = getSelectedPack();
+    if (!pack) {
+        log('Error: Selecciona un modpack para instalar.', 'error');
+        return;
+    }
+
+    const modsDir = path.join(pack.location, 'mods');
+    if (!fs.existsSync(modsDir)) {
+        log(`Error: No existe la carpeta mods/ en ${pack.location}`, 'error');
+        return;
+    }
+
+    try {
+        log(`Instalando "${pack.title}" en el launcher...`, 'info');
+        progressContainer.style.display = 'flex';
+        progressStatus.textContent = 'Compilando modpack...';
+
+        // 1. Compilar (misma lógica que btn-build)
+        const files = fs.readdirSync(modsDir);
+        const jarFiles = files.filter(f => f.toLowerCase().endsWith('.jar'));
+
+        if (jarFiles.length === 0) {
+            throw new Error('La carpeta mods/ está vacía.');
+        }
+
+        const modpackJson = [];
+        let processed = 0;
+
+        for (const file of jarFiles) {
+            const filePath = path.join(modsDir, file);
+            progressStatus.textContent = `Hasheando: ${file}...`;
+
+            const md5 = await calculateMD5(filePath);
+
+            modpackJson.push({
+                name: file,
+                url: `mods/${file}`,
+                md5: md5,
+                path: `mods/${file}`
+            });
+
+            processed++;
+            compileProgress.value = Math.round((processed / jarFiles.length) * 100);
+        }
+
+        // 2. Escribir modpack.json local
+        const jsonOutPath = path.join(pack.location, 'modpack.json');
+        fs.writeFileSync(jsonOutPath, JSON.stringify(modpackJson, null, 4));
+        log('Compilación completada.', 'success');
+
+        // 3. Copiar al directorio de instancias del launcher
+        progressStatus.textContent = 'Copiando al launcher...';
+        const launcherDataDir = path.resolve('./data/modpacks');
+        if (!fs.existsSync(launcherDataDir)) {
+            fs.mkdirSync(launcherDataDir, { recursive: true });
+        }
+
+        const instanceDir = path.join(launcherDataDir, pack.id);
+        if (!fs.existsSync(instanceDir)) {
+            fs.mkdirSync(instanceDir, { recursive: true });
+        }
+
+        // Copiar modpack.json
+        fs.copyFileSync(jsonOutPath, path.join(instanceDir, 'modpack.json'));
+
+        // Copiar carpeta mods
+        const destMods = path.join(instanceDir, 'mods');
+        if (!fs.existsSync(destMods)) {
+            fs.mkdirSync(destMods, { recursive: true });
+        }
+        const modFiles = fs.readdirSync(modsDir);
+        modFiles.forEach(mod => {
+            fs.copyFileSync(path.join(modsDir, mod), path.join(destMods, mod));
+        });
+
+        // 4. Registrar la instancia en creator-modpacks.json para que el launcher la detecte
+        const creatorPath = path.resolve('./data/creator-modpacks.json');
+        let creatorModpacks = [];
+        if (fs.existsSync(creatorPath)) {
+            try {
+                creatorModpacks = JSON.parse(fs.readFileSync(creatorPath, 'utf8'));
+            } catch (e) {
+                creatorModpacks = [];
+            }
+        }
+
+        const existingIdx = creatorModpacks.findIndex(m => m.id === pack.id);
+        const entry = {
+            id: pack.id,
+            title: pack.title,
+            gameVersion: pack.gameVersion,
+            loader: pack.loader,
+            loaderVersion: pack.loaderVersion,
+            location: instanceDir
+        };
+
+        if (existingIdx >= 0) {
+            creatorModpacks[existingIdx] = entry;
+        } else {
+            creatorModpacks.push(entry);
+        }
+        fs.writeFileSync(creatorPath, JSON.stringify(creatorModpacks, null, 4));
+
+        log(`¡Modpack instalado en el launcher!`, 'success');
+        log(`Ruta: ${instanceDir}`, 'info');
+        progressStatus.textContent = '¡Instalado con éxito!';
+        compileProgress.value = 100;
+    } catch (e) {
+        log(`Error al instalar: ${e.message}`, 'error');
+        progressStatus.textContent = 'Error en la instalación.';
+    }
+});
+
 // Start up
 loadDb();
 loadGitConfig();
 renderModpacks();
 log('Yusup Modpack Creator cargado correctamente.', 'success');
+log('--- CONFIGURACIÓN REMOTA ---', 'info');
+try {
+    const pkg = JSON.parse(fs.readFileSync(path.resolve('./package.json'), 'utf8'));
+    const launcherUrl = pkg.url || 'No configurada';
+    log(`URL del launcher (package.json): ${launcherUrl}`, 'info');
+    log('Los archivos se publican en docs/ (GitHub Pages config /docs)', 'info');
+    if (selectedGitLocation) {
+        getGitHubPagesUrl(selectedGitLocation).then(ghUrl => {
+            log(`URL de GitHub Pages detectada: ${ghUrl}`, 'info');
+            if (launcherUrl !== ghUrl) {
+                log(`⚠️  Las URLs no coinciden. Edita package.json#url para que apunte a: ${ghUrl}`, 'error');
+            } else {
+                log('✅ Las URLs coinciden. El launcher ya puede ver estas instancias.', 'success');
+            }
+        });
+    } else {
+        log('ℹ️  No hay repo Git configurado. Usá "Subir a GitHub Pages" para configurar uno.', 'info');
+    }
+} catch (e) {
+    log('No se pudo leer package.json', 'error');
+}

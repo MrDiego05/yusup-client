@@ -45,7 +45,7 @@ class NeoForgeSync {
 
                 progressCallback(50, 100, "Instalando NeoForge (esto puede tardar un poco)...");
 
-                const process = spawn(this.javaPath, ['-jar', installerJarPath, '--installClient', this.gamePath]);
+                const process = spawn(this.javaPath, ['-jar', installerJarPath, '--install-client', this.gamePath]);
 
                 process.stdout.on('data', (data) => {
                     console.log(`[NeoForge Installer]: ${data}`);

@@ -1,5 +1,5 @@
 {
-    "client_id": "REEMPLAZA_ESTO_CON_TU_CLIENT_ID_DE_AZURE",
+    "client_id": "",
     "online": false,
     "dataDirectory": "yusup",
     "maintenance": false,

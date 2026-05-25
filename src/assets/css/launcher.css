@@ -1,19 +1,19 @@
 @import 'font.css';
-@import 'theme.css';
 @import 'panels/login.css';
 @import 'panels/home.css';
 @import 'panels/settings.css';
 
 body {
-    margin: 0;
+    margin: 0px;
     padding: 10px;
     width: 100%;
     height: 100%;
     overflow: hidden;
     user-select: none;
-    color: var(--color);
-    font-family: 'Poppins';
-    font-weight: bolder;
+    color: --var(--text);
+    background-color: #F1F5F9;
+    font-family: 'Google Sans', sans-serif;
+    font-weight: 500;
     box-sizing: border-box;
 }
 
@@ -30,14 +30,6 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
-
-.content-scroll {
-    overflow: auto;
-}
-
-.content-scroll::-webkit-scrollbar {
-    width: 0;
 }
 
 .dragbar {
@@ -71,22 +63,19 @@ input::-webkit-inner-spin-button {
 
 .other .button-frame {
     position: relative;
-    display: table-cell;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 30px;
     height: 26px;
     transition: color .2s, background-color .2s;
-    color: black;
+    color: var(--text);
     cursor: pointer;
 }
 
-.button-frame:before {
-    position: absolute;
-    top: 6px;
-    left: 8px;
+.other .button-frame svg {
     width: 14px;
     height: 14px;
-    font-size: 14px;
-    color: #f8f9f9;
 }
 
 .darwin-icon-minimize,
@@ -126,6 +115,75 @@ input::-webkit-inner-spin-button {
 .icon-restore-down:hover,
 .icon-maximize:hover {
     background-color: #0000009d;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--background);
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.loading-icon {
+    color: var(--select-secundary);
+    animation: loading-pulse 1.5s ease-in-out infinite;
+}
+
+.loading-status {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'Google Sans Flex', sans-serif;
+}
+
+.loading-substatus {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text);
+    opacity: 0.6;
+    font-family: 'Google Sans Flex', sans-serif;
+}
+
+.loading-bar-track {
+    width: 240px;
+    height: 4px;
+    background: var(--background-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.loading-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--select-secundary);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+@keyframes loading-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
 }
 
 .popup {

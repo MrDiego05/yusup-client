@@ -8,10 +8,11 @@
 .login-tabs {
     position: absolute;
     padding: 15px;
-    background: var(--background);
+    background: var(--background-element);
     border-radius: 15px;
     text-align: center;
     min-width: 40%;
+    border: var(--card-border);
 }
 
 .login-home,
@@ -22,29 +23,47 @@
 }
 
 .login-text {
-    font-size: 1.3rem;
+    font-size: 16px;
+    color: var(--color);
 }
 
 .connect,
 .cancel {
-    background: none;
-    color: var(--color);
-    border: solid 4px var(--element-color);
-    border-radius: 10px;
+    background: var(--element-color);
+    color: #020618;
+    border: none;
+    border-radius: 100px;
     padding: 0.3rem 4rem;
-    font-size: inherit;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Google Sans Flex', sans-serif;
     margin: 15px 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.connect:hover {
+    background: #006626;
+    color: var(--color);
 }
 
 .input-login .email,
 .input-login .password,
 .A2F {
     color: var(--color);
-    background: none;
-    border: solid 2px var(--element-color);
-    border-radius: 30px;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-tertiary);
+    border-radius: 100px;
     width: 50%;
     padding: 0.4rem 1rem;
     margin-top: 10px;
+    font-family: 'Google Sans Flex', sans-serif;
+    font-size: 12px;
+}
+
+.input-login .email:focus,
+.input-login .password:focus,
+.A2F:focus {
+    border-color: var(--element-color);
+    outline: none;
 }

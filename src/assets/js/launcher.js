@@ -23,12 +23,35 @@ class Launcher {
         this.shortcut()
         await setBackground()
         this.initFrame();
+        this.showLoading('Conectando...', 'Obteniendo configuración del servidor', 10);
         this.config = await config.GetConfig().then(res => res).catch(err => err);
-        if (await this.config.error) return this.errorConnect()
+        if (await this.config.error) {
+            this.hideLoading();
+            return this.errorConnect()
+        }
+        this.showLoading('Base de datos', 'Inicializando almacenamiento local', 25);
         this.db = new database();
         await this.initConfigClient();
+        this.showLoading('Paneles', 'Cargando interfaz del launcher', 40);
         this.createPanels(Login, Home, Settings);
+        this.showLoading('Instancias', 'Cargando catálogo de modpacks', 60);
         this.startLauncher();
+    }
+
+    showLoading(status, substatus, progress) {
+        const overlay = document.getElementById('loading-overlay');
+        const statusEl = document.getElementById('loading-status');
+        const substatusEl = document.getElementById('loading-substatus');
+        const barEl = document.getElementById('loading-bar-fill');
+        if (statusEl) statusEl.textContent = status;
+        if (substatusEl) substatusEl.textContent = substatus;
+        if (barEl) barEl.style.width = `${Math.min(progress, 95)}%`;
+        if (overlay) overlay.classList.remove('hidden');
+    }
+
+    hideLoading() {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.classList.add('hidden');
     }
 
     initLog() {
@@ -155,7 +178,10 @@ class Launcher {
         let popupRefresh = new popup();
 
         if (accounts?.length) {
+            let accIdx = 0;
             for (let account of accounts) {
+                accIdx++;
+                this.showLoading('Cuentas', `Verificando cuenta ${accIdx}/${accounts.length}: ${account.name}`, 60 + Math.round((accIdx / accounts.length) * 25));
                 let account_ID = account.ID
                 if (account.error) {
                     await this.db.deleteData('accounts', account_ID)
@@ -289,10 +315,13 @@ class Launcher {
                 return changePanel("login");
             }
 
+            this.showLoading('Listo', 'Cargando interfaz principal', 95);
             popupRefresh.closePopup()
+            this.hideLoading();
             changePanel("home");
         } else {
             popupRefresh.closePopup()
+            this.hideLoading();
             changePanel('login');
         }
     }

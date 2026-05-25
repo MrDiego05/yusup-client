@@ -85,7 +85,8 @@ ipcMain.on('main-window-hide', () => MainWindow.getWindow().hide())
 ipcMain.on('main-window-show', () => MainWindow.getWindow().show())
 
 ipcMain.handle('Microsoft-window', async (_, client_id) => {
-    return await new Microsoft(client_id).getAuth();
+    const id = (client_id && client_id !== '00000000-0000-0000-0000-000000000000') ? client_id : undefined;
+    return await new Microsoft(id).getAuth();
 })
 
 ipcMain.handle('is-dark-theme', (_, theme) => {

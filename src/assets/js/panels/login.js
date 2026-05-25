@@ -59,15 +59,6 @@ class Login {
         let microsoftBtn = document.querySelector('.connect-home');
 
         microsoftBtn.addEventListener("click", () => {
-            if (!this.config.client_id || this.config.client_id === '00000000-0000-0000-0000-000000000000') {
-                popupLogin.openPopup({
-                    title: 'Error de Configuración',
-                    content: 'El cliente de Microsoft no está configurado. El administrador debe registrar una aplicación en Azure Portal y colocar el client_id en config.json del repositorio GitHub Pages.',
-                    options: true
-                });
-                return;
-            }
-
             popupLogin.openPopup({
                 title: 'Conexión',
                 content: 'Por favor, espera...',
@@ -228,6 +219,17 @@ class Login {
 
     async saveData(connectionData) {
         let configClient = await this.db.readData('configClient');
+        let allAccounts = await this.db.readAllData('accounts') || [];
+        let nickInUse = allAccounts.find(a => a.name?.toLowerCase() === connectionData.name?.toLowerCase());
+        if (nickInUse) {
+            let popupLogin = new popup();
+            popupLogin.openPopup({
+                title: 'Error',
+                content: `El nombre "${connectionData.name}" ya está en uso por otra cuenta. Usa un nombre diferente.`,
+                options: true
+            });
+            return;
+        }
         let account = await this.db.createData('accounts', connectionData)
         let instanceSelect = configClient.instance_select
         let instancesList = await config.getInstanceList()

@@ -26,8 +26,6 @@ async function setBackground(theme) {
     }
     let body = document.body;
     body.className = theme ? 'dark global' : 'light global';
-    body.style.backgroundImage = 'none';
-    body.style.backgroundColor = theme ? '#0b0f19' : '#f8fafc';
 }
 
 async function changePanel(id) {
@@ -62,6 +60,8 @@ async function addAccount(data) {
         || document.getElementById('accounts-buttons-container')
         || document.getElementById('account-selection-container');
     if (container) {
+        let existing = document.getElementById(data.ID);
+        if (existing) existing.remove();
         container.appendChild(div);
     }
 }
