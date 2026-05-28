@@ -1,4 +1,4 @@
-import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, ModpackSync, NeoForgeSync, skin2D, accountSelect } from '../utils.js';
+import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, ModpackSync, skin2D, accountSelect } from '../utils.js';
 
 const { Launch } = require('minecraft-java-core');
 const { shell, ipcRenderer } = require('electron');
@@ -1012,6 +1012,26 @@ class Home {
                     if (cc.instances_features) delete cc.instances_features[pack.name];
                     await this.db.updateData('configClient', cc);
 
+                    // Also remove NeoForge version folder for this instance, if any
+                    const nfVersion = pack.loader?.build || pack.loader?.loader_version;
+                    if (nfVersion) {
+                        const versionsDir = path.join(gamePath, 'versions');
+                        if (fs.existsSync(versionsDir)) {
+                            try {
+                                const entries = fs.readdirSync(versionsDir);
+                                const nfFolder = entries.find(e =>
+                                    e.toLowerCase().includes(nfVersion.toLowerCase()) &&
+                                    fs.existsSync(path.join(versionsDir, e, `${e}.json`))
+                                );
+                                if (nfFolder) {
+                                    fs.rmSync(path.join(versionsDir, nfFolder), { recursive: true, force: true });
+                                }
+                            } catch (e) {
+                                console.error('Error cleaning NeoForge version folder:', e);
+                            }
+                        }
+                    }
+
                     alert('Instancia eliminada con éxito. Ya puedes reinstalarla limpiamente.');
                     // Refresh view
                     await this.initInstances();
@@ -1337,25 +1357,30 @@ class Home {
 
                 this.hideDownload(options.name);
 
-                // Store the new version
-                if (!configClient.instances_versions) configClient.instances_versions = {};
-                configClient.instances_versions[options.name] = result.version;
-                await this.db.updateData('configClient', configClient);
+                if (result && result.version) {
+                    // Store the new version
+                    if (!configClient.instances_versions) configClient.instances_versions = {};
+                    configClient.instances_versions[options.name] = result.version;
+                    await this.db.updateData('configClient', configClient);
 
-                // Refresh instances grid so installed pack moves from "Todas" to "Instaladas"
-                await this.initInstances();
-                await this.selectInstance(options);
+                    // Refresh instances grid so installed pack moves from "Todas" to "Instaladas"
+                    await this.initInstances();
+                    await this.selectInstance(options);
 
-                // Re-acquire DOM references after selectInstance replaced the play button via cloneNode
-                playBtn = document.getElementById('detail-play-btn');
-                btnContent = document.getElementById('detail-play-btn-content');
-                btnSpinner = document.getElementById('detail-play-btn-spinner');
-                progressContainer.style.display = 'flex';
+                    // Re-acquire DOM references after selectInstance replaced the play button via cloneNode
+                    playBtn = document.getElementById('detail-play-btn');
+                    btnContent = document.getElementById('detail-play-btn-content');
+                    btnSpinner = document.getElementById('detail-play-btn-spinner');
+                    progressContainer.style.display = 'flex';
 
-                // Re-apply loading state for remaining phases (NeoForge install, game launch)
-                if (btnContent) btnContent.style.display = 'none';
-                if (btnSpinner) btnSpinner.style.display = 'flex';
-                if (playBtn) playBtn.disabled = true;
+                    // Re-apply loading state for remaining phases (NeoForge install, game launch)
+                    if (btnContent) btnContent.style.display = 'none';
+                    if (btnSpinner) btnSpinner.style.display = 'flex';
+                    if (playBtn) playBtn.disabled = true;
+                } else {
+                    // Modpack sync skipped or failed (e.g. 404) — continue to NeoForge without mods
+                    // DOM references from lines 1183-1185 are still valid (selectInstance was NOT called)
+                }
             } catch (err) {
                 this.hideDownload(options.name);
                 let popupError = new popup();
@@ -1376,48 +1401,8 @@ class Home {
             }
         }
 
-        // 2. Install NeoForge if specified (externally via official installer)
-        if (loaderType === 'neoforge') {
-            try {
-                progressText.innerHTML = `Instalando NeoForge en curso...`;
-                const javaPath = configClient.java_config?.java_path || 'java';
-                const neoForgeSync = new NeoForgeSync(effectivePath, javaPath);
-
-                this.showDownload(options.name, options.title || options.name);
-                const versionName = await neoForgeSync.install(
-                    mcVersion,
-                    loaderVersion,
-                    (progress, size, message) => {
-                        progressText.innerHTML = `${message}`;
-                        ipcRenderer.send('main-window-progress', { progress, size });
-                        const pct = ((progress / size) * 100).toFixed(0);
-                        wavyBar.style.width = `${pct}%`;
-                        progressPct.innerHTML = `${pct}%`;
-                        this.updateDownload(options.name, pct, message);
-                    }
-                );
-                this.hideDownload(options.name);
-
-                opt.version = versionName;
-                opt.loader.enable = false;
-            } catch (err) {
-                let popupError = new popup();
-                popupError.openPopup({
-                    title: 'Error de Instalación de NeoForge',
-                    content: err.message,
-                    color: 'red',
-                    options: true
-                });
-
-                this.hideDownload(options.name);
-                if (btnContent) btnContent.style.display = 'flex';
-                if (btnSpinner) btnSpinner.style.display = 'none';
-                playBtn.disabled = false;
-                progressContainer.style.display = 'none';
-                this._launching = false;
-                return;
-            }
-        }
+        // 2. NeoForge — use built-in loader (minecraft-java-core handles download + install)
+        // opt.loader.enable and opt.loader.build are already set above
 
         // Analytics: session tracking
         let sessionId = null;

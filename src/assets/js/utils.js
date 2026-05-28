@@ -146,6 +146,5 @@ export {
     slider as Slider,
     pkg as pkg,
     setStatus as setStatus,
-    ModpackSync as ModpackSync,
-    NeoForgeSync as NeoForgeSync
+    ModpackSync as ModpackSync
 }

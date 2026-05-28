@@ -1,13 +1,13 @@
 JVM info: Oracle Corporation - 17.0.12 - 17.0.12+8-LTS-286
 java.net.preferIPv4Stack=true
-Current Time: 28/05/2026 16:27:11
-Host: maven.neoforged.net [45.236.140.103]
-Host: libraries.minecraft.net [150.171.109.113]
+Current Time: 28/05/2026 17:41:53
+Host: maven.neoforged.net [89.187.171.45, 89.222.120.5, 89.187.171.42, 89.222.120.8, 89.222.120.2]
+Host: libraries.minecraft.net [13.107.253.40, 13.107.226.40]
 Host: launchermeta.mojang.com [150.171.109.115]
 Host: piston-meta.mojang.com [150.171.109.117]
-Host: sessionserver.mojang.com [150.171.109.70]
+Host: sessionserver.mojang.com [150.171.109.114]
 Found java version 17.0.12
-Target Directory: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup
+Target Directory: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2
 Extracting json
 Considering minecraft client jar
 Following redirect: https://neoforged.net/mirrorlist.json
@@ -15,20 +15,24 @@ Following redirect: https://neoforged.net/mirrorlist.json
     Download completed: Checksum validated.
 Downloading libraries
 Found 1 additional library directories
-Considering library net.neoforged.fancymodloader:earlydisplay:2.0.11@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/earlydisplay/2.0.11/earlydisplay-2.0.11.jar
+Considering library net.neoforged.fancymodloader:earlydisplay:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/earlydisplay/2.0.7/earlydisplay-2.0.7.jar
     Download completed: Checksum validated.
-Considering library net.neoforged.fancymodloader:loader:2.0.11@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/loader/2.0.11/loader-2.0.11.jar
+Considering library net.neoforged.fancymodloader:core:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/core/2.0.7/core-2.0.7.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.fancymodloader:loader:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/loader/2.0.7/loader-2.0.7.jar
     Download completed: Checksum validated.
 Considering library net.neoforged:coremods:6.0.4@jar
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/coremods/6.0.4/coremods-6.0.4.jar
     Download completed: Checksum validated.
-Considering library net.neoforged.fancymodloader:spi:2.0.11@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/spi/2.0.11/spi-2.0.11.jar
+Considering library net.neoforged.fancymodloader:spi:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/spi/2.0.7/spi-2.0.7.jar
     Download completed: Checksum validated.
 Considering library cpw.mods:modlauncher:10.0.9@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/cpw/mods/modlauncher/10.0.9/modlauncher-10.0.9.jar
+    Download completed: Checksum validated.
 Considering library cpw.mods:securejarhandler:2.1.24@jar
   Downloading library from https://maven.neoforged.net/releases/cpw/mods/securejarhandler/2.1.24/securejarhandler-2.1.24.jar
     Download completed: Checksum validated.
@@ -39,132 +43,199 @@ Considering library net.neoforged:accesstransformers:10.0.1@jar
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/accesstransformers/10.0.1/accesstransformers-10.0.1.jar
     Download completed: Checksum validated.
 Considering library org.openjdk.nashorn:nashorn-core:15.4@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/openjdk/nashorn/nashorn-core/15.4/nashorn-core-15.4.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-commons:9.5@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-commons/9.5/asm-commons-9.5.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged:mergetool:2.0.0:api@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/mergetool/2.0.0/mergetool-2.0.0-api.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-util:9.5@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-util/9.5/asm-util-9.5.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-analysis:9.5@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-tree:9.5@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged:bus:7.2.0@jar
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/bus/7.2.0/bus-7.2.0.jar
     Download completed: Checksum validated.
 Considering library org.ow2.asm:asm:9.5@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm/9.5/asm-9.5.jar
+    Download completed: Checksum validated.
 Considering library net.minecraftforge:unsafe:0.2.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/minecraftforge/unsafe/0.2.0/unsafe-0.2.0.jar
+    Download completed: Checksum validated.
 Considering library com.electronwill.night-config:toml:3.6.4@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/com/electronwill/night-config/toml/3.6.4/toml-3.6.4.jar
+    Download completed: Checksum validated.
 Considering library com.electronwill.night-config:core:3.6.4@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/com/electronwill/night-config/core/3.6.4/core-3.6.4.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged:JarJarSelector:0.4.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/JarJarSelector/0.4.0/JarJarSelector-0.4.0.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged:JarJarMetadata:0.4.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/JarJarMetadata/0.4.0/JarJarMetadata-0.4.0.jar
+    Download completed: Checksum validated.
 Considering library org.apache.maven:maven-artifact:3.8.5@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/apache/maven/maven-artifact/3.8.5/maven-artifact-3.8.5.jar
+    Download completed: Checksum validated.
 Considering library net.jodah:typetools:0.6.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/jodah/typetools/0.6.3/typetools-0.6.3.jar
+    Download completed: Checksum validated.
 Considering library net.minecrell:terminalconsoleappender:1.2.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/minecrell/terminalconsoleappender/1.2.0/terminalconsoleappender-1.2.0.jar
+    Download completed: Checksum validated.
 Considering library org.spongepowered:mixin:0.8.5@jar
-  File exists: Checksum validated.
-Considering library org.apache.commons:commons-lang3:3.13.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar
+    Download completed: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
-  File exists: Checksum validated.
-Considering library commons-io:commons-io:2.11.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar
+    Download completed: Checksum validated.
 Considering library org.apache.logging.log4j:log4j-core:2.19.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.19.0/log4j-core-2.19.0.jar
+    Download completed: Checksum validated.
 Considering library org.apache.logging.log4j:log4j-api:2.19.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.19.0/log4j-api-2.19.0.jar
+    Download completed: Checksum validated.
 Considering library com.google.guava:guava:31.1-jre@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/guava/guava/31.1-jre/guava-31.1-jre.jar
+    Download completed: Checksum validated.
 Considering library com.google.code.gson:gson:2.10@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/code/gson/gson/2.10/gson-2.10.jar
+    Download completed: Checksum validated.
+Considering library org.apache.commons:commons-lang3:3.12.0@jar
+  Found artifact in local folder C:\Users\Diego\.m2\repository
+    Checksum validated
+    Successfully copied local file
 Considering library com.mojang:logging:1.1.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/mojang/logging/1.1.1/logging-1.1.1.jar
+    Download completed: Checksum validated.
 Considering library org.jetbrains:annotations:22.0.0@jar
   Downloading library from https://maven.neoforged.net/releases/org/jetbrains/annotations/22.0.0/annotations-22.0.0.jar
     Download completed: Checksum validated.
 Considering library org.slf4j:slf4j-api:2.0.9@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar
+    Download completed: Checksum validated.
 Considering library org.antlr:antlr4-runtime:4.13.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/antlr/antlr4-runtime/4.13.1/antlr4-runtime-4.13.1.jar
+    Download completed: Checksum validated.
 Considering library net.minecraftforge:srgutils:0.4.15@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/minecraftforge/srgutils/0.4.15/srgutils-0.4.15.jar
+    Download completed: Checksum validated.
 Considering library org.codehaus.plexus:plexus-utils:3.3.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/codehaus/plexus/plexus-utils/3.3.0/plexus-utils-3.3.0.jar
+    Download completed: Checksum validated.
 Considering library org.jline:jline-reader:3.12.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/jline/jline-reader/3.12.1/jline-reader-3.12.1.jar
+    Download completed: Checksum validated.
 Considering library com.machinezoo.noexception:noexception:1.7.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/com/machinezoo/noexception/noexception/1.7.1/noexception-1.7.1.jar
+    Download completed: Checksum validated.
 Considering library com.google.guava:failureaccess:1.0.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar
+    Download completed: Checksum validated.
 Considering library com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
+    Download completed: Checksum validated.
 Considering library com.google.code.findbugs:jsr305:3.0.2@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar
+    Download completed: Checksum validated.
 Considering library org.checkerframework:checker-qual:3.12.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.jar
+    Download completed: Checksum validated.
 Considering library com.google.errorprone:error_prone_annotations:2.11.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/errorprone/error_prone_annotations/2.11.0/error_prone_annotations-2.11.0.jar
+    Download completed: Checksum validated.
 Considering library com.google.j2objc:j2objc-annotations:1.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar
+    Download completed: Checksum validated.
+Considering library commons-io:commons-io:2.11.0@jar
+  Found artifact in local folder C:\Users\Diego\.m2\repository
+    Checksum validated
+    Successfully copied local file
 Considering library org.jline:jline-terminal:3.12.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/jline/jline-terminal/3.12.1/jline-terminal-3.12.1.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.fancymodloader:language-java:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/language-java/2.0.7/language-java-2.0.7.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.fancymodloader:language-lowcode:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/language-lowcode/2.0.7/language-lowcode-2.0.7.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.fancymodloader:language-minecraft:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/language-minecraft/2.0.7/language-minecraft-2.0.7.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.fancymodloader:events:2.0.7@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/fancymodloader/events/2.0.7/events-2.0.7.jar
+    Download completed: Checksum validated.
 Considering library cpw.mods:bootstraplauncher:1.1.2@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/cpw/mods/bootstraplauncher/1.1.2/bootstraplauncher-1.1.2.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged:JarJarFileSystems:0.4.0@jar
-  File exists: Checksum validated.
-Considering library net.neoforged.installertools:installertools:2.1.2@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/installertools/2.1.2/installertools-2.1.2.jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/JarJarFileSystems/0.4.0/JarJarFileSystems-0.4.0.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.installertools:installertools:2.1.1@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/installertools/2.1.1/installertools-2.1.1.jar
     Download completed: Checksum validated.
 Considering library net.md-5:SpecialSource:1.11.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/md-5/SpecialSource/1.11.0/SpecialSource-1.11.0.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-commons:9.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-commons/9.3/asm-commons-9.3.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-analysis:9.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-analysis/9.3/asm-analysis-9.3.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-tree:9.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm-tree/9.3/asm-tree-9.3.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm:9.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/ow2/asm/asm/9.3/asm-9.3.jar
+    Download completed: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.8.9@jar
   Downloading library from https://libraries.minecraft.net/com/google/code/gson/gson/2.8.9/gson-2.8.9.jar
     Download completed: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/cli-utils/2.1.1/cli-utils-2.1.1.jar
+    Download completed: Checksum validated.
 Considering library com.opencsv:opencsv:4.4@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/com/opencsv/opencsv/4.4/opencsv-4.4.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/srgutils/1.0.0/srgutils-1.0.0.jar
     Download completed: Checksum validated.
 Considering library org.apache.commons:commons-text:1.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/apache/commons/commons-text/1.3/commons-text-1.3.jar
+    Download completed: Checksum validated.
 Considering library de.siegmar:fastcsv:2.0.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/de/siegmar/fastcsv/2.0.0/fastcsv-2.0.0.jar
+    Download completed: Checksum validated.
 Considering library org.apache.commons:commons-lang3:3.8.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar
+    Download completed: Checksum validated.
 Considering library org.apache.commons:commons-collections4:4.2@jar
-  File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/cli-utils/2.1.2/cli-utils-2.1.2.jar
+  Downloading library from https://maven.neoforged.net/releases/org/apache/commons/commons-collections4/4.2/commons-collections4-4.2.jar
     Download completed: Checksum validated.
 Considering library com.google.guava:guava:20.0@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/com/google/guava/guava/20.0/guava-20.0.jar
+    Download completed: Checksum validated.
 Considering library commons-beanutils:commons-beanutils:1.9.3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.jar
+    Download completed: Checksum validated.
 Considering library commons-collections:commons-collections:3.2.2@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar
+    Download completed: Checksum validated.
 Considering library commons-logging:commons-logging:1.2@jar
-  File exists: Checksum validated.
-Considering library net.neoforged.installertools:installertools:2.1.2@jar
+  Downloading library from https://libraries.minecraft.net/commons-logging/commons-logging/1.2/commons-logging-1.2.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.installertools:installertools:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.md-5:SpecialSource:1.11.0@jar
   File exists: Checksum validated.
@@ -180,6 +251,8 @@ Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.8.9@jar
   File exists: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
+  File exists: Checksum validated.
 Considering library com.opencsv:opencsv:4.4@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
@@ -192,8 +265,6 @@ Considering library org.apache.commons:commons-lang3:3.8.1@jar
   File exists: Checksum validated.
 Considering library org.apache.commons:commons-collections4:4.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  File exists: Checksum validated.
 Considering library com.google.guava:guava:20.0@jar
   File exists: Checksum validated.
 Considering library commons-beanutils:commons-beanutils:1.9.3@jar
@@ -202,7 +273,7 @@ Considering library commons-collections:commons-collections:3.2.2@jar
   File exists: Checksum validated.
 Considering library commons-logging:commons-logging:1.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:installertools:2.1.2@jar
+Considering library net.neoforged.installertools:installertools:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.md-5:SpecialSource:1.11.0@jar
   File exists: Checksum validated.
@@ -218,6 +289,8 @@ Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.8.9@jar
   File exists: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
+  File exists: Checksum validated.
 Considering library com.opencsv:opencsv:4.4@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
@@ -230,8 +303,6 @@ Considering library org.apache.commons:commons-lang3:3.8.1@jar
   File exists: Checksum validated.
 Considering library org.apache.commons:commons-collections4:4.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  File exists: Checksum validated.
 Considering library com.google.guava:guava:20.0@jar
   File exists: Checksum validated.
 Considering library commons-beanutils:commons-beanutils:1.9.3@jar
@@ -240,7 +311,7 @@ Considering library commons-collections:commons-collections:3.2.2@jar
   File exists: Checksum validated.
 Considering library commons-logging:commons-logging:1.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:installertools:2.1.2@jar
+Considering library net.neoforged.installertools:installertools:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.md-5:SpecialSource:1.11.0@jar
   File exists: Checksum validated.
@@ -256,6 +327,8 @@ Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.8.9@jar
   File exists: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
+  File exists: Checksum validated.
 Considering library com.opencsv:opencsv:4.4@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
@@ -268,8 +341,6 @@ Considering library org.apache.commons:commons-lang3:3.8.1@jar
   File exists: Checksum validated.
 Considering library org.apache.commons:commons-collections4:4.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  File exists: Checksum validated.
 Considering library com.google.guava:guava:20.0@jar
   File exists: Checksum validated.
 Considering library commons-beanutils:commons-beanutils:1.9.3@jar
@@ -278,7 +349,7 @@ Considering library commons-collections:commons-collections:3.2.2@jar
   File exists: Checksum validated.
 Considering library commons-logging:commons-logging:1.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:installertools:2.1.2@jar
+Considering library net.neoforged.installertools:installertools:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.md-5:SpecialSource:1.11.0@jar
   File exists: Checksum validated.
@@ -294,6 +365,8 @@ Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.8.9@jar
   File exists: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
+  File exists: Checksum validated.
 Considering library com.opencsv:opencsv:4.4@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
@@ -306,8 +379,6 @@ Considering library org.apache.commons:commons-lang3:3.8.1@jar
   File exists: Checksum validated.
 Considering library org.apache.commons:commons-collections4:4.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  File exists: Checksum validated.
 Considering library com.google.guava:guava:20.0@jar
   File exists: Checksum validated.
 Considering library commons-beanutils:commons-beanutils:1.9.3@jar
@@ -316,7 +387,7 @@ Considering library commons-collections:commons-collections:3.2.2@jar
   File exists: Checksum validated.
 Considering library commons-logging:commons-logging:1.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:installertools:2.1.2@jar
+Considering library net.neoforged.installertools:installertools:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.md-5:SpecialSource:1.11.0@jar
   File exists: Checksum validated.
@@ -332,6 +403,8 @@ Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.8.9@jar
   File exists: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
+  File exists: Checksum validated.
 Considering library com.opencsv:opencsv:4.4@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
@@ -344,8 +417,6 @@ Considering library org.apache.commons:commons-lang3:3.8.1@jar
   File exists: Checksum validated.
 Considering library org.apache.commons:commons-collections4:4.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  File exists: Checksum validated.
 Considering library com.google.guava:guava:20.0@jar
   File exists: Checksum validated.
 Considering library commons-beanutils:commons-beanutils:1.9.3@jar
@@ -354,71 +425,80 @@ Considering library commons-collections:commons-collections:3.2.2@jar
   File exists: Checksum validated.
 Considering library commons-logging:commons-logging:1.2@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:jarsplitter:2.1.2@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/jarsplitter/2.1.2/jarsplitter-2.1.2.jar
+Considering library net.neoforged.installertools:jarsplitter:2.1.1@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/jarsplitter/2.1.1/jarsplitter-2.1.1.jar
     Download completed: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:jarsplitter:2.1.2@jar
+Considering library net.neoforged.installertools:jarsplitter:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
   File exists: Checksum validated.
-Considering library net.neoforged:AutoRenamingTool:1.0.13:all@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/AutoRenamingTool/1.0.13/AutoRenamingTool-1.0.13-all.jar
+Considering library net.neoforged:AutoRenamingTool:1.0.12:all@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/AutoRenamingTool/1.0.12/AutoRenamingTool-1.0.12-all.jar
     Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-commons:9.5@jar
   File exists: Checksum validated.
 Considering library net.minecraftforge:srgutils:0.5.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/minecraftforge/srgutils/0.5.1/srgutils-0.5.1.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.0@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/cli-utils/2.1.0/cli-utils-2.1.0.jar
+    Download completed: Checksum validated.
 Considering library org.ow2.asm:asm-tree:9.5@jar
   File exists: Checksum validated.
 Considering library org.ow2.asm:asm:9.5@jar
   File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
-  File exists: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:6.0-alpha-3@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/net/sf/jopt-simple/jopt-simple/6.0-alpha-3/jopt-simple-6.0-alpha-3.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged.javadoctor:gson-io:2.0.0@jar
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/javadoctor/gson-io/2.0.0/gson-io-2.0.0.jar
     Download completed: Checksum validated.
 Considering library com.google.code.gson:gson:2.10.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://libraries.minecraft.net/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar
+    Download completed: Checksum validated.
 Considering library net.neoforged.javadoctor:spec:2.0.0@jar
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/javadoctor/spec/2.0.0/spec-2.0.0.jar
     Download completed: Checksum validated.
-Considering library net.neoforged.installertools:binarypatcher:2.1.2@jar
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/binarypatcher/2.1.2/binarypatcher-2.1.2.jar
+Considering library net.neoforged.installertools:binarypatcher:2.1.1@jar
+  Downloading library from https://maven.neoforged.net/releases/net/neoforged/installertools/binarypatcher/2.1.1/binarypatcher-2.1.1.jar
     Download completed: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
   File exists: Checksum validated.
 Considering library com.nothome:javaxdelta:2.0.1@jar
-  File exists: Checksum validated.
+  Downloading library from https://maven.neoforged.net/releases/com/nothome/javaxdelta/2.0.1/javaxdelta-2.0.1.jar
+    Download completed: Checksum validated.
 Considering library trove:trove:1.0.2@jar
-  File exists: Checksum validated.
-Considering library net.neoforged.installertools:cli-utils:2.1.2@jar
+  Downloading library from https://maven.neoforged.net/releases/trove/trove/1.0.2/trove-1.0.2.jar
+    Download completed: Checksum validated.
+Considering library net.neoforged.installertools:cli-utils:2.1.1@jar
   File exists: Checksum validated.
 Considering library net.neoforged:srgutils:1.0.0@jar
   File exists: Checksum validated.
 Considering library com.github.jponge:lzma-java:1.3@jar
-  File exists: Checksum validated.
-Considering library net.neoforged:neoforge:20.4.167:universal
-  Downloading library from https://maven.neoforged.net/releases/net/neoforged/neoforge/20.4.167/neoforge-20.4.167-universal.jar
+  Downloading library from https://maven.neoforged.net/releases/com/github/jponge/lzma-java/1.3/lzma-java-1.3.jar
     Download completed: Checksum validated.
-Considering library net.neoforged.fancymodloader:earlydisplay:2.0.11@jar
+Considering library net.neoforged:neoforge:20.4.80-beta:universal
+  Extracting library from /maven/net/neoforged/neoforge/20.4.80-beta/neoforge-20.4.80-beta-universal.jar
+    Extraction completed: Checksum validated.
+Considering library net.neoforged.fancymodloader:earlydisplay:2.0.7@jar
   File exists: Checksum validated.
-Considering library net.neoforged.fancymodloader:loader:2.0.11@jar
+Considering library net.neoforged.fancymodloader:core:2.0.7@jar
+  File exists: Checksum validated.
+Considering library net.neoforged.fancymodloader:loader:2.0.7@jar
   File exists: Checksum validated.
 Considering library net.neoforged:coremods:6.0.4@jar
   File exists: Checksum validated.
-Considering library net.neoforged.fancymodloader:spi:2.0.11@jar
+Considering library net.neoforged.fancymodloader:spi:2.0.7@jar
   File exists: Checksum validated.
 Considering library cpw.mods:modlauncher:10.0.9@jar
   File exists: Checksum validated.
@@ -462,14 +542,10 @@ Considering library net.minecrell:terminalconsoleappender:1.2.0@jar
   File exists: Checksum validated.
 Considering library org.spongepowered:mixin:0.8.5@jar
   File exists: Checksum validated.
-Considering library org.apache.commons:commons-lang3:3.13.0@jar
-  File exists: Checksum validated.
 Considering library net.neoforged:neoform:1.20.4-20231207.154220@zip
   Downloading library from https://maven.neoforged.net/releases/net/neoforged/neoform/1.20.4-20231207.154220/neoform-1.20.4-20231207.154220.zip
     Download completed: Checksum validated.
 Considering library net.sf.jopt-simple:jopt-simple:5.0.4@jar
-  File exists: Checksum validated.
-Considering library commons-io:commons-io:2.11.0@jar
   File exists: Checksum validated.
 Considering library org.apache.logging.log4j:log4j-core:2.19.0@jar
   File exists: Checksum validated.
@@ -478,6 +554,8 @@ Considering library org.apache.logging.log4j:log4j-api:2.19.0@jar
 Considering library com.google.guava:guava:31.1-jre@jar
   File exists: Checksum validated.
 Considering library com.google.code.gson:gson:2.10@jar
+  File exists: Checksum validated.
+Considering library org.apache.commons:commons-lang3:3.12.0@jar
   File exists: Checksum validated.
 Considering library com.mojang:logging:1.1.1@jar
   File exists: Checksum validated.
@@ -507,125 +585,127 @@ Considering library com.google.errorprone:error_prone_annotations:2.11.0@jar
   File exists: Checksum validated.
 Considering library com.google.j2objc:j2objc-annotations:1.3@jar
   File exists: Checksum validated.
+Considering library commons-io:commons-io:2.11.0@jar
+  File exists: Checksum validated.
 Considering library org.jline:jline-terminal:3.12.1@jar
   File exists: Checksum validated.
-Created Temporary Directory: C:\Users\Diego\AppData\Local\Temp\forge_installer3219977210696921355
+Created Temporary Directory: C:\Users\Diego\AppData\Local\Temp\forge_installer6858624672410672465
   Extracting: /data/client.lzma
 Building Processors
 ===============================================================================
 Processor: net.neoforged.installertools:installertools -> MCP_DATA
   MainClass: net.neoforged.installertools.ConsoleTool
   Classpath:
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\installertools\2.1.2\installertools-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm\9.3\asm-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\md-5\SpecialSource\1.11.0\SpecialSource-1.11.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\installertools\2.1.2\installertools-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\code\gson\gson\2.8.9\gson-2.8.9.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-tree\9.3\asm-tree-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\opencsv\opencsv\4.4\opencsv-4.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-text\1.3\commons-text-1.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\de\siegmar\fastcsv\2.0.0\fastcsv-2.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-lang3\3.8.1\commons-lang3-3.8.1.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-collections4\4.2\commons-collections4-4.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-commons\9.3\asm-commons-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\cli-utils\2.1.2\cli-utils-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\guava\guava\20.0\guava-20.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-beanutils\commons-beanutils\1.9.3\commons-beanutils-1.9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-analysis\9.3\asm-analysis-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-logging\commons-logging\1.2\commons-logging-1.2.jar
-  Args: --task, MCP_DATA, --input, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220.zip, --output, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt, --key, mappings
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\installertools\2.1.1\installertools-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm\9.3\asm-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\md-5\SpecialSource\1.11.0\SpecialSource-1.11.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\code\gson\gson\2.8.9\gson-2.8.9.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\cli-utils\2.1.1\cli-utils-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-tree\9.3\asm-tree-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\opencsv\opencsv\4.4\opencsv-4.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-text\1.3\commons-text-1.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\de\siegmar\fastcsv\2.0.0\fastcsv-2.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-lang3\3.8.1\commons-lang3-3.8.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\installertools\2.1.1\installertools-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-collections4\4.2\commons-collections4-4.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-commons\9.3\asm-commons-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\guava\guava\20.0\guava-20.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-beanutils\commons-beanutils\1.9.3\commons-beanutils-1.9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-analysis\9.3\asm-analysis-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-logging\commons-logging\1.2\commons-logging-1.2.jar
+  Args: --task, MCP_DATA, --input, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220.zip, --output, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt, --key, mappings
 Task: MCP_DATA
-Input:  C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220.zip
-Output: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt
+Input:  C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220.zip
+Output: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt
 Key:    mappings
 Extracting: config/joined.tsrg
 ===============================================================================
 Processor: net.neoforged.installertools:installertools -> DOWNLOAD_MOJMAPS
   MainClass: net.neoforged.installertools.ConsoleTool
   Classpath:
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\installertools\2.1.2\installertools-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm\9.3\asm-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\md-5\SpecialSource\1.11.0\SpecialSource-1.11.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\installertools\2.1.2\installertools-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\code\gson\gson\2.8.9\gson-2.8.9.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-tree\9.3\asm-tree-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\opencsv\opencsv\4.4\opencsv-4.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-text\1.3\commons-text-1.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\de\siegmar\fastcsv\2.0.0\fastcsv-2.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-lang3\3.8.1\commons-lang3-3.8.1.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-collections4\4.2\commons-collections4-4.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-commons\9.3\asm-commons-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\cli-utils\2.1.2\cli-utils-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\guava\guava\20.0\guava-20.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-beanutils\commons-beanutils\1.9.3\commons-beanutils-1.9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-analysis\9.3\asm-analysis-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-logging\commons-logging\1.2\commons-logging-1.2.jar
-  Args: --task, DOWNLOAD_MOJMAPS, --version, 1.20.4, --side, client, --output, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\installertools\2.1.1\installertools-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm\9.3\asm-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\md-5\SpecialSource\1.11.0\SpecialSource-1.11.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\code\gson\gson\2.8.9\gson-2.8.9.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\cli-utils\2.1.1\cli-utils-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-tree\9.3\asm-tree-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\opencsv\opencsv\4.4\opencsv-4.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-text\1.3\commons-text-1.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\de\siegmar\fastcsv\2.0.0\fastcsv-2.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-lang3\3.8.1\commons-lang3-3.8.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\installertools\2.1.1\installertools-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-collections4\4.2\commons-collections4-4.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-commons\9.3\asm-commons-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\guava\guava\20.0\guava-20.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-beanutils\commons-beanutils\1.9.3\commons-beanutils-1.9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-analysis\9.3\asm-analysis-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-logging\commons-logging\1.2\commons-logging-1.2.jar
+  Args: --task, DOWNLOAD_MOJMAPS, --version, 1.20.4, --side, client, --output, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt
 Task: DOWNLOAD_MOJMAPS
 MC Version: 1.20.4
 Side:       client
-Output:     C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt
+Output:     C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt
 Downloaded Mojang mappings for 1.20.4
 ===============================================================================
 Processor: net.neoforged.installertools:installertools -> MERGE_MAPPING
   MainClass: net.neoforged.installertools.ConsoleTool
   Classpath:
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\installertools\2.1.2\installertools-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm\9.3\asm-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\md-5\SpecialSource\1.11.0\SpecialSource-1.11.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\installertools\2.1.2\installertools-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\code\gson\gson\2.8.9\gson-2.8.9.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-tree\9.3\asm-tree-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\opencsv\opencsv\4.4\opencsv-4.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-text\1.3\commons-text-1.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\de\siegmar\fastcsv\2.0.0\fastcsv-2.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-lang3\3.8.1\commons-lang3-3.8.1.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\apache\commons\commons-collections4\4.2\commons-collections4-4.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-commons\9.3\asm-commons-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\cli-utils\2.1.2\cli-utils-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\guava\guava\20.0\guava-20.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-beanutils\commons-beanutils\1.9.3\commons-beanutils-1.9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-analysis\9.3\asm-analysis-9.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\commons-logging\commons-logging\1.2\commons-logging-1.2.jar
-  Args: --task, MERGE_MAPPING, --left, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt, --right, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt, --output, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt, --classes, --fields, --methods, --reverse-right
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\installertools\2.1.1\installertools-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm\9.3\asm-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\md-5\SpecialSource\1.11.0\SpecialSource-1.11.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\code\gson\gson\2.8.9\gson-2.8.9.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\cli-utils\2.1.1\cli-utils-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-tree\9.3\asm-tree-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\opencsv\opencsv\4.4\opencsv-4.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-text\1.3\commons-text-1.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\de\siegmar\fastcsv\2.0.0\fastcsv-2.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-lang3\3.8.1\commons-lang3-3.8.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\installertools\2.1.1\installertools-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\apache\commons\commons-collections4\4.2\commons-collections4-4.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-commons\9.3\asm-commons-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\guava\guava\20.0\guava-20.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-beanutils\commons-beanutils\1.9.3\commons-beanutils-1.9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-analysis\9.3\asm-analysis-9.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\commons-logging\commons-logging\1.2\commons-logging-1.2.jar
+  Args: --task, MERGE_MAPPING, --left, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt, --right, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt, --output, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt, --classes, --fields, --methods, --reverse-right
 Task: MERGE_MAPPING
-Left:    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt
+Left:    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings.txt
          Reversed=false
          null
-Right:   C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt
+Right:   C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-mappings.txt
          Reversed=true
          null
 Classes: true
 Fields:  true
 Methods: true
 Params:  false
-Output:  C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt
+Output:  C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt
 ===============================================================================
 Processor: net.neoforged.installertools:jarsplitter
   MainClass: net.neoforged.jarsplitter.ConsoleTool
   Classpath:
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\jarsplitter\2.1.2\jarsplitter-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\jarsplitter\2.1.2\jarsplitter-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\cli-utils\2.1.2\cli-utils-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
-  Args: --input, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\versions\1.20.4\1.20.4.jar, --slim, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar, --extra, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-extra.jar, --srg, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\jarsplitter\2.1.1\jarsplitter-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\jarsplitter\2.1.1\jarsplitter-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\cli-utils\2.1.1\cli-utils-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
+  Args: --input, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\versions\1.20.4\1.20.4.jar, --slim, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar, --extra, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-extra.jar, --srg, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt
 Splitter: 
-  Input:    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\versions\1.20.4\1.20.4.jar
-  Slim:     C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar
+  Input:    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\versions\1.20.4\1.20.4.jar
+  Slim:     C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar
   Data:     null
-  Extra:    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-extra.jar
+  Extra:    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-extra.jar
   Including data in extra
-  SRG:   C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt
+  SRG:   C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt
   InputSha: fd19469fed4a4b4c15b2d5133985f0e3e7816a8a
   SrgSha:   9afa1cc5b34f29d05a09fb15c403264b63f0a08e
 Splitting 22597 files:
@@ -633,24 +713,24 @@ Splitting 22597 files:
 Processor: net.neoforged:AutoRenamingTool
   MainClass: net.minecraftforge.fart.Main
   Classpath:
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\AutoRenamingTool\1.0.13\AutoRenamingTool-1.0.13-all.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-commons\9.5\asm-commons-9.5.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraftforge\srgutils\0.5.1\srgutils-0.5.1.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm\9.5\asm-9.5.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\cli-utils\2.1.2\cli-utils-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\sf\jopt-simple\jopt-simple\6.0-alpha-3\jopt-simple-6.0-alpha-3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\javadoctor\gson-io\2.0.0\gson-io-2.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\javadoctor\spec\2.0.0\spec-2.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\AutoRenamingTool\1.0.13\AutoRenamingTool-1.0.13-all.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\org\ow2\asm\asm-tree\9.5\asm-tree-9.5.jar
-  Args: --input, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar, --output, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar, --names, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt, --ann-fix, --ids-fix, --src-fix, --record-fix
-Forge Auto Renaming Tool v1.0.13
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\AutoRenamingTool\1.0.12\AutoRenamingTool-1.0.12-all.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-commons\9.5\asm-commons-9.5.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraftforge\srgutils\0.5.1\srgutils-0.5.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\cli-utils\2.1.0\cli-utils-2.1.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm\9.5\asm-9.5.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\sf\jopt-simple\jopt-simple\6.0-alpha-3\jopt-simple-6.0-alpha-3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\javadoctor\gson-io\2.0.0\gson-io-2.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\AutoRenamingTool\1.0.12\AutoRenamingTool-1.0.12-all.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\javadoctor\spec\2.0.0\spec-2.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\org\ow2\asm\asm-tree\9.5\asm-tree-9.5.jar
+  Args: --input, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar, --output, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar, --names, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt, --ann-fix, --ids-fix, --src-fix, --record-fix
+Forge Auto Renaming Tool v1.0.12
 log: null
-input: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar
-output: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar
+input: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar
+output: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar
 threads: 8
-Names: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt(reversed: false)
+Names: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoform\1.20.4-20231207.154220\neoform-1.20.4-20231207.154220-mappings-merged.txt(reversed: false)
 Fix Annotations: true
 Fix Records: true
 Fix Identifiers: ALL
@@ -658,7 +738,7 @@ Fix SourceFile: JAVA
 Fix Line Numbers: false
 Strip codesigning signatures: false
 Adding Libraries to Inheritance
-Reading Input: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar
+Reading Input: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-slim.jar
 Processor: net.neoforged:AutoRenamingTool: Reading input jar
 Processor: net.neoforged:AutoRenamingTool: Processing entries
 Adding input to inheritance map
@@ -667,17 +747,17 @@ Can't Find Class: javax/annotation/ParametersAreNonnullByDefault
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntConsumer
 Can't Find Class: org/slf4j/Logger
 Can't Find Class: javax/annotation/Nullable
+Can't Find Class: org/lwjgl/opengl/GL
+Can't Find Class: org/lwjgl/opengl/GL32C
+Can't Find Class: org/lwjgl/opengl/GLCapabilities
+Can't Find Class: org/lwjgl/opengl/ARBTimerQuery
+Can't Find Class: org/lwjgl/system/MemoryUtil
+Can't Find Class: org/lwjgl/glfw/GLFW
 Can't Find Class: org/joml/Matrix3f
 Can't Find Class: org/joml/Matrix4f
-Can't Find Class: org/joml/Vector3f
-Can't Find Class: org/lwjgl/system/MemoryUtil
-Can't Find Class: org/lwjgl/opengl/GL32C
-Can't Find Class: org/lwjgl/glfw/GLFW
-Can't Find Class: org/lwjgl/opengl/ARBTimerQuery
-Can't Find Class: org/lwjgl/opengl/GL
-Can't Find Class: org/lwjgl/opengl/GLCapabilities
 Can't Find Class: javax/annotation/Nonnull
 Can't Find Class: javax/annotation/meta/TypeQualifierDefault
+Can't Find Class: org/joml/Vector3f
 Can't Find Class: com/google/common/collect/ImmutableList
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntSet
 Can't Find Class: org/lwjgl/stb/STBTTFontinfo
@@ -688,152 +768,152 @@ Can't Find Class: it/unimi/dsi/fastutil/ints/IntSets
 Can't Find Class: com/mojang/serialization/codecs/RecordCodecBuilder$Instance
 Can't Find Class: com/mojang/serialization/codecs/RecordCodecBuilder
 Can't Find Class: com/mojang/datafixers/Products$P1
-Can't Find Class: com/mojang/datafixers/Products
-Can't Find Class: com/google/common/collect/Lists
-Can't Find Class: org/lwjgl/openal/AL10
-Can't Find Class: org/lwjgl/openal/ALC10
-Can't Find Class: com/mojang/serialization/MapCodec
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntCollection
-Can't Find Class: org/lwjgl/BufferUtils
+Can't Find Class: com/mojang/datafixers/Products
 Can't Find Class: org/lwjgl/stb/STBTruetype
 Can't Find Class: org/lwjgl/system/MemoryStack
-Can't Find Class: com/mojang/logging/LogUtils
-Can't Find Class: com/google/common/collect/Sets
-Can't Find Class: org/lwjgl/openal/ALC
-Can't Find Class: org/lwjgl/openal/ALCCapabilities
-Can't Find Class: it/unimi/dsi/fastutil/ints/IntOpenHashSet
-Can't Find Class: org/lwjgl/stb/STBVorbis
-Can't Find Class: org/lwjgl/stb/STBVorbisAlloc
-Can't Find Class: org/lwjgl/stb/STBVorbisInfo
-Can't Find Class: org/lwjgl/openal/AL
-Can't Find Class: org/lwjgl/glfw/GLFWErrorCallbackI
-Can't Find Class: org/lwjgl/openal/ALCapabilities
-Can't Find Class: org/lwjgl/openal/SOFTHRTF
-Can't Find Class: org/lwjgl/openal/ALUtil
+Can't Find Class: com/mojang/serialization/MapCodec
 Can't Find Class: com/mojang/datafixers/util/Either
-Can't Find Class: com/google/common/collect/Maps
+Can't Find Class: com/google/common/collect/Lists
 Can't Find Class: com/mojang/datafixers/kinds/App
+Can't Find Class: org/lwjgl/BufferUtils
+Can't Find Class: it/unimi/dsi/fastutil/ints/IntOpenHashSet
 Can't Find Class: com/mojang/serialization/Codec
-Can't Find Class: org/lwjgl/PointerBuffer
 Can't Find Class: com/mojang/serialization/codecs/PrimitiveCodec
 Can't Find Class: com/mojang/serialization/codecs/UnboundedMapCodec
 Can't Find Class: com/mojang/datafixers/kinds/Applicative
+Can't Find Class: org/lwjgl/openal/AL10
+Can't Find Class: org/lwjgl/openal/ALC
+Can't Find Class: org/lwjgl/openal/ALCCapabilities
+Can't Find Class: org/lwjgl/openal/ALC10
+Can't Find Class: com/google/common/collect/Sets
+Can't Find Class: org/lwjgl/openal/AL
+Can't Find Class: org/lwjgl/stb/STBVorbis
+Can't Find Class: org/lwjgl/openal/ALCapabilities
+Can't Find Class: org/lwjgl/stb/STBVorbisAlloc
+Can't Find Class: org/lwjgl/stb/STBVorbisInfo
+Can't Find Class: org/lwjgl/openal/SOFTHRTF
+Can't Find Class: org/lwjgl/glfw/GLFWErrorCallbackI
+Can't Find Class: org/lwjgl/PointerBuffer
+Can't Find Class: com/mojang/logging/LogUtils
+Can't Find Class: com/google/common/collect/Maps
+Can't Find Class: org/lwjgl/openal/ALUtil
 Can't Find Class: org/joml/Vector4f
 Can't Find Class: org/lwjgl/openal/ALC11
 Can't Find Class: org/apache/commons/io/IOUtils
 Can't Find Class: org/apache/commons/lang3/StringUtils
-Can't Find Class: org/joml/Matrix4fc
-Can't Find Class: org/joml/Matrix3fc
 Can't Find Class: org/apache/commons/lang3/mutable/MutableInt
-Can't Find Class: org/joml/Quaternionf
-Can't Find Class: org/joml/Quaternionfc
-Can't Find Class: com/google/common/collect/Queues
-Can't Find Class: org/joml/Vector3fc
-Can't Find Class: it/unimi/dsi/fastutil/ints/IntComparator
-Can't Find Class: it/unimi/dsi/fastutil/ints/IntArrays
-Can't Find Class: com/google/common/primitives/Floats
+Can't Find Class: org/joml/Matrix4fc
 Can't Find Class: com/google/common/collect/ImmutableMap
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntList
-Can't Find Class: com/google/common/collect/ImmutableMap$Builder
+Can't Find Class: org/joml/Vector3fc
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntArrayList
 Can't Find Class: com/google/common/collect/ImmutableCollection
 Can't Find Class: com/google/common/collect/UnmodifiableIterator
 Can't Find Class: com/google/common/collect/ImmutableSet
+Can't Find Class: it/unimi/dsi/fastutil/ints/IntComparator
+Can't Find Class: org/joml/Matrix3fc
+Can't Find Class: it/unimi/dsi/fastutil/ints/IntArrays
+Can't Find Class: org/joml/Quaternionf
+Can't Find Class: org/joml/Quaternionfc
+Can't Find Class: com/google/common/primitives/Floats
+Can't Find Class: com/google/common/collect/ImmutableMap$Builder
+Can't Find Class: com/google/common/collect/Queues
 Can't Find Class: org/lwjgl/opengl/GL11
 Can't Find Class: org/lwjgl/glfw/GLFWErrorCallback
 Can't Find Class: org/lwjgl/system/Pointer
+Can't Find Class: com/google/common/base/Charsets
 Can't Find Class: org/lwjgl/system/MemoryUtil$MemoryAllocator
 Can't Find Class: org/lwjgl/glfw/GLFWImage$Buffer
 Can't Find Class: org/lwjgl/glfw/GLFWImage
-Can't Find Class: com/google/common/base/Charsets
+Can't Find Class: com/mojang/brigadier/Message
 Can't Find Class: org/lwjgl/glfw/GLFWFramebufferSizeCallbackI
-Can't Find Class: org/lwjgl/glfw/GLFWVidMode$Buffer
+Can't Find Class: it/unimi/dsi/fastutil/ints/Int2ObjectFunction
 Can't Find Class: org/lwjgl/glfw/GLFWFramebufferSizeCallback
-Can't Find Class: org/lwjgl/glfw/GLFWVidMode
 Can't Find Class: org/lwjgl/glfw/GLFWWindowPosCallbackI
 Can't Find Class: org/lwjgl/glfw/GLFWWindowPosCallback
 Can't Find Class: org/lwjgl/glfw/GLFWWindowSizeCallbackI
-Can't Find Class: com/mojang/brigadier/Message
 Can't Find Class: org/lwjgl/glfw/GLFWWindowSizeCallback
-Can't Find Class: it/unimi/dsi/fastutil/ints/Int2ObjectFunction
 Can't Find Class: org/lwjgl/glfw/GLFWWindowFocusCallbackI
 Can't Find Class: org/lwjgl/glfw/GLFWWindowFocusCallback
 Can't Find Class: org/lwjgl/glfw/GLFWCursorEnterCallbackI
-Can't Find Class: org/lwjgl/stb/STBIWriteCallback
 Can't Find Class: org/lwjgl/glfw/GLFWCursorEnterCallback
+Can't Find Class: org/lwjgl/glfw/GLFWVidMode$Buffer
+Can't Find Class: org/lwjgl/glfw/GLFWVidMode
 Can't Find Class: org/lwjgl/system/CustomBuffer
 Can't Find Class: org/lwjgl/util/tinyfd/TinyFileDialogs
 Can't Find Class: org/lwjgl/glfw/Callbacks
+Can't Find Class: org/lwjgl/stb/STBIWriteCallback
 Can't Find Class: org/lwjgl/opengl/GLDebugMessageCallback
 Can't Find Class: org/lwjgl/opengl/KHRDebug
-Can't Find Class: org/lwjgl/glfw/GLFWKeyCallbackI
-Can't Find Class: org/lwjgl/opengl/GLDebugMessageCallbackI
-Can't Find Class: org/lwjgl/glfw/GLFWCharModsCallbackI
-Can't Find Class: org/lwjgl/glfw/GLFWKeyCallback
 Can't Find Class: org/lwjgl/stb/STBImage
+Can't Find Class: org/lwjgl/opengl/GLDebugMessageCallbackI
+Can't Find Class: org/lwjgl/opengl/ARBDebugOutput
+Can't Find Class: org/lwjgl/opengl/GLDebugMessageARBCallbackI
+Can't Find Class: org/lwjgl/glfw/GLFWKeyCallbackI
+Can't Find Class: org/lwjgl/glfw/GLFWCharModsCallbackI
+Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectMap
+Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectOpenHashMap
+Can't Find Class: org/lwjgl/glfw/GLFWMonitorCallbackI
+Can't Find Class: org/lwjgl/opengl/GLDebugMessageARBCallback
+Can't Find Class: org/lwjgl/glfw/GLFWMonitorCallback
+Can't Find Class: org/lwjgl/glfw/GLFWKeyCallback
+Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectCollection
+Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectIterator
+Can't Find Class: com/google/common/collect/EvictingQueue
 Can't Find Class: org/lwjgl/glfw/GLFWCharModsCallback
 Can't Find Class: org/lwjgl/glfw/GLFWCursorPosCallbackI
 Can't Find Class: org/lwjgl/glfw/GLFWMouseButtonCallbackI
 Can't Find Class: org/lwjgl/glfw/GLFWScrollCallbackI
-Can't Find Class: org/lwjgl/opengl/ARBDebugOutput
-Can't Find Class: org/lwjgl/opengl/GLDebugMessageARBCallbackI
-Can't Find Class: org/lwjgl/opengl/GLDebugMessageARBCallback
-Can't Find Class: com/google/common/collect/EvictingQueue
-Can't Find Class: ca/weblite/objc/NSObject
-Can't Find Class: org/lwjgl/glfw/GLFWNativeCocoa
-Can't Find Class: com/sun/jna/Pointer
-Can't Find Class: ca/weblite/objc/Client
-Can't Find Class: ca/weblite/objc/Proxy
 Can't Find Class: org/lwjgl/glfw/GLFWDropCallbackI
-Can't Find Class: oshi/hardware/CentralProcessor$ProcessorIdentifier
 Can't Find Class: org/lwjgl/glfw/GLFWCursorPosCallback
 Can't Find Class: org/lwjgl/glfw/GLFWMouseButtonCallback
 Can't Find Class: org/lwjgl/glfw/GLFWScrollCallback
-Can't Find Class: oshi/hardware/CentralProcessor
-Can't Find Class: org/lwjgl/Version
 Can't Find Class: org/lwjgl/glfw/GLFWDropCallback
-Can't Find Class: org/lwjgl/system/FunctionProvider
-Can't Find Class: org/lwjgl/glfw/GLFWNativeGLX
+Can't Find Class: oshi/hardware/CentralProcessor$ProcessorIdentifier
+Can't Find Class: org/lwjgl/stb/STBImageWrite
 Can't Find Class: org/lwjgl/opengl/GL20
 Can't Find Class: org/lwjgl/opengl/GL14
-Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectMap
-Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectOpenHashMap
-Can't Find Class: org/lwjgl/glfw/GLFWMonitorCallbackI
-Can't Find Class: org/lwjgl/glfw/GLFWMonitorCallback
-Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectCollection
-Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectIterator
-Can't Find Class: org/lwjgl/stb/STBImageWrite
-Can't Find Class: com/google/common/base/Joiner
-Can't Find Class: oshi/SystemInfo
-Can't Find Class: org/apache/commons/lang3/ArrayUtils
 Can't Find Class: org/lwjgl/stb/STBImageResize
-Can't Find Class: oshi/hardware/HardwareAbstractionLayer
 Can't Find Class: org/lwjgl/opengl/GL20C
 Can't Find Class: org/lwjgl/opengl/GL15
 Can't Find Class: org/lwjgl/opengl/GL30
 Can't Find Class: org/lwjgl/opengl/GL13
+Can't Find Class: ca/weblite/objc/NSObject
 Can't Find Class: com/google/common/base/Strings
+Can't Find Class: org/apache/commons/lang3/ArrayUtils
+Can't Find Class: org/lwjgl/glfw/GLFWNativeCocoa
+Can't Find Class: com/sun/jna/Pointer
+Can't Find Class: ca/weblite/objc/Client
+Can't Find Class: ca/weblite/objc/Proxy
+Can't Find Class: oshi/hardware/CentralProcessor
+Can't Find Class: org/lwjgl/Version
+Can't Find Class: org/lwjgl/system/FunctionProvider
 Can't Find Class: it/unimi/dsi/fastutil/booleans/BooleanConsumer
+Can't Find Class: org/lwjgl/glfw/GLFWNativeGLX
+Can't Find Class: com/google/common/base/Joiner
+Can't Find Class: oshi/SystemInfo
+Can't Find Class: oshi/hardware/HardwareAbstractionLayer
 Can't Find Class: com/google/common/util/concurrent/RateLimiter
 Can't Find Class: org/apache/commons/compress/archivers/tar/TarArchiveOutputStream
 Can't Find Class: org/apache/commons/compress/archivers/tar/TarArchiveEntry
 Can't Find Class: org/apache/commons/compress/archivers/ArchiveEntry
 Can't Find Class: org/apache/commons/compress/utils/IOUtils
 Can't Find Class: com/mojang/authlib/minecraft/MinecraftSessionService
+Can't Find Class: com/google/common/annotations/VisibleForTesting
 Can't Find Class: com/mojang/authlib/yggdrasil/ProfileResult
 Can't Find Class: com/mojang/authlib/GameProfile
-Can't Find Class: com/google/common/annotations/VisibleForTesting
 Can't Find Class: com/mojang/util/UndashedUuid
 Can't Find Class: com/google/common/collect/ComparisonChain
-Can't Find Class: org/apache/commons/lang3/builder/EqualsBuilder
 Can't Find Class: org/apache/http/entity/InputStreamEntity
 Can't Find Class: org/apache/http/client/config/RequestConfig$Builder
 Can't Find Class: org/apache/http/client/config/RequestConfig
+Can't Find Class: org/apache/commons/io/output/CountingOutputStream
 Can't Find Class: org/apache/http/client/methods/HttpPost
 Can't Find Class: org/apache/http/impl/client/HttpClientBuilder
 Can't Find Class: org/apache/http/impl/client/CloseableHttpClient
+Can't Find Class: org/apache/commons/lang3/builder/EqualsBuilder
 Can't Find Class: org/apache/http/client/methods/HttpUriRequest
-Can't Find Class: org/apache/commons/io/output/CountingOutputStream
 Can't Find Class: org/apache/http/client/methods/CloseableHttpResponse
 Can't Find Class: org/apache/http/HttpResponse
 Can't Find Class: org/apache/http/HttpEntity
@@ -843,127 +923,127 @@ Can't Find Class: org/apache/http/util/EntityUtils
 Can't Find Class: org/apache/http/NameValuePair
 Can't Find Class: org/apache/http/util/Args
 Can't Find Class: org/apache/http/client/methods/HttpGet
-Can't Find Class: org/apache/commons/compress/archivers/tar/TarArchiveInputStream
-Can't Find Class: org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream
 Can't Find Class: com/google/common/hash/Hashing
 Can't Find Class: com/google/common/hash/HashFunction
 Can't Find Class: com/google/common/io/Files
 Can't Find Class: com/google/common/hash/HashCode
 Can't Find Class: org/apache/commons/io/FileUtils
+Can't Find Class: org/apache/commons/compress/archivers/tar/TarArchiveInputStream
+Can't Find Class: org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream
 Can't Find Class: io/netty/channel/SimpleChannelInboundHandler
 Can't Find Class: it/unimi/dsi/fastutil/floats/FloatUnaryOperator
+Can't Find Class: com/mojang/serialization/Keyable
 Can't Find Class: it/unimi/dsi/fastutil/ints/Int2ObjectArrayMap
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap
-Can't Find Class: com/mojang/serialization/Keyable
 Can't Find Class: org/slf4j/Marker
 Can't Find Class: com/google/common/collect/Multimap
 Can't Find Class: com/google/common/collect/HashMultimap
 Can't Find Class: com/mojang/serialization/DataResult$PartialResult
 Can't Find Class: com/mojang/serialization/DataResult
-Can't Find Class: org/slf4j/MarkerFactory
 Can't Find Class: com/mojang/serialization/JsonOps
 Can't Find Class: com/mojang/serialization/DynamicOps
 Can't Find Class: org/apache/commons/lang3/mutable/MutableFloat
 Can't Find Class: org/apache/commons/lang3/mutable/MutableObject
+Can't Find Class: org/slf4j/MarkerFactory
 Can't Find Class: com/mojang/authlib/properties/PropertyMap
 Can't Find Class: com/mojang/authlib/properties/PropertyMap$Serializer
 Can't Find Class: com/google/common/base/Ticker
 Can't Find Class: com/google/common/base/Stopwatch
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectMap$FastEntrySet
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectMap$Entry
-Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectArrayMap
 Can't Find Class: io/netty/channel/ChannelInitializer
 Can't Find Class: io/netty/channel/Channel
 Can't Find Class: com/google/common/base/Supplier
-Can't Find Class: com/google/common/base/Suppliers
 Can't Find Class: com/mojang/authlib/minecraft/UserApiService
+Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectArrayMap
+Can't Find Class: com/mojang/brigadier/suggestion/Suggestions
+Can't Find Class: com/mojang/brigadier/suggestion/SuggestionsBuilder
+Can't Find Class: com/mojang/brigadier/context/CommandContext
 Can't Find Class: io/netty/channel/ChannelException
 Can't Find Class: io/netty/channel/ChannelConfig
 Can't Find Class: io/netty/channel/ChannelOption
 Can't Find Class: io/netty/channel/ChannelPipeline
 Can't Find Class: io/netty/channel/ChannelHandler
-Can't Find Class: com/mojang/brigadier/suggestion/Suggestions
-Can't Find Class: com/mojang/brigadier/suggestion/SuggestionsBuilder
-Can't Find Class: com/mojang/brigadier/context/CommandContext
-Can't Find Class: io/netty/buffer/ByteBuf
 Can't Find Class: com/google/common/collect/ImmutableList$Builder
+Can't Find Class: com/google/common/base/Suppliers
 Can't Find Class: com/google/common/net/HostAndPort
+Can't Find Class: io/netty/buffer/ByteBuf
 Can't Find Class: com/mojang/blocklist/BlockListSupplier
 Can't Find Class: com/google/common/collect/Streams
-Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectOpenHashMap
 Can't Find Class: io/netty/bootstrap/Bootstrap
 Can't Find Class: io/netty/channel/EventLoopGroup
 Can't Find Class: io/netty/bootstrap/AbstractBootstrap
+Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectOpenHashMap
 Can't Find Class: io/netty/channel/socket/nio/NioSocketChannel
 Can't Find Class: io/netty/channel/ChannelFuture
 Can't Find Class: com/mojang/authlib/yggdrasil/response/KeyPairResponse$KeyPair
 Can't Find Class: com/mojang/authlib/yggdrasil/response/KeyPairResponse
+Can't Find Class: com/mojang/brigadier/arguments/ArgumentType
 Can't Find Class: com/mojang/authlib/minecraft/InsecurePublicKeyException$MissingException
 Can't Find Class: com/mojang/authlib/minecraft/InsecurePublicKeyException
-Can't Find Class: com/mojang/brigadier/arguments/ArgumentType
 Can't Find Class: com/mojang/authlib/minecraft/report/AbuseReport
-Can't Find Class: com/mojang/brigadier/CommandDispatcher
-Can't Find Class: it/unimi/dsi/fastutil/objects/ReferenceOpenHashSet
-Can't Find Class: it/unimi/dsi/fastutil/ints/IntRBTreeSet
 Can't Find Class: com/mojang/authlib/minecraft/report/AbuseReportLimits
-Can't Find Class: it/unimi/dsi/fastutil/ints/IntSortedSet
 Can't Find Class: com/mojang/authlib/minecraft/report/ReportedEntity
-Can't Find Class: com/mojang/datafixers/util/Unit
+Can't Find Class: it/unimi/dsi/fastutil/ints/IntRBTreeSet
+Can't Find Class: it/unimi/dsi/fastutil/ints/IntSortedSet
 Can't Find Class: com/mojang/authlib/minecraft/report/ReportEvidence
+Can't Find Class: com/mojang/datafixers/util/Unit
 Can't Find Class: com/mojang/authlib/minecraft/report/ReportChatMessage
-Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectOpenHashSet
+Can't Find Class: com/mojang/authlib/exceptions/MinecraftClientException
 Can't Find Class: com/mojang/authlib/exceptions/MinecraftClientException$ErrorType
 Can't Find Class: com/mojang/authlib/yggdrasil/request/AbuseReportRequest$ClientInfo
 Can't Find Class: com/mojang/authlib/yggdrasil/request/AbuseReportRequest
 Can't Find Class: com/mojang/authlib/yggdrasil/request/AbuseReportRequest$ThirdPartyServerInfo
 Can't Find Class: com/mojang/authlib/yggdrasil/request/AbuseReportRequest$RealmInfo
-Can't Find Class: com/mojang/authlib/exceptions/MinecraftClientException
-Can't Find Class: com/mojang/datafixers/Products$P2
+Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectOpenHashSet
 Can't Find Class: com/mojang/authlib/exceptions/MinecraftClientHttpException
+Can't Find Class: com/mojang/datafixers/Products$P2
+Can't Find Class: com/mojang/brigadier/CommandDispatcher
 Can't Find Class: com/mojang/datafixers/Products$P3
+Can't Find Class: it/unimi/dsi/fastutil/objects/ReferenceOpenHashSet
+Can't Find Class: com/mojang/datafixers/util/Function3
 Can't Find Class: com/google/common/base/Splitter
 Can't Find Class: io/netty/channel/ChannelHandlerContext
 Can't Find Class: io/netty/buffer/ByteBufAllocator
 Can't Find Class: io/netty/channel/ChannelFutureListener
 Can't Find Class: io/netty/util/concurrent/GenericFutureListener
-Can't Find Class: com/mojang/datafixers/util/Function3
 Can't Find Class: com/mojang/authlib/exceptions/AuthenticationUnavailableException
 Can't Find Class: com/mojang/authlib/exceptions/InvalidCredentialsException
 Can't Find Class: com/mojang/authlib/exceptions/InsufficientPrivilegesException
 Can't Find Class: com/mojang/authlib/exceptions/UserBannedException
 Can't Find Class: com/mojang/authlib/exceptions/ForcedUsernameChangeException
 Can't Find Class: com/mojang/authlib/exceptions/AuthenticationException
-Can't Find Class: com/mojang/datafixers/util/Pair
 Can't Find Class: com/mojang/datafixers/Products$P4
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanFunction
+Can't Find Class: com/mojang/datafixers/DataFixer
+Can't Find Class: com/mojang/datafixers/util/Pair
+Can't Find Class: com/google/common/math/LongMath
 Can't Find Class: com/mojang/brigadier/tree/RootCommandNode
 Can't Find Class: org/apache/commons/compress/utils/Lists
-Can't Find Class: com/google/common/base/MoreObjects
-Can't Find Class: org/apache/commons/lang3/StringEscapeUtils
-Can't Find Class: com/mojang/brigadier/ParseResults
-Can't Find Class: com/mojang/datafixers/DataFixer
-Can't Find Class: com/google/common/math/LongMath
 Can't Find Class: com/mojang/datafixers/util/Function4
+Can't Find Class: com/google/common/base/MoreObjects
 Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectArrayList
 Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectListIterator
 Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet
+Can't Find Class: com/mojang/brigadier/ParseResults
 Can't Find Class: com/google/common/util/concurrent/ThreadFactoryBuilder
-Can't Find Class: com/ibm/icu/text/Collator
-Can't Find Class: com/mojang/serialization/Dynamic
 Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectSet
-Can't Find Class: com/google/common/collect/ForwardingList
+Can't Find Class: com/ibm/icu/text/Collator
+Can't Find Class: org/apache/commons/lang3/StringEscapeUtils
 Can't Find Class: org/apache/commons/lang3/mutable/MutableBoolean
+Can't Find Class: com/google/common/collect/ForwardingList
 Can't Find Class: com/google/common/collect/Ordering
 Can't Find Class: org/joml/Vector2ic
 Can't Find Class: org/joml/Vector2i
 Can't Find Class: com/mojang/text2speech/Narrator
 Can't Find Class: com/mojang/authlib/minecraft/BanDetails
+Can't Find Class: com/mojang/serialization/Dynamic
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2IntMap
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2IntOpenHashMap
 Can't Find Class: it/unimi/dsi/fastutil/objects/Reference2IntOpenHashMap
+Can't Find Class: com/mojang/serialization/Lifecycle
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanMap
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanLinkedOpenHashMap
-Can't Find Class: com/mojang/serialization/Lifecycle
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntIterator
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntSets$EmptySet
 Can't Find Class: it/unimi/dsi/fastutil/bytes/ByteList
@@ -972,11 +1052,11 @@ Can't Find Class: com/mojang/datafixers/Products$P5
 Can't Find Class: com/mojang/datafixers/util/Function5
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongSets$EmptySet
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongSets
-Can't Find Class: com/mojang/brigadier/suggestion/Suggestion
-Can't Find Class: com/google/common/base/Function
-Can't Find Class: com/mojang/brigadier/context/StringRange
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongSet
+Can't Find Class: com/mojang/brigadier/suggestion/Suggestion
 Can't Find Class: com/mojang/datafixers/DataFixUtils
+Can't Find Class: com/mojang/brigadier/context/StringRange
+Can't Find Class: com/google/common/base/Function
 Can't Find Class: com/mojang/brigadier/ImmutableStringReader
 Can't Find Class: com/mojang/brigadier/StringReader
 Can't Find Class: com/mojang/brigadier/exceptions/CommandSyntaxException
@@ -1000,13 +1080,13 @@ Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectFunction
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectMap
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectFunction
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2FloatLinkedOpenHashMap
-Can't Find Class: com/google/common/base/MoreObjects$ToStringHelper
 Can't Find Class: org/joml/Vector4fc
+Can't Find Class: com/google/common/base/MoreObjects$ToStringHelper
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2IntLinkedOpenHashMap
-Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntOpenHashMap
-Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntMap
 Can't Find Class: com/google/common/collect/BiMap
 Can't Find Class: com/google/common/collect/HashBiMap
+Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntOpenHashMap
+Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntMap
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongOpenHashSet
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2ObjectLinkedOpenHashMap
 Can't Find Class: org/joml/FrustumIntersection
@@ -1019,7 +1099,6 @@ Can't Find Class: it/unimi/dsi/fastutil/ints/IntPriorityQueue
 Can't Find Class: it/unimi/dsi/fastutil/objects/ReferenceArraySet
 Can't Find Class: it/unimi/dsi/fastutil/floats/Float2FloatFunction
 Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntFunction
-Can't Find Class: org/joml/Vector3d
 Can't Find Class: com/mojang/authlib/minecraft/UserApiService$UserProperties
 Can't Find Class: com/mojang/authlib/minecraft/UserApiService$UserFlag
 Can't Find Class: com/mojang/authlib/yggdrasil/YggdrasilAuthenticationService
@@ -1027,8 +1106,11 @@ Can't Find Class: com/google/common/collect/AbstractIterator
 Can't Find Class: com/google/common/collect/PeekingIterator
 Can't Find Class: com/google/common/collect/Iterators
 Can't Find Class: it/unimi/dsi/fastutil/Swapper
+Can't Find Class: org/joml/Vector3d
 Can't Find Class: it/unimi/dsi/fastutil/Arrays
 Can't Find Class: com/mojang/authlib/yggdrasil/ProfileActionType
+Can't Find Class: com/mojang/authlib/yggdrasil/ServicesKeySet
+Can't Find Class: com/mojang/authlib/yggdrasil/ServicesKeyType
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongList
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongArrayList
 Can't Find Class: com/mojang/authlib/minecraft/TelemetrySession
@@ -1040,56 +1122,53 @@ Can't Find Class: com/mojang/serialization/MapLike
 Can't Find Class: it/unimi/dsi/fastutil/objects/Reference2ObjectOpenHashMap
 Can't Find Class: org/apache/commons/lang3/Validate
 Can't Find Class: com/google/common/cache/CacheLoader
-Can't Find Class: com/mojang/authlib/minecraft/MinecraftProfileTextures
-Can't Find Class: com/mojang/authlib/yggdrasil/ServicesKeySet
-Can't Find Class: com/mojang/authlib/yggdrasil/ServicesKeyType
 Can't Find Class: com/mojang/authlib/minecraft/MinecraftProfileTexture$Type
+Can't Find Class: com/mojang/authlib/minecraft/MinecraftProfileTextures
 Can't Find Class: com/mojang/authlib/minecraft/MinecraftProfileTexture
 Can't Find Class: com/google/common/cache/LoadingCache
-Can't Find Class: org/apache/commons/lang3/tuple/Pair
 Can't Find Class: com/google/common/cache/CacheBuilder
 Can't Find Class: com/mojang/authlib/properties/Property
 Can't Find Class: com/mojang/authlib/SignatureState
+Can't Find Class: org/apache/commons/lang3/tuple/Pair
 Can't Find Class: com/ibm/icu/lang/UCharacter
 Can't Find Class: com/ibm/icu/text/BidiRun
 Can't Find Class: org/joml/Math
 Can't Find Class: it/unimi/dsi/fastutil/booleans/BooleanList
 Can't Find Class: it/unimi/dsi/fastutil/booleans/BooleanArrayList
+Can't Find Class: it/unimi/dsi/fastutil/ints/IntStack
 Can't Find Class: io/netty/util/ResourceLeakDetector$Level
 Can't Find Class: io/netty/util/ResourceLeakDetector
 Can't Find Class: com/mojang/datafixers/DSL$TypeReference
-Can't Find Class: com/mojang/datafixers/DSL
-Can't Find Class: it/unimi/dsi/fastutil/ints/IntStack
 Can't Find Class: oshi/hardware/PhysicalMemory
-Can't Find Class: org/apache/commons/io/FilenameUtils
+Can't Find Class: com/mojang/datafixers/DSL
 Can't Find Class: oshi/hardware/VirtualMemory
 Can't Find Class: oshi/hardware/GlobalMemory
 Can't Find Class: oshi/hardware/GraphicsCard
+Can't Find Class: org/apache/commons/io/FilenameUtils
 Can't Find Class: com/google/common/util/concurrent/MoreExecutors
 Can't Find Class: com/google/common/util/concurrent/ListeningExecutorService
-Can't Find Class: com/mojang/datafixers/Products$P6
-Can't Find Class: com/google/common/collect/Sets$SetView
 Can't Find Class: com/mojang/datafixers/types/Type
 Can't Find Class: com/mojang/datafixers/schemas/Schema
+Can't Find Class: com/mojang/datafixers/Products$P6
+Can't Find Class: com/google/common/collect/Sets$SetView
 Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectList
 Can't Find Class: it/unimi/dsi/fastutil/objects/ReferenceImmutableList
 Can't Find Class: it/unimi/dsi/fastutil/objects/ReferenceList
 Can't Find Class: it/unimi/dsi/fastutil/objects/Reference2IntMap
 Can't Find Class: com/mojang/datafixers/Typed
+Can't Find Class: com/mojang/datafixers/util/Function6
 Can't Find Class: com/mojang/datafixers/Products$P8
 Can't Find Class: com/mojang/datafixers/util/Function8
-Can't Find Class: com/mojang/datafixers/util/Function6
 Can't Find Class: com/mojang/datafixers/Products$P13
 Can't Find Class: com/google/common/collect/ImmutableBiMap$Builder
 Can't Find Class: com/google/common/collect/ImmutableBiMap
 Can't Find Class: com/mojang/datafixers/util/Function13
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanMap$Entry
-Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanMaps
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanOpenHashMap
+Can't Find Class: it/unimi/dsi/fastutil/objects/Object2BooleanMaps
 Can't Find Class: com/mojang/brigadier/exceptions/Dynamic2CommandExceptionType$Function
 Can't Find Class: com/mojang/brigadier/exceptions/Dynamic2CommandExceptionType
 Can't Find Class: com/mojang/brigadier/ResultConsumer
-Can't Find Class: com/mojang/brigadier/exceptions/Dynamic3CommandExceptionType$Function
 Can't Find Class: com/mojang/brigadier/context/ContextChain
 Can't Find Class: com/mojang/brigadier/builder/ArgumentBuilder
 Can't Find Class: com/mojang/brigadier/Command
@@ -1097,13 +1176,14 @@ Can't Find Class: com/mojang/brigadier/builder/RequiredArgumentBuilder
 Can't Find Class: com/mojang/brigadier/suggestion/SuggestionProvider
 Can't Find Class: com/mojang/brigadier/builder/LiteralArgumentBuilder
 Can't Find Class: com/mojang/brigadier/AmbiguityConsumer
+Can't Find Class: com/mojang/brigadier/exceptions/Dynamic3CommandExceptionType$Function
 Can't Find Class: com/mojang/brigadier/exceptions/Dynamic3CommandExceptionType
 Can't Find Class: com/mojang/brigadier/RedirectModifier
 Can't Find Class: com/mojang/brigadier/context/ContextChain$Stage
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntLists
 Can't Find Class: com/mojang/brigadier/arguments/BoolArgumentType
-Can't Find Class: com/mojang/brigadier/tree/ArgumentCommandNode
 Can't Find Class: com/mojang/brigadier/arguments/FloatArgumentType
+Can't Find Class: com/mojang/brigadier/tree/ArgumentCommandNode
 Can't Find Class: com/mojang/brigadier/arguments/DoubleArgumentType
 Can't Find Class: com/mojang/brigadier/arguments/IntegerArgumentType
 Can't Find Class: com/mojang/brigadier/arguments/LongArgumentType
@@ -1111,8 +1191,8 @@ Can't Find Class: com/mojang/brigadier/arguments/StringArgumentType
 Can't Find Class: com/mojang/brigadier/arguments/StringArgumentType$StringType
 Can't Find Class: javax/annotation/concurrent/Immutable
 Can't Find Class: org/jetbrains/annotations/VisibleForTesting
-Can't Find Class: it/unimi/dsi/fastutil/longs/LongConsumer
 Can't Find Class: com/google/common/base/Predicate
+Can't Find Class: it/unimi/dsi/fastutil/longs/LongConsumer
 Can't Find Class: com/google/common/hash/HashingOutputStream
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongArraySet
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2LongMap$Entry
@@ -1154,11 +1234,11 @@ Can't Find Class: io/netty/buffer/ByteBufInputStream
 Can't Find Class: io/netty/buffer/ByteBufUtil
 Can't Find Class: io/netty/buffer/Unpooled
 Can't Find Class: io/netty/handler/codec/CorruptedFrameException
-Can't Find Class: io/netty/channel/ChannelHandler$Sharable
 Can't Find Class: io/netty/util/ByteProcessor
-Can't Find Class: io/netty/util/ReferenceCounted
 Can't Find Class: com/mojang/serialization/MapEncoder
 Can't Find Class: com/mojang/serialization/MapDecoder
+Can't Find Class: io/netty/channel/ChannelHandler$Sharable
+Can't Find Class: io/netty/util/ReferenceCounted
 Can't Find Class: com/mojang/serialization/Decoder
 Can't Find Class: com/google/common/primitives/Ints
 Can't Find Class: com/google/common/base/Preconditions
@@ -1175,10 +1255,10 @@ Can't Find Class: it/unimi/dsi/fastutil/shorts/ShortSet
 Can't Find Class: it/unimi/dsi/fastutil/shorts/ShortIterator
 Can't Find Class: it/unimi/dsi/fastutil/ints/Int2ObjectMaps
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntListIterator
+Can't Find Class: org/apache/commons/lang3/ObjectUtils
 Can't Find Class: com/mojang/serialization/ListBuilder$Builder
 Can't Find Class: com/mojang/serialization/ListBuilder
 Can't Find Class: com/mojang/serialization/RecordBuilder$MapBuilder
-Can't Find Class: org/apache/commons/lang3/ObjectUtils
 Can't Find Class: com/google/common/collect/MapMaker
 Can't Find Class: it/unimi/dsi/fastutil/Stack
 Can't Find Class: com/google/common/net/InetAddresses
@@ -1193,7 +1273,6 @@ Can't Find Class: it/unimi/dsi/fastutil/longs/Long2LongMap
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ByteOpenHashMap
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2LongOpenHashMap
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongCollection
-Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectBidirectionalIterator
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ByteMap$Entry
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2IntMap
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2IntOpenHashMap
@@ -1201,20 +1280,22 @@ Can't Find Class: it/unimi/dsi/fastutil/longs/Long2IntMaps
 Can't Find Class: com/google/common/base/Objects
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2IntMap$FastEntrySet
 Can't Find Class: io/netty/channel/ChannelInboundHandlerAdapter
-Can't Find Class: com/google/common/collect/Comparators
 Can't Find Class: io/netty/util/Timer
 Can't Find Class: io/netty/util/Timeout
-Can't Find Class: io/netty/channel/epoll/EpollServerSocketChannel
 Can't Find Class: io/netty/util/TimerTask
-Can't Find Class: io/netty/channel/socket/nio/NioServerSocketChannel
 Can't Find Class: io/netty/util/HashedWheelTimer
+Can't Find Class: io/netty/channel/epoll/EpollServerSocketChannel
+Can't Find Class: io/netty/channel/socket/nio/NioServerSocketChannel
 Can't Find Class: io/netty/bootstrap/ServerBootstrap
+Can't Find Class: it/unimi/dsi/fastutil/ints/Int2ObjectMap$Entry
 Can't Find Class: io/netty/channel/socket/ServerSocketChannel
 Can't Find Class: io/netty/channel/local/LocalAddress
-Can't Find Class: it/unimi/dsi/fastutil/ints/Int2ObjectMap$Entry
+Can't Find Class: com/mojang/logging/LogQueues
 Can't Find Class: com/google/common/base/Functions
 Can't Find Class: com/mojang/authlib/ProfileLookupCallback
 Can't Find Class: com/mojang/authlib/yggdrasil/ProfileNotFoundException
+Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectBidirectionalIterator
+Can't Find Class: com/google/common/collect/Comparators
 Can't Find Class: com/google/common/collect/Interner
 Can't Find Class: com/google/common/collect/Interners
 Can't Find Class: com/google/common/base/Predicates
@@ -1230,7 +1311,6 @@ Can't Find Class: com/google/common/hash/Hasher
 Can't Find Class: com/google/common/hash/Funnels
 Can't Find Class: com/google/common/hash/PrimitiveSink
 Can't Find Class: com/mojang/serialization/RecordBuilder$AbstractUniversalBuilder
-Can't Find Class: org/apache/commons/lang3/math/NumberUtils
 Can't Find Class: com/sun/jna/platform/win32/Tlhelp32$MODULEENTRY32W
 Can't Find Class: com/sun/jna/platform/win32/Tlhelp32
 Can't Find Class: com/sun/jna/Platform
@@ -1242,12 +1322,13 @@ Can't Find Class: com/sun/jna/Native
 Can't Find Class: com/sun/jna/platform/win32/Win32Exception
 Can't Find Class: com/sun/jna/Memory
 Can't Find Class: com/sun/jna/ptr/PointerByReference
+Can't Find Class: org/apache/commons/lang3/math/NumberUtils
 Can't Find Class: com/google/common/collect/ImmutableMultimap
 Can't Find Class: io/netty/util/internal/ThreadLocalRandom
 Can't Find Class: com/mojang/authlib/yggdrasil/ServicesKeyInfo
+Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectArrays
 Can't Find Class: com/mojang/datafixers/DataFix
 Can't Find Class: com/mojang/datafixers/DataFixerBuilder
-Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectArrays
 Can't Find Class: com/mojang/datafixers/OpticFinder
 Can't Find Class: com/mojang/datafixers/TypeRewriteRule
 Can't Find Class: com/mojang/serialization/OptionalDynamic
@@ -1270,11 +1351,10 @@ Can't Find Class: com/mojang/datafixers/FieldFinder
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2IntArrayMap
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntBinaryOperator
 Can't Find Class: com/mojang/datafixers/types/templates/Const$PrimitiveType
-Can't Find Class: com/mojang/datafixers/types/templates/Const
 Can't Find Class: com/mojang/datafixers/types/templates/TypeTemplate
+Can't Find Class: com/mojang/datafixers/types/templates/Const
 Can't Find Class: com/mojang/datafixers/types/templates/Hook$HookFunction
 Can't Find Class: com/mojang/datafixers/types/templates/Hook
-Can't Find Class: com/mojang/logging/LogQueues
 Can't Find Class: it/unimi/dsi/fastutil/objects/Object2LongMaps
 Can't Find Class: com/google/common/math/Quantiles$ScaleAndIndexes
 Can't Find Class: com/google/common/math/Quantiles
@@ -1329,20 +1409,20 @@ Can't Find Class: it/unimi/dsi/fastutil/objects/Object2FloatOpenHashMap
 Can't Find Class: com/google/common/collect/ImmutableSortedMap
 Can't Find Class: com/google/common/collect/ArrayTable
 Can't Find Class: com/google/common/collect/AbstractTable
+Can't Find Class: it/unimi/dsi/fastutil/shorts/ShortListIterator
 Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntMap$FastEntrySet
 Can't Find Class: it/unimi/dsi/fastutil/ints/Int2IntMap$Entry
-Can't Find Class: it/unimi/dsi/fastutil/shorts/ShortListIterator
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongLinkedOpenHashSet
 Can't Find Class: com/mojang/datafixers/Products$P15
 Can't Find Class: com/mojang/datafixers/util/Function15
-Can't Find Class: com/google/common/collect/Range
-Can't Find Class: com/google/common/collect/DiscreteDomain
-Can't Find Class: com/google/common/collect/ContiguousSet
-Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectMaps
-Can't Find Class: org/apache/commons/lang3/mutable/MutableDouble
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongSortedSet
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongAVLTreeSet
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongBidirectionalIterator
+Can't Find Class: com/google/common/collect/Range
+Can't Find Class: it/unimi/dsi/fastutil/longs/Long2ObjectMaps
+Can't Find Class: com/google/common/collect/DiscreteDomain
+Can't Find Class: com/google/common/collect/ContiguousSet
+Can't Find Class: org/apache/commons/lang3/mutable/MutableDouble
 Can't Find Class: it/unimi/dsi/fastutil/doubles/Double2DoubleFunction
 Can't Find Class: com/mojang/datafixers/Products$P11
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2IntFunction
@@ -1359,23 +1439,23 @@ Can't Find Class: it/unimi/dsi/fastutil/doubles/DoubleListIterator
 Can't Find Class: it/unimi/dsi/fastutil/ints/IntBidirectionalIterator
 Can't Find Class: it/unimi/dsi/fastutil/longs/LongArrayFIFOQueue
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2LongLinkedOpenHashMap
-Can't Find Class: com/google/common/io/ByteSource
 Can't Find Class: it/unimi/dsi/fastutil/shorts/Short2BooleanMap
 Can't Find Class: it/unimi/dsi/fastutil/shorts/Short2BooleanFunction
 Can't Find Class: it/unimi/dsi/fastutil/shorts/Short2BooleanOpenHashMap
+Can't Find Class: com/google/common/io/ByteSource
 Can't Find Class: com/google/common/primitives/UnsignedLong
 Can't Find Class: it/unimi/dsi/fastutil/doubles/AbstractDoubleList
 Can't Find Class: com/google/common/math/IntMath
 Can't Find Class: it/unimi/dsi/fastutil/doubles/DoubleLists
 Can't Find Class: com/google/common/math/DoubleMath
 Can't Find Class: it/unimi/dsi/fastutil/objects/Reference2ObjectFunction
-Can't Find Class: it/unimi/dsi/fastutil/objects/Reference2ObjectMap
 Can't Find Class: it/unimi/dsi/fastutil/objects/ObjectOpenCustomHashSet
 Can't Find Class: it/unimi/dsi/fastutil/longs/Long2LongMaps
+Can't Find Class: it/unimi/dsi/fastutil/objects/Reference2ObjectMap
 Adding extras
 Sorting
 Processor: net.neoforged:AutoRenamingTool: Writing output
-Writing Output: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar
+Writing Output: C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar
   com/
   com/mojang/
   com/mojang/blaze3d/
@@ -9506,23 +9586,23 @@ Writing Output: C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libra
 Processor: net.neoforged.installertools:binarypatcher
   MainClass: net.neoforged.binarypatcher.ConsoleTool
   Classpath:
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\binarypatcher\2.1.2\binarypatcher-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\binarypatcher\2.1.2\binarypatcher-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\trove\trove\1.0.2\trove-1.0.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\installertools\cli-utils\2.1.2\cli-utils-2.1.2.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\github\jponge\lzma-java\1.3\lzma-java-1.3.jar
-    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\com\nothome\javaxdelta\2.0.1\javaxdelta-2.0.1.jar
-  Args: --clean, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar, --output, C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoforge\20.4.167\neoforge-20.4.167-client.jar, --apply, C:\Users\Diego\AppData\Local\Temp\forge_installer3219977210696921355\data\client.lzma
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\binarypatcher\2.1.1\binarypatcher-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\binarypatcher\2.1.1\binarypatcher-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\trove\trove\1.0.2\trove-1.0.2.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\installertools\cli-utils\2.1.1\cli-utils-2.1.1.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\srgutils\1.0.0\srgutils-1.0.0.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\github\jponge\lzma-java\1.3\lzma-java-1.3.jar
+    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\com\nothome\javaxdelta\2.0.1\javaxdelta-2.0.1.jar
+  Args: --clean, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar, --output, C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoforge\20.4.80-beta\neoforge-20.4.80-beta-client.jar, --apply, C:\Users\Diego\AppData\Local\Temp\forge_installer6858624672410672465\data\client.lzma
 Applying: 
-  Clean:     C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar
-  Output:    C:\Users\Diego\Documents\Proyects\yusup-client\data\.yusup\libraries\net\neoforged\neoforge\20.4.167\neoforge-20.4.167-client.jar
+  Clean:     C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\minecraft\client\1.20.4-20231207.154220\client-1.20.4-20231207.154220-srg.jar
+  Output:    C:\Users\Diego\AppData\Local\Temp\neoforge-mc-test2\libraries\net\neoforged\neoforge\20.4.80-beta\neoforge-20.4.80-beta-client.jar
   KeepData:  false
   Unpatched: false
   Pack200:   false
   Legacy:    false
-Loading patches file: C:\Users\Diego\AppData\Local\Temp\forge_installer3219977210696921355\data\client.lzma
+Loading patches file: C:\Users\Diego\AppData\Local\Temp\forge_installer6858624672410672465\data\client.lzma
 Processor: net.neoforged.installertools:binarypatcher: Loading patch files
 Processor: net.neoforged.installertools:binarypatcher: Patching input
 Processor: net.neoforged.installertools:binarypatcher: Adding new files

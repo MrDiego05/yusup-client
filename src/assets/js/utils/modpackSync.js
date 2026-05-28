@@ -93,7 +93,8 @@ class ModpackSync {
                 manifest = await res.json();
             }
         } catch (error) {
-            throw new Error(`Error al obtener manifest: ${error.message}`);
+            console.warn(`ModpackSync: no se pudo obtener el manifest (${error.message}), se omite la sincronización`);
+            return null;
         }
 
         this.manifest = manifest;

@@ -20,12 +20,23 @@ class NeoForgeSync {
     async install(mcVersion, nfVersion, progressCallback) {
         return new Promise(async (resolve, reject) => {
             try {
-                const versionFolderName = `neoforge-${nfVersion}`;
-                const versionJsonPath = path.join(this.gamePath, 'versions', versionFolderName, `${versionFolderName}.json`);
+                const versionsDir = path.join(this.gamePath, 'versions');
 
-                if (fs.existsSync(versionJsonPath)) {
-                    progressCallback(100, 100, "NeoForge ya está instalado.");
-                    return resolve(versionFolderName);
+                // Check if NeoForge is already installed (handle any folder name containing the version)
+                if (fs.existsSync(versionsDir)) {
+                    try {
+                        const entries = fs.readdirSync(versionsDir);
+                        const found = entries.find(e =>
+                            e.toLowerCase().includes(nfVersion.toLowerCase()) &&
+                            fs.existsSync(path.join(versionsDir, e, `${e}.json`))
+                        );
+                        if (found) {
+                            progressCallback(100, 100, "NeoForge ya está instalado.");
+                            return resolve(found);
+                        }
+                    } catch (e) {
+                        // ignore scan errors
+                    }
                 }
 
                 progressCallback(0, 100, "Descargando instalador de NeoForge...");
@@ -101,7 +112,7 @@ class NeoForgeSync {
                         progressCallback(100, 100, "NeoForge instalado correctamente.");
 
                         const versionsDir = path.join(this.gamePath, 'versions');
-                        let actualVersion = versionFolderName;
+                        let actualVersion = `neoforge-${nfVersion}`;
                         if (fs.existsSync(versionsDir)) {
                             try {
                                 const entries = fs.readdirSync(versionsDir);

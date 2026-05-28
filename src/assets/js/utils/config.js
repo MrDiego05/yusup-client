@@ -81,10 +81,10 @@ class Config {
                 url: "",
                 loader: {
                     type: "neoforge",
-                    build: "20.4.80",
+                    build: "1.20.1-47.1.106",
                     enable: true,
                     loader_type: "neoforge",
-                    loader_version: "20.4.80",
+                    loader_version: "1.20.1-47.1.106",
                     minecraft_version: "1.20.1"
                 },
                 verify: true,
