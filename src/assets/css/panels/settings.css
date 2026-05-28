@@ -191,73 +191,6 @@
 /* ==========================================================================
    RAM & JAVA TAB
    ========================================================================== */
-.memory-slider {
-    position: relative;
-    height: 12px;
-    width: 55%;
-    background: var(--background-tertiary);
-    border-radius: 6px;
-    user-select: none;
-}
-
-.slider-touch-left,
-.slider-touch-right {
-    box-sizing: border-box;
-    display: block;
-    position: absolute;
-    height: 18px;
-    width: 18px;
-    z-index: 2;
-    top: -3px;
-}
-
-.slider-touch-left span,
-.slider-touch-right span {
-    display: block;
-    width: 20px;
-    height: 20px;
-    background: var(--element-color);
-    border: 4px solid #006626;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    transition: background-color .2s;
-    box-sizing: border-box;
-}
-
-.slider-touch-left span:after,
-.slider-touch-right span:after {
-    content: attr(value);
-    color: var(--color);
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    pointer-events: none;
-    position: absolute;
-    top: -24px;
-    left: 50%;
-    transform: translate(-50%);
-}
-
-.slider-line {
-    box-sizing: border-box;
-    position: absolute;
-    width: calc(100% - 18px);
-    left: 9px;
-    top: 0px;
-    height: 100%;
-    border-radius: 6px;
-    background-color: transparent;
-    z-index: 0;
-    overflow: hidden;
-}
-
-.slider-line span {
-    display: block;
-    height: 100%;
-    background: var(--element-color);
-}
-
 .ram-info-block {
     font-size: 12px;
     color: var(--color);
@@ -453,6 +386,191 @@
 
 .content-scroll::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
+}
+
+/* RAM stepper inputs (replaced memory-slider) */
+.ram-stepper-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.ram-input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ram-input-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.ram-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--background);
+}
+
+.ram-step-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: var(--background-secondary);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.ram-step-btn:hover {
+    background: var(--background-tertiary);
+}
+
+.ram-input {
+    width: 70px;
+    height: 34px;
+    border: none;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    background: var(--background-primary);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.ram-input::-webkit-outer-spin-button,
+.ram-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.ram-input:focus {
+    background: var(--background);
+}
+
+/* RAM number inputs */
+.ram-input-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.ram-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ram-input-group label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.ram-input-group input {
+    width: 80px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.ram-input-group input:focus {
+    border-color: var(--element-color);
+    outline: none;
+}
+
+/* Theme selector */
+.theme-box {
+    display: flex;
+    gap: 8px;
+}
+
+.theme-option {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+}
+
+.theme-option:hover {
+    background: var(--background-secondary);
+}
+
+.theme-option.theme-active {
+    border-color: var(--element-color);
+    background: rgba(24, 255, 111, 0.08);
+    color: var(--element-color);
+}
+
+/* JVM args */
+.jvm-args-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.jvm-args-input:focus {
+    border-color: var(--element-color);
+    outline: none;
+}
+
+.jvm-args-btn {
+    align-self: flex-start;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: auto;
+}
+
+.jvm-args-btn:hover {
+    background: var(--background-secondary);
 }
 
 @keyframes fade-in {

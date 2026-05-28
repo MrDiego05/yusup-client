@@ -1,0 +1,112 @@
+diff --git a/node_modules/minecraft-java-core/build/Launch.js b/node_modules/minecraft-java-core/build/Launch.js
+index cdfc77c..f5245b6 100644
+--- a/node_modules/minecraft-java-core/build/Launch.js
++++ b/node_modules/minecraft-java-core/build/Launch.js
+@@ -116,15 +116,18 @@ class Launch extends events_1.EventEmitter {
+         argumentsLogs = argumentsLogs.replaceAll(`${this.options.path}/`, '');
+         this.emit('data', `Launching with arguments ${argumentsLogs}`);
+         let minecraftDebug = (0, child_process_1.spawn)(java, Arguments, { cwd: logs, detached: this.options.detached });
++        this._process = minecraftDebug;
+         minecraftDebug.stdout.on('data', (data) => this.emit('data', data.toString('utf-8')));
+         minecraftDebug.stderr.on('data', (data) => this.emit('data', data.toString('utf-8')));
+-        minecraftDebug.on('close', (code) => this.emit('close', 'Minecraft closed'));
++        minecraftDebug.on('close', (code) => { this._process = null; this.emit('close', 'Minecraft closed'); });
+     }
+     async DownloadGame() {
+         const InfoVersion = await new Minecraft_Json_js_1.default(this.options).GetInfoVersion();
+         let loaderJson = null;
+-        if ('error' in InfoVersion)
+-            return this.emit('error', InfoVersion);
++        if ('error' in InfoVersion) {
++            this.emit('error', InfoVersion);
++            return InfoVersion;
++        }
+         const { json, version } = InfoVersion;
+         const libraries = new Minecraft_Libraries_js_1.default(this.options);
+         const bundle = new Minecraft_Bundle_js_1.default(this.options);
+diff --git a/node_modules/minecraft-java-core/build/Minecraft/Minecraft-Json.js b/node_modules/minecraft-java-core/build/Minecraft/Minecraft-Json.js
+index f9f2d15..1b4fd84 100644
+--- a/node_modules/minecraft-java-core/build/Minecraft/Minecraft-Json.js
++++ b/node_modules/minecraft-java-core/build/Minecraft/Minecraft-Json.js
+@@ -7,8 +7,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+     return (mod && mod.__esModule) ? mod : { "default": mod };
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
++const fs = require('fs');
++const path = require('path');
+ const os_1 = __importDefault(require("os"));
+ const Minecraft_Lwjgl_Native_js_1 = __importDefault(require("./Minecraft-Lwjgl-Native.js"));
++
++/**
++ * Merge a child version JSON inheriting from a parent (inheritsFrom).
++ */
++function mergeInherited(parentJson, childJson) {
++    const merged = { ...parentJson, ...childJson };
++    merged.libraries = [...(parentJson.libraries || []), ...(childJson.libraries || [])];
++    if (childJson.mainClass) merged.mainClass = childJson.mainClass;
++    if (childJson.arguments) merged.arguments = childJson.arguments;
++    if (childJson.minecraftArguments) merged.minecraftArguments = childJson.minecraftArguments;
++    return merged;
++}
++
+ /**
+  * This class retrieves Minecraft version information from Mojang's
+  * version manifest, and optionally processes the JSON for ARM-based Linux.
+@@ -26,6 +41,57 @@ class Json {
+      */
+     async GetInfoVersion() {
+         let { version } = this.options;
++        // Check local versions folder first (NeoForge, custom loaders installed externally)
++        if (version && this.options.path) {
++            let localPath = path.resolve(this.options.path, 'versions', version, version + '.json');
++            if (!fs.existsSync(localPath)) {
++                // Scan versions folder for any folder containing this version string
++                const versionsDir = path.resolve(this.options.path, 'versions');
++                if (fs.existsSync(versionsDir)) {
++                    try {
++                        const entries = fs.readdirSync(versionsDir);
++                        const match = entries.find(e =>
++                            e.toLowerCase().includes(version.toLowerCase()) &&
++                            fs.existsSync(path.join(versionsDir, e, `${e}.json`))
++                        );
++                        if (match) {
++                            version = match;
++                            localPath = path.resolve(versionsDir, match, match + '.json');
++                        }
++                    } catch (e) {}
++                }
++            }
++            if (fs.existsSync(localPath)) {
++                try {
++                    let versionJson = JSON.parse(fs.readFileSync(localPath, 'utf8'));
++                    // Resolve inheritsFrom chain (NeoForge version JSON inherits from base MC)
++                    if (versionJson.inheritsFrom) {
++                        const parentPath = path.resolve(this.options.path, 'versions', versionJson.inheritsFrom, versionJson.inheritsFrom + '.json');
++                        if (fs.existsSync(parentPath)) {
++                            const parentJson = JSON.parse(fs.readFileSync(parentPath, 'utf8'));
++                            versionJson = mergeInherited(parentJson, versionJson);
++                        } else {
++                            // Parent not local, fetch from Mojang
++                            const manifestResp = await fetch(`https://launchermeta.mojang.com/mc/game/version_manifest_v2.json?_t=${new Date().toISOString()}`);
++                            const manifest = await manifestResp.json();
++                            const parentMatch = manifest.versions.find(v => v.id === versionJson.inheritsFrom);
++                            if (parentMatch) {
++                                const parentResp = await fetch(parentMatch.url);
++                                const parentJson = await parentResp.json();
++                                versionJson = mergeInherited(parentJson, versionJson);
++                            }
++                        }
++                    }
++                    return {
++                        InfoVersion: { id: version },
++                        json: versionJson,
++                        version
++                    };
++                } catch (e) {
++                    // Fall through to Mojang lookup
++                }
++            }
++        }
+         // Fetch the version manifest
+         const response = await fetch(`https://launchermeta.mojang.com/mc/game/version_manifest_v2.json?_t=${new Date().toISOString()}`);
+         const manifest = await response.json();

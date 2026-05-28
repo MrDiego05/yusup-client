@@ -1,44 +1,110 @@
 <div class="launcher-dashboard">
 
     <div class="sidebar-left">
-        <!-- Top Section: Account & Dynamic Back Button -->
-        <div class="sidebar-top">
-            <div class="sidebar-circle-btn" id="nav-btn-account" title="Cuenta">
-                <div class="player-head-nav">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M9.175 10.825C8.39167 10.0417 8 9.1 8 8C8 6.9 8.39167 5.95833 9.175 5.175C9.95833 4.39167 10.9 4 12 4C13.1 4 14.0417 4.39167 14.825 5.175C15.6083 5.95833 16 6.9 16 8C16 9.1 15.6083 10.0417 14.825 10.825C14.0417 11.6083 13.1 12 12 12C10.9 12 9.95833 11.6083 9.175 10.825ZM4 20V17.2C4 16.6333 4.14583 16.1125 4.4375 15.6375C4.72917 15.1625 5.11667 14.8 5.6 14.55C6.63333 14.0333 7.68333 13.6458 8.75 13.3875C9.81667 13.1292 10.9 13 12 13C13.1 13 14.1833 13.1292 15.25 13.3875C16.3167 13.6458 17.3667 14.0333 18.4 14.55C18.8833 14.8 19.2708 15.1625 19.5625 15.6375C19.8542 16.1125 20 16.6333 20 17.2V20H4ZM6 18H18V17.2C18 17.0167 17.9542 16.85 17.8625 16.7C17.7708 16.55 17.65 16.4333 17.5 16.35C16.6 15.9 15.6917 15.5625 14.775 15.3375C13.8583 15.1125 12.9333 15 12 15C11.0667 15 10.1417 15.1125 9.225 15.3375C8.30833 15.5625 7.4 15.9 6.5 16.35C6.35 16.4333 6.22917 16.55 6.1375 16.7C6.04583 16.85 6 17.0167 6 17.2V18ZM13.4125 9.4125C13.8042 9.02083 14 8.55 14 8C14 7.45 13.8042 6.97917 13.4125 6.5875C13.0208 6.19583 12.55 6 12 6C11.45 6 10.9792 6.19583 10.5875 6.5875C10.1958 6.97917 10 7.45 10 8C10 8.55 10.1958 9.02083 10.5875 9.4125C10.9792 9.80417 11.45 10 12 10C12.55 10 13.0208 9.80417 13.4125 9.4125Z" fill="#314158"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="sidebar-circle-btn nav-btn active" id="nav-btn-home" title="Inicio">
+        <div class="sidebar-nav">
+            <div class="sidebar-item nav-btn active" id="nav-btn-home" title="Inicio">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M5.00004 15.8333H7.50004V10.8333H12.5V15.8333H15V8.33333L10 4.58333L5.00004 8.33333V15.8333ZM3.33337 17.5V7.5L10 2.5L16.6667 7.5V17.5H10.8334V12.5H9.16671V17.5H3.33337Z" fill="#314158"/>
+                    <path d="M5.00004 15.8333H7.50004V10.8333H12.5V15.8333H15V8.33333L10 4.58333L5.00004 8.33333V15.8333ZM3.33337 17.5V7.5L10 2.5L16.6667 7.5V17.5H10.8334V12.5H9.16671V17.5H3.33337Z" fill="currentColor"/>
                 </svg>
+                <span class="sidebar-item-label">Inicio</span>
             </div>
-            <div class="sidebar-circle-btn nav-btn" id="nav-btn-instances" title="Instancias">
+            <div class="sidebar-item nav-btn" id="nav-btn-instances" title="Librería">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M4.5875 19.4125C4.19583 19.0208 4 18.55 4 18C4 17.45 4.19583 16.9792 4.5875 16.5875C4.97917 16.1958 5.45 16 6 16C6.55 16 7.02083 16.1958 7.4125 16.5875C7.80417 16.9792 8 17.45 8 18C8 18.55 7.80417 19.0208 7.4125 19.4125C7.02083 19.8042 6.55 20 6 20C5.45 20 4.97917 19.8042 4.5875 19.4125ZM10.5875 19.4125C10.1958 19.0208 10 18.55 10 18C10 17.45 10.1958 16.9792 10.5875 16.5875C10.9792 16.1958 11.45 16 12 16C12.55 16 13.0208 16.1958 13.4125 16.5875C13.8042 16.9792 14 17.45 14 18C14 18.55 13.8042 19.0208 13.4125 19.4125C13.0208 19.8042 12.55 20 12 20C11.45 20 10.9792 19.8042 10.5875 19.4125ZM16.5875 19.4125C16.1958 19.0208 16 18.55 16 18C16 17.45 16.1958 16.9792 16.5875 16.5875C16.9792 16.1958 17.45 16 18 16C18.55 16 19.0208 16.1958 19.4125 16.5875C19.8042 16.9792 20 17.45 20 18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20C17.45 20 16.9792 19.8042 16.5875 19.4125ZM4.5875 13.4125C4.19583 13.0208 4 12.55 4 12C4 11.45 4.19583 10.9792 4.5875 10.5875C4.97917 10.1958 5.45 10 6 10C6.55 10 7.02083 10.1958 7.4125 10.5875C7.80417 10.9792 8 11.45 8 12C8 12.55 7.80417 13.0208 7.4125 13.4125C7.02083 13.8042 6.55 14 6 14C5.45 14 4.97917 13.8042 4.5875 13.4125ZM10.5875 13.4125C10.1958 13.0208 10 12.55 10 12C10 11.45 10.1958 10.9792 10.5875 10.5875C10.9792 10.1958 11.45 10 12 10C12.55 10 13.0208 10.1958 13.4125 10.5875C13.8042 10.9792 14 11.45 14 12C14 12.55 13.8042 13.0208 13.4125 13.4125C13.0208 13.8042 12.55 14 12 14C11.45 14 10.9792 13.8042 10.5875 13.4125ZM16.5875 13.4125C16.1958 13.0208 16 12.55 16 12C16 11.45 16.1958 10.9792 16.5875 10.5875C16.9792 10.1958 17.45 10 18 10C18.55 10 19.0208 10.1958 19.4125 10.5875C19.8042 10.9792 20 11.45 20 12C20 12.55 19.8042 13.0208 19.4125 13.4125C19.0208 13.8042 18.55 14 18 14C17.45 14 16.9792 13.8042 16.5875 13.4125ZM4.5875 7.4125C4.19583 7.02083 4 6.55 4 6C4 5.45 4.19583 4.97917 4.5875 4.5875C4.97917 4.19583 5.45 4 6 4C6.55 4 7.02083 4.19583 7.4125 4.5875C7.80417 4.97917 8 5.45 8 6C8 6.55 7.80417 7.02083 7.4125 7.4125C7.02083 7.80417 6.55 8 6 8C5.45 8 4.97917 7.80417 4.5875 7.4125Z" fill="#314158"/>
+                    <path d="M4 6H20V18H4V6ZM2 4V20H22V4H2ZM6 8H18V14H6V8Z" fill="currentColor"/>
                 </svg>
+                <span class="sidebar-item-label">Librería</span>
+            </div>
+            <div class="sidebar-item nav-btn" id="nav-btn-settings" title="Ajustes">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.70833 18.3333L7.375 15.6667C7.19444 15.5972 7.02431 15.5139 6.86458 15.4167C6.70486 15.3194 6.54861 15.2153 6.39583 15.1042L3.91667 16.1458L1.625 12.1875L3.77083 10.5625C3.75694 10.4653 3.75 10.3715 3.75 10.2813V9.71875C3.75 9.62848 3.75694 9.53473 3.77083 9.4375L1.625 7.8125L3.91667 3.85417L6.39583 4.89584C6.54861 4.78473 6.70833 4.68056 6.875 4.58334C7.04167 4.48612 7.20833 4.40278 7.375 4.33334L7.70833 1.66667H12.2917L12.625 4.33334C12.8056 4.40278 12.9757 4.48612 13.1354 4.58334C13.2951 4.68056 13.4514 4.78473 13.6042 4.89584L16.0833 3.85417L18.375 7.8125L16.2292 9.4375C16.2431 9.53473 16.25 9.62848 16.25 9.71875V10.2813C16.25 10.3715 16.2361 10.4653 16.2083 10.5625L18.3542 12.1875L16.0625 16.1458L13.6042 15.1042C13.4514 15.2153 13.2917 15.3194 13.125 15.4167C12.9583 15.5139 12.7917 15.5972 12.625 15.6667L12.2917 18.3333H7.70833ZM9.16667 16.6667H10.8125L11.1042 14.4583C11.5347 14.3472 11.934 14.184 12.3021 13.9688C12.6701 13.7535 13.0069 13.4931 13.3125 13.1875L15.375 14.0417L16.1875 12.625L14.3958 11.2708C14.4653 11.0764 14.5139 10.8715 14.5417 10.6563C14.5694 10.441 14.5833 10.2222 14.5833 10C14.5833 9.77778 14.5694 9.55903 14.5417 9.34375C14.5139 9.12848 14.4653 8.92362 14.3958 8.72917L16.1875 7.375L15.375 5.95834L13.3125 6.83334C13.0069 6.51389 12.6701 6.24653 12.3021 6.03125C11.934 5.81598 11.5347 5.65278 11.1042 5.54167L10.8333 3.33334H9.1875L8.89583 5.54167C8.46528 5.65278 8.06597 5.81598 7.69792 6.03125C7.32986 6.24653 6.99306 6.50695 6.6875 6.8125L4.625 5.95834L3.8125 7.375L5.60417 8.70834C5.53472 8.91667 5.48611 9.125 5.45833 9.33334C5.43056 9.54167 5.41667 9.76389 5.41667 10C5.41667 10.2222 5.43056 10.4375 5.45833 10.6458C5.48611 10.8542 5.53472 11.0625 5.60417 11.2708L3.8125 12.625L4.625 14.0417L6.6875 13.1667C6.99306 13.4861 7.32986 13.7535 7.69792 13.9688C8.06597 14.184 8.46528 14.3472 8.89583 14.4583L9.16667 16.6667ZM10.0417 12.9167C10.8472 12.9167 11.5347 12.6319 12.1042 12.0625C12.6736 11.4931 12.9583 10.8056 12.9583 10C12.9583 9.19444 12.6736 8.50694 12.1042 7.9375C11.5347 7.36806 10.8472 7.08333 10.0417 7.08333C9.23611 7.08333 8.54861 7.36806 7.97917 7.9375C7.40972 8.50694 7.125 9.19444 7.125 10C7.125 10.8056 7.40972 11.4931 7.97917 12.0625C8.54861 12.6319 9.23611 12.9167 10.0417 12.9167Z"/>
+                </svg>
+                <span class="sidebar-item-label">Ajustes</span>
+            </div>
+            <div class="sidebar-dm" id="sidebar-btn-dm" title="DesfioMine" style="display:none">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 7L12 12L22 7L12 2ZM2 17L12 22L22 17M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <span>DesfioMine</span>
+                <span class="sidebar-dm-badge">DM</span>
             </div>
         </div>
 
-        <div class="sidebar-bottom">
-            <div class="sidebar-circle-btn nav-btn" id="sidebar-back-btn" style="display: none;"
-                title="Volver a Instancias">
+        <div class="sidebar-quick-access" id="sidebar-quick-access">
+            <span class="sidebar-quick-access-title">Accesos rápidos</span>
+            <div class="sidebar-quick-access-items" id="sidebar-quick-access-items"></div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-item nav-btn" id="sidebar-back-btn" style="display: none;" title="Volver">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M10.4 12L15 16.6L13.6 18L7.6 12L13.6 6L15 7.4L10.4 12Z" fill="#314158"/>
+                    <path d="M10.4 12L15 16.6L13.6 18L7.6 12L13.6 6L15 7.4L10.4 12Z" fill="currentColor"/>
                 </svg>
+                <span class="sidebar-item-label">Volver</span>
             </div>
-            <div class="sidebar-circle-btn nav-btn" id="nav-btn-settings" title="Ajustes del Launcher">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M7.70833 18.3333L7.375 15.6667C7.19444 15.5972 7.02431 15.5139 6.86458 15.4167C6.70486 15.3194 6.54861 15.2153 6.39583 15.1042L3.91667 16.1458L1.625 12.1875L3.77083 10.5625C3.75694 10.4653 3.75 10.3715 3.75 10.2813V9.71875C3.75 9.62848 3.75694 9.53473 3.77083 9.4375L1.625 7.8125L3.91667 3.85417L6.39583 4.89584C6.54861 4.78473 6.70833 4.68056 6.875 4.58334C7.04167 4.48612 7.20833 4.40278 7.375 4.33334L7.70833 1.66667H12.2917L12.625 4.33334C12.8056 4.40278 12.9757 4.48612 13.1354 4.58334C13.2951 4.68056 13.4514 4.78473 13.6042 4.89584L16.0833 3.85417L18.375 7.8125L16.2292 9.4375C16.2431 9.53473 16.25 9.62848 16.25 9.71875V10.2813C16.25 10.3715 16.2361 10.4653 16.2083 10.5625L18.3542 12.1875L16.0625 16.1458L13.6042 15.1042C13.4514 15.2153 13.2917 15.3194 13.125 15.4167C12.9583 15.5139 12.7917 15.5972 12.625 15.6667L12.2917 18.3333H7.70833ZM9.16667 16.6667H10.8125L11.1042 14.4583C11.5347 14.3472 11.934 14.184 12.3021 13.9688C12.6701 13.7535 13.0069 13.4931 13.3125 13.1875L15.375 14.0417L16.1875 12.625L14.3958 11.2708C14.4653 11.0764 14.5139 10.8715 14.5417 10.6563C14.5694 10.441 14.5833 10.2222 14.5833 10C14.5833 9.77778 14.5694 9.55903 14.5417 9.34375C14.5139 9.12848 14.4653 8.92362 14.3958 8.72917L16.1875 7.375L15.375 5.95834L13.3125 6.83334C13.0069 6.51389 12.6701 6.24653 12.3021 6.03125C11.934 5.81598 11.5347 5.65278 11.1042 5.54167L10.8333 3.33334H9.1875L8.89583 5.54167C8.46528 5.65278 8.06597 5.81598 7.69792 6.03125C7.32986 6.24653 6.99306 6.50695 6.6875 6.8125L4.625 5.95834L3.8125 7.375L5.60417 8.70834C5.53472 8.91667 5.48611 9.125 5.45833 9.33334C5.43056 9.54167 5.41667 9.76389 5.41667 10C5.41667 10.2222 5.43056 10.4375 5.45833 10.6458C5.48611 10.8542 5.53472 11.0625 5.60417 11.2708L3.8125 12.625L4.625 14.0417L6.6875 13.1667C6.99306 13.4861 7.32986 13.7535 7.69792 13.9688C8.06597 14.184 8.46528 14.3472 8.89583 14.4583L9.16667 16.6667ZM10.0417 12.9167C10.8472 12.9167 11.5347 12.6319 12.1042 12.0625C12.6736 11.4931 12.9583 10.8056 12.9583 10C12.9583 9.19444 12.6736 8.50694 12.1042 7.9375C11.5347 7.36806 10.8472 7.08333 10.0417 7.08333C9.23611 7.08333 8.54861 7.36806 7.97917 7.9375C7.40972 8.50694 7.125 9.19444 7.125 10C7.125 10.8056 7.40972 11.4931 7.97917 12.0625C8.54861 12.6319 9.23611 12.9167 10.0417 12.9167Z" fill="#314158"/>
+            <div class="sidebar-item" id="nav-btn-downloads" title="Descargas">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M13 5V11H14.17L12 13.17L9.83 11H11V5H13ZM15 3H9V9H5L12 16L19 9H15V3ZM5 18H19V20H5V18Z" fill="currentColor"/>
                 </svg>
+                <span class="sidebar-item-label">Descargas</span>
+                <span class="downloads-badge" id="downloads-badge" style="display:none;">0</span>
+            </div>
+        </div>
+
+        <!-- Floating downloads panel -->
+        <div class="downloads-floating-panel" id="downloads-floating-panel" style="display:none;">
+            <div class="downloads-panel-header">
+                <span>Descargas activas</span>
+                <button class="downloads-panel-close" id="downloads-panel-close">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                        <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="downloads-panel-body" id="downloads-panel-body">
+                <div class="downloads-panel-empty">No hay descargas activas.</div>
             </div>
         </div>
     </div>
 
     <!-- 2. MAIN CONTENT VIEWPORT -->
     <div class="dashboard-content">
+
+        <!-- Top bar with account avatar -->
+        <div class="top-bar">
+            <div class="top-bar-avatar" id="top-bar-avatar" title="Cuenta">
+            </div>
+        </div>
+
+        <!-- Account Dropdown -->
+        <div class="account-dropdown-overlay" id="account-dropdown-overlay">
+            <div class="account-dropdown" id="account-dropdown">
+                <div class="dropdown-header">
+                    <div class="dropdown-header-avatar" id="dd-header-avatar">
+                        <div class="dropdown-header-status"></div>
+                    </div>
+                    <div class="dropdown-header-info">
+                        <div class="dropdown-header-name" id="dd-header-name">Cargando...</div>
+                        <div class="dropdown-header-type" id="dd-header-type">Offline</div>
+                    </div>
+                    <div class="dropdown-close-btn" id="dd-close-btn">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="dropdown-accounts" id="dd-accounts-list">
+                    <!-- Loaded dynamically -->
+                </div>
+                <button class="dropdown-add-btn" id="dd-add-account-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Añadir una cuenta
+                </button>
+            </div>
+        </div>
+
         <div class="main-card-viewport">
 
             <!-- ==================== VIEW 1: ACCOUNT SETTINGS ==================== -->
@@ -46,7 +112,6 @@
                 <h1 class="view-title">Configuración de Cuenta</h1>
 
                 <div class="account-grid-layout content-scroll">
-                    <!-- Col 1: Active Account info & Switcher -->
                     <div class="account-card-col">
                         <div class="glass-section-card active-profile-box">
                             <div class="active-profile-header">
@@ -62,7 +127,6 @@
                         <div class="glass-section-card accounts-list-box">
                             <h3 class="section-card-title">Cambiar Cuenta</h3>
                             <div class="accounts-grid-scroller" id="account-selection-container">
-                                <!-- Loaded dynamically in home.js -->
                             </div>
                             <button class="premium-action-btn add-acc-btn" id="acc-btn-add-account">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
@@ -75,12 +139,10 @@
                         </div>
                     </div>
 
-                    <!-- Col 2: Friends list -->
                     <div class="account-card-col">
                         <div class="glass-section-card friends-box">
                             <h3 class="section-card-title">Lista de Amigos</h3>
                             <div class="friends-list content-scroll" id="friends-list-container">
-                                <!-- Loaded dynamically in home.js -->
                             </div>
 
                             <div class="add-friend-form">
@@ -96,39 +158,48 @@
             <!-- ==================== VIEW 2: HOME / UPDATES ==================== -->
             <div class="dashboard-view active" id="view-home">
                 <h1 class="view-title">Home</h1>
-                <h2 class="view-subtitle">Ultimas actualizaciones</h2>
+                <h2 class="view-subtitle">Bienvenido</h2>
+
+                <button class="discord-cta-btn" id="discord-cta-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                    </svg>
+                    Unirse a Discord
+                </button>
 
                 <div class="news-list content-scroll">
-                    <!-- News blocks loaded dynamically in home.js -->
                 </div>
             </div>
 
             <!-- ==================== VIEW 3: INSTANCES CATALOG ==================== -->
             <div class="dashboard-view" id="view-instances">
-                <h1 class="view-title">Instancias</h1>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                    <h1 class="view-title" style="margin:0;">Librería</h1>
+                    <button id="btn-refresh-instances" class="sidebar-circle-btn" style="width:36px; height:36px; border-radius:50%; background:var(--background-primary); color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; border:none; transition:0.2s;" title="Refrescar instancias">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                    </button>
+                </div>
 
                 <div class="instances-viewport-scroll content-scroll">
-                    <!-- Admin Section: Creados (Creator Tools) -->
                     <div class="instances-section" id="instances-admin-section" style="display: none;">
                         <h2 class="instances-section-title">Creados en Creator Tools</h2>
                         <div class="instances-grid" id="instances-grid-creator">
-                            <!-- Dynamically loaded in home.js -->
                         </div>
                     </div>
 
-                    <!-- Standard Section: Instalados -->
                     <div class="instances-section">
                         <h2 class="instances-section-title">Instalados</h2>
                         <div class="instances-grid" id="instances-grid-installed">
-                            <!-- Dynamically loaded in home.js -->
                         </div>
                     </div>
 
-                    <!-- Standard Section: Todas las instancias -->
                     <div class="instances-section">
                         <h2 class="instances-section-title">Todas las instancias</h2>
                         <div class="instances-grid" id="instances-grid-all">
-                            <!-- Dynamically loaded in home.js -->
                         </div>
                     </div>
                 </div>
@@ -136,12 +207,10 @@
 
             <!-- ==================== VIEW 4: MODPACK DETAILS ==================== -->
             <div class="dashboard-view" id="view-detail">
-                <!-- Selected Modpack Screen details -->
                 <div class="detail-pack-screen">
                     <h1 class="detail-pack-name" id="detail-title">Cargando...</h1>
 
                     <div class="detail-pack-actions-bar">
-                        <!-- Play / Download Capsule Button -->
                         <button class="detail-play-btn" id="detail-play-btn">
                             <span class="detail-play-btn-content" id="detail-play-btn-content">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none">
@@ -156,7 +225,6 @@
                             </div>
                         </button>
 
-                        <!-- Options Three Dots Button -->
                         <button class="detail-options-trigger-btn" id="detail-options-btn" title="Accesos Rápidos">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
@@ -166,7 +234,6 @@
                             </svg>
                         </button>
 
-                        <!-- Absolute Glassmorphic Options Dropdown Menu -->
                         <div class="detail-glass-dropdown" id="detail-options-dropdown" style="display: none;">
                             <div class="detail-dropdown-item" id="opt-btn-worlds">
                                 <span class="dropdown-item-icon">🌍</span>
@@ -192,14 +259,12 @@
                         </div>
                     </div>
 
-                    <!-- Tags list -->
                     <div class="detail-pack-tags" id="detail-tags">
                         <span>Forge</span>
                         <span>Terror</span>
                         <span>Amistad</span>
                     </div>
 
-                    <!-- Metadata details -->
                     <div class="detail-pack-meta-box">
                         <div class="meta-item-badge">
                             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
@@ -214,7 +279,6 @@
                         </div>
                     </div>
 
-                    <!-- Text information -->
                     <div class="detail-pack-description-container content-scroll">
                         <h3 class="detail-info-heading">Información</h3>
                         <p class="detail-pack-description-text" id="detail-desc">
@@ -223,7 +287,6 @@
                     </div>
                 </div>
 
-                <!-- Download/Installation Progress Card (styled inline on the bottom right) -->
                 <div class="detail-progress-overlay-card" id="detail-progress" style="display: none;">
                     <div class="progress-status-container">
                         <div class="progress-status-text" id="detail-progress-text">Descargando recursos...</div>
@@ -240,7 +303,6 @@
                 <h1 class="view-title">Configuración del Launcher</h1>
 
                 <div class="settings-content-wrapper content-scroll">
-                    <!-- Tab 1: RAM & JAVA -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">Asignación de RAM</h3>
                         <p class="section-card-description">
@@ -248,21 +310,26 @@
                             superar el 50% de la RAM física de tu equipo.
                         </p>
 
-                        <div class="slider-block-container">
-                            <div class="memory-slider" min="0.5" max="8" step="0.5">
-                                <div class="slider-touch-left">
-                                    <span value="0 Go"></span>
-                                </div>
-                                <div class="slider-touch-right">
-                                    <span value="0 Go"></span>
-                                </div>
-                                <div class="slider-line">
-                                    <span></span>
+                        <div class="ram-controls-row">
+                            <div class="ram-input-box">
+                                <label class="ram-input-label">Mín (GB)</label>
+                                <div class="ram-stepper">
+                                    <button class="ram-step-btn" data-target="min" data-dir="-1">−</button>
+                                    <input type="number" class="ram-input ram-min-input" min="0.5" step="0.5" value="1">
+                                    <button class="ram-step-btn" data-target="min" data-dir="1">+</button>
                                 </div>
                             </div>
-                            <div class="ram-details-badge">
-                                <div>Total: <span id="total-ram" class="badge-accent">0 GB</span></div>
-                                <div>Libre: <span id="free-ram" class="badge-accent">0 GB</span></div>
+                            <div class="ram-input-box">
+                                <label class="ram-input-label">Máx (GB)</label>
+                                <div class="ram-stepper">
+                                    <button class="ram-step-btn" data-target="max" data-dir="-1">−</button>
+                                    <input type="number" class="ram-input ram-max-input" min="0.5" step="0.5" value="2">
+                                    <button class="ram-step-btn" data-target="max" data-dir="1">+</button>
+                                </div>
+                            </div>
+                            <div class="ram-info-block">
+                                <span class="ram-info-text">Total: <b id="total-ram">0 GB</b></span>
+                                <span class="ram-info-text">Libre: <b id="free-ram">0 GB</b></span>
                             </div>
                         </div>
 
@@ -283,7 +350,6 @@
                         </div>
                     </div>
 
-                    <!-- Tab 2: MINECRAFT RESOLUTION -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">Resolución de Pantalla</h3>
                         <p class="section-card-description">
@@ -299,7 +365,6 @@
                         </div>
                     </div>
 
-                    <!-- Tab 3: LAUNCHER DOWNLOADS, THEME & BEHAVIORS -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">Descargas Paralelas</h3>
                         <p class="section-card-description">

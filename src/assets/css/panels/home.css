@@ -2,10 +2,21 @@
    GLOBAL PANEL STYLING & CORE DESIGN SYSTEM (Obsidian & Slate-Navy)
    ========================================================================== */
    :root {
-    --background: #F1F5F9;
+    --background: #F0F4F9;
     --background-primary: #FFFFFF;
+    --sidebar-bg: #F0F4F9;
     --text: #314158;
-    --background-tertiary: #CAD5E2;
+    --text-secondary: #5F6368;
+    --accent: #FF69B4;
+    --border-color: #D0D5DD;
+    --color: #314158;
+    --element-color: #FF69B4;
+    --background-secondary: #E8ECF0;
+    --background-element: #FFFFFF;
+    --card-border: 1px solid #E0E3E7;
+    --shadow: rgba(0, 0, 0, 0.06);
+    --transition: all 0.2s ease;
+    --background-tertiary: #DDE1E6;
     --select-primary: #DCFA9E;
     --select-secundary: #3C6301;
     --border: 12px solid;
@@ -31,123 +42,567 @@
    1. LEFT SIDEBAR (VERTICAL NAVBAR)
    ========================================================================== */
 .sidebar-left {
-    height: 700px;
+    width: 230px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
     box-sizing: border-box;
-    flex-shrink: 0;
     z-index: 100;
-    gap: 10px;
+    height: 100%;
+    overflow: hidden;
 }
 
-.sidebar-top {
+.sidebar-nav {
     display: flex;
     flex-direction: column;
+    gap: 5px;
+}
+
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    gap: 10px;
+    padding: 0px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 400;
+    font-family: "Google Sans Flex", sans-serif;
+    user-select: none;
+}
+
+.sidebar-item.active {
+    color: var(--text);
+    background: #FFFFFF;
+}
+
+.sidebar-item svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-item svg path {
+    fill: var(--text-secondary);
+    transition: fill 0.2s;
+}
+
+.sidebar-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.sidebar-footer{
+    position: relative;
+    bottom: 0px;
+}
+
+.sidebar-item.active svg path {
+    fill: var(--text);
+}
+
+.sidebar-item-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Downloads badge on sidebar */
+.downloads-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    box-sizing: border-box;
+}
+
+/* Floating downloads panel (Epic Games style) */
+.downloads-floating-panel {
+    position: absolute;
+    bottom: 70px;
+    left: 20px;
+    width: 320px;
+    max-height: 280px;
+    background: var(--background-primary);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 200;
+    overflow: hidden;
+    animation: panel-slide-up 0.2s ease;
+}
+
+.downloads-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.downloads-panel-close {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.downloads-panel-close:hover {
+    background: var(--background-secondary);
+    color: var(--text);
+}
+
+.downloads-panel-body {
+    padding: 8px 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.downloads-panel-empty {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 20px 0;
+}
+
+.downloads-row-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.downloads-row-item:last-child {
+    border-bottom: none;
+}
+
+.downloads-row-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.downloads-row-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.downloads-row-status {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.downloads-row-bar {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--background-secondary);
+    overflow: hidden;
+}
+
+.downloads-row-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
+
+.downloads-row-pct {
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: right;
+}
+
+@keyframes panel-slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sidebar quick access */
+.sidebar-quick-access {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin: 8px 0;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.sidebar-quick-access-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0 16px 4px;
+}
+
+.sidebar-quick-access-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-quick-access-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    height: 50px;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-quick-access-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text);
+}
+
+.qa-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.sidebar-quick-access-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text);
+}
+
+.sidebar-quick-access-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* DM Badge */
+.sidebar-dm {
+    display: flex;
+    align-items: center;
     gap: 12px;
-    align-items: center;
-    margin-bottom: auto;
+    padding: 8px 16px;
+    margin: 8px 0;
+    border-radius: 12px;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    cursor: pointer;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Google Sans Flex", sans-serif;
+    transition: box-shadow 0.2s;
+    user-select: none;
 }
 
-.sidebar-bottom {
-    gap: 10px;
-    margin-top: auto;
+.sidebar-dm:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.sidebar-dm-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: var(--accent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   2. TOP BAR & MAIN CONTENT VIEWPORT
+   ========================================================================== */
+.dashboard-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    height: 100%;
+    padding: 0px 60px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
-.sidebar-circle-btn {
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px 0 8px 0;
+    flex-shrink: 0;
+}
+
+.top-bar-avatar {
     width: 50px;
     height: 50px;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    image-rendering: pixelated;
+    cursor: pointer;
+    position: fixed;
+    top: 35;
+    right: 10px;
+    background-color: var(--background-secondary);
+    transition: border-color 0.2s;
+}
+
+.top-bar-avatar:hover {
+    border-color: var(--text-secondary);
+}
+
+/* Account Dropdown */
+.account-dropdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: none;
+}
+
+.account-dropdown-overlay.open {
+    display: block;
+}
+
+.account-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 90px;
+    width: 280px;
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    padding: 16px;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.dropdown-close-btn {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background-color: var(--background-primary);
-    color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: 0.2s;
+    color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s;
 }
 
-.sidebar-circle-btn svg {
-    width: 20px;
-    height: 20px;
+.dropdown-close-btn:hover {
+    background: rgba(0,0,0,0.06);
+    color: var(--text);
 }
 
-.sidebar-circle-btn:hover {
-    background-color: #DFE8F1;
-    color: var(--select-secundary);
-    border-radius: 12px;
-}
-
-/* Active Nav State */
-.sidebar-circle-btn.nav-btn.active {
-    background-color: var(--select-primary);
-    color: var(--select-secundary);
-    border-radius: 12px;
-}
-
-.sidebar-circle-btn.nav-btn.active svg path {
-    fill: var(--select-secundary);
-}
-
-#nav-btn-account {
-    border-color: var(--background-tertiary);
-    background-color: var(--background-secondary);
-}
-
-#nav-btn-account .player-head-nav {
-    width: 100%;
-    height: 100%;
-    border-radius: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.dropdown-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     background-size: cover;
     background-position: center;
     image-rendering: pixelated;
+    background-color: var(--background-secondary);
+    position: relative;
 }
 
-#nav-btn-account.active {
-    border-color: var(--element-color);
-    box-shadow: 0 0 15px rgba(24, 255, 111, 0.25);
+.dropdown-header-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #34A853;
+    border: 2px solid #FFFFFF;
 }
 
-/* ==========================================================================
-   2. MAIN CONTENT VIEWPORT
-   ========================================================================== */
-.dashboard-content {
-    flex: 1;
-    height: 100%;
-    padding: 0px 0px 0px 5px;
-    box-sizing: border-box;
+.dropdown-header-info {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
-.main-card-viewport {
+.dropdown-header-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.dropdown-header-type {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.dropdown-accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dropdown-account-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.dropdown-account-item:hover {
+    background: var(--background);
+}
+
+.dropdown-account-item.active-account {
+    background: #F0F4F9;
+}
+
+.dropdown-account-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--background-secondary);
+    flex-shrink: 0;
+}
+
+.dropdown-account-info {
     flex: 1;
-    border-radius: 21px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.dropdown-account-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
     overflow: hidden;
-    position: relative;
-    margin-left: 5px;
-    background: var(--background-primary);
+    text-overflow: ellipsis;
+}
+
+.dropdown-account-uuid {
+    font-size: 10px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-account-delete {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s;
+}
+
+.dropdown-account-delete:hover {
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+}
+
+.dropdown-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--text);
+    font-family: "Google Sans Flex", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-sizing: border-box;
+}
+
+.dropdown-add-btn:hover {
+    background: var(--background-secondary);
+}
+
+/* Main card */
+.main-card-viewport {
+    max-width: 860px;
+    height: 100%;
+    overflow: hidden;
 }
 
 /* Dashboard Views (Sub-panels) */
 .dashboard-view {
     display: none;
     flex-direction: column;
-    width: 100%;
     height: 100%;
-    padding: 10px 30px;
-    box-sizing: border-box;
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
+    padding: 0px;
+    overflow-y: auto;
 }
 
 .dashboard-view.active {
@@ -155,22 +610,140 @@
     animation: view-fade-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* RAM controls (no more slider — pure number inputs with stepper) */
+.ram-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.ram-input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ram-input-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.ram-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--background);
+}
+
+.ram-step-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: var(--background-secondary);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.ram-step-btn:hover {
+    background: var(--background-tertiary);
+}
+
+.ram-input {
+    width: 70px;
+    height: 34px;
+    border: none;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    background: var(--background-primary);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+}
+
+.ram-input::-webkit-outer-spin-button,
+.ram-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.ram-input:focus {
+    background: var(--background);
+}
+
+.ram-info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.ram-info-text b {
+    color: var(--text);
+    font-weight: 600;
+}
+
 /* Global View Typography */
 .view-title {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
-    color: var(--color);
-    margin: 0 0 6px 0;
+    color: var(--text);
+    margin: 0 0 4px 0;
     font-family: "Google Sans Flex", sans-serif;
 }
 
 .view-subtitle {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 500;
-    color: var(--color);
-    opacity: 0.6;
-    margin: 0 0 30px 0;
+    color: var(--text-secondary);
+    margin: 0 0 24px 0;
     font-family: "Google Sans Flex", sans-serif;
+}
+
+/* Discord CTA Button */
+.discord-cta-btn {
+    width: 160px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text);
+    font-family: "Google Sans Flex", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    margin-bottom: 24px;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+.discord-cta-btn:hover {
+    background: var(--accent);
+    color: #FFFFFF;
+    border-color: var(--accent);
 }
 
 /* Custom Premium Scrollbar */
@@ -1084,26 +1657,6 @@
 }
 
 /* RAM Memory Slider */
-.slider-block-container {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin: 20px 0 12px 0;
-}
-
-.ram-details-badge {
-    display: flex;
-    gap: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color);
-    opacity: 0.7;
-}
-
-.badge-accent {
-    color: var(--element-color);
-}
-
 /* Custom Input Styling */
 .input-field-design {
     background-color: var(--background-secondary);

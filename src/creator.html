@@ -425,6 +425,7 @@
         <div class="divider"></div>
         <button class="tool-btn" id="btn-modify">📝 Modificar</button>
         <button class="tool-btn" id="btn-open-folder">📂 Abrir Carpeta</button>
+        <button class="tool-btn" id="btn-whitelist" style="background: rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.4);">👥 Roles</button>
         <button class="tool-btn" id="btn-delete-pack" style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4);">🗑️ Eliminar</button>
         <button class="tool-btn" id="btn-check">✔️ Verificar</button>
         <div class="divider"></div>
@@ -436,8 +437,11 @@
         <button class="tool-btn" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4);"
             id="btn-github">🚀 Subir a GitHub Pages</button>
         <div class="divider"></div>
+        <div class="divider"></div>
         <button class="tool-btn" style="background: rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.5);"
-            id="btn-install-launcher">⬇️ Instalar en Launcher</button>
+            id="btn-install-launcher">⬇️ Instalar Seleccionados</button>
+        <button class="tool-btn" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4);"
+            id="btn-install-all">⬇️⬇️ Instalar Todos</button>
     </div>
 
     <!-- Main Workspace -->
@@ -448,6 +452,7 @@
                 <table id="modpack-table">
                     <thead>
                         <tr>
+                            <th style="width:32px;"><input type="checkbox" id="check-all" title="Seleccionar todos"></th>
                             <th>Nombre</th>
                             <th>Título</th>
                             <th>Versión del Juego</th>
@@ -508,7 +513,20 @@
 
             <div class="input-group">
                 <label>Versión del Loader</label>
-                <input type="text" id="new-loader-version" value="20.4.80">
+                <select id="new-loader-version">
+                    <option value="">Seleccioná una versión de MC primero</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Descripción</label>
+                <textarea id="new-description" rows="3" placeholder="Descripción del modpack..."
+                    style="background: rgba(2,6,24,0.6); border:1px solid var(--border-color); border-radius:8px; color:#fff; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none; resize:vertical;"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Tags (separadas por coma)</label>
+                <input type="text" id="new-tags" placeholder="ej. PVP, Terror, Amistad, Optimizado">
             </div>
 
             <div class="input-group">
@@ -552,6 +570,46 @@
             <div class="modal-buttons">
                 <button class="modal-btn cancel" id="btn-cancel-github">Cancelar</button>
                 <button class="modal-btn confirm" id="btn-push-github">Subir y Publicar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Whitelist / Roles -->
+    <div class="modal" id="modal-whitelist">
+        <div class="modal-content" style="width:560px;">
+            <h3 class="modal-title">👥 Jugadores y Roles</h3>
+            <p style="font-size:0.85em; color:#94a3b8; margin:0;">
+            Definí qué cuentas pueden ver y jugar este modpack.
+            <b>Admin</b> ve todas las instancias. <b>Player</b> solo ve las que tiene asignadas.
+            </p>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="wl-player-name" placeholder="Nombre del jugador"
+                    style="flex:1; background:rgba(2,6,24,0.6); border:1px solid var(--border-color); border-radius:8px; color:#fff; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
+                <select id="wl-player-role"
+                    style="background:rgba(2,6,24,0.6); border:1px solid var(--border-color); border-radius:8px; color:#fff; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
+                    <option value="player">Player</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button class="tool-btn" id="btn-wl-add" style="white-space:nowrap;">➕ Agregar</button>
+            </div>
+
+            <div style="flex:1; overflow-y:auto; max-height:180px; border:1px solid var(--border-color); border-radius:8px; background:rgba(2,6,24,0.4);">
+                <table style="width:100%; font-size:0.85em;">
+                    <thead>
+                        <tr><th style="padding:8px 12px;">Jugador</th><th style="padding:8px 12px;">Rol</th><th style="padding:8px 12px; width:40px;"></th></tr>
+                    </thead>
+                    <tbody id="wl-list"></tbody>
+                </table>
+            </div>
+
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.85em; color:#94a3b8;">
+                <input type="checkbox" id="wl-active"> Activar lista de permisos (solo Player pueden ver este modpack)
+            </label>
+
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="btn-cancel-wl">Cerrar</button>
+                <button class="modal-btn confirm" id="btn-save-wl">Guardar Cambios</button>
             </div>
         </div>
     </div>

@@ -9,32 +9,46 @@ class NeoForgeSync {
         this.javaPath = javaPath;
     }
 
-    async getInstallerUrl(mcVersion, nfVersion) {
-        // Formato para NeoForge: https://maven.neoforged.net/releases/net/neoforged/neoforge/<nfVersion>/neoforge-<nfVersion>-installer.jar
-        return `https://maven.neoforged.net/releases/net/neoforged/neoforge/${nfVersion}/neoforge-${nfVersion}-installer.jar`;
+    getInstallerUrls(nfVersion) {
+        const base = 'https://maven.neoforged.net/releases/net/neoforged/neoforge';
+        return [
+            `${base}/${nfVersion}/neoforge-${nfVersion}-installer.jar`,
+            `${base}/${nfVersion}-beta/neoforge-${nfVersion}-beta-installer.jar`,
+        ];
     }
 
     async install(mcVersion, nfVersion, progressCallback) {
         return new Promise(async (resolve, reject) => {
             try {
-                // Verificar si ya está instalado
                 const versionFolderName = `neoforge-${nfVersion}`;
                 const versionJsonPath = path.join(this.gamePath, 'versions', versionFolderName, `${versionFolderName}.json`);
-                
+
                 if (fs.existsSync(versionJsonPath)) {
                     progressCallback(100, 100, "NeoForge ya está instalado.");
                     return resolve(versionFolderName);
                 }
 
                 progressCallback(0, 100, "Descargando instalador de NeoForge...");
-                const installerUrl = await this.getInstallerUrl(mcVersion, nfVersion);
-                
+                const installerUrls = this.getInstallerUrls(nfVersion);
+
                 const installerDir = path.join(this.gamePath, 'temp');
                 if (!fs.existsSync(installerDir)) fs.mkdirSync(installerDir, { recursive: true });
                 const installerJarPath = path.join(installerDir, `neoforge-${nfVersion}-installer.jar`);
 
-                const response = await fetch(installerUrl);
-                if (!response.ok) throw new Error(`Fallo al descargar NeoForge: ${response.statusText}`);
+                let response = null;
+                for (const url of installerUrls) {
+                    const controller = new AbortController();
+                    const fetchTimeout = setTimeout(() => controller.abort(), 30000);
+                    try {
+                        const resp = await fetch(url, { signal: controller.signal });
+                        clearTimeout(fetchTimeout);
+                        if (resp.ok) { response = resp; break; }
+                        clearTimeout(fetchTimeout);
+                    } catch {
+                        clearTimeout(fetchTimeout);
+                    }
+                }
+                if (!response) throw new Error('No se pudo descargar el instalador de NeoForge (404 en todas las URLs).');
 
                 const fileStream = fs.createWriteStream(installerJarPath);
                 await new Promise((res, rej) => {
@@ -45,7 +59,22 @@ class NeoForgeSync {
 
                 progressCallback(50, 100, "Instalando NeoForge (esto puede tardar un poco)...");
 
+                const profilesPath = path.join(this.gamePath, 'launcher_profiles.json');
+                if (!fs.existsSync(profilesPath)) {
+                    const defaultProfiles = {
+                        profiles: {},
+                        selectedProfile: '(Default)',
+                        clientToken: '00000000-0000-0000-0000-000000000000'
+                    };
+                    fs.writeFileSync(profilesPath, JSON.stringify(defaultProfiles, null, 2));
+                }
+
                 const process = spawn(this.javaPath, ['-jar', installerJarPath, '--install-client', this.gamePath]);
+                let processTimedOut = false;
+                const processTimeout = setTimeout(() => {
+                    processTimedOut = true;
+                    process.kill();
+                }, 300000);
 
                 process.stdout.on('data', (data) => {
                     console.log(`[NeoForge Installer]: ${data}`);
@@ -55,28 +84,38 @@ class NeoForgeSync {
                     console.error(`[NeoForge Installer Error]: ${data}`);
                 });
 
-                process.on('close', (code) => {
+                process.on('error', (err) => {
+                    clearTimeout(processTimeout);
                     if (fs.existsSync(installerJarPath)) fs.unlinkSync(installerJarPath);
+                    reject(new Error(`No se pudo iniciar el instalador de NeoForge: ${err.message}`));
+                });
+
+                process.on('close', (code) => {
+                    clearTimeout(processTimeout);
+                    if (fs.existsSync(installerJarPath)) fs.unlinkSync(installerJarPath);
+                    if (processTimedOut) {
+                        reject(new Error('El instalador de NeoForge tardó demasiado y fue cancelado.'));
+                        return;
+                    }
                     if (code === 0) {
                         progressCallback(100, 100, "NeoForge instalado correctamente.");
-                        
-                        // Determinar el nombre de la versión leyendo launcher_profiles.json
-                        let installedVersionId = versionFolderName;
-                        const profilesPath = path.join(this.gamePath, 'launcher_profiles.json');
-                        if (fs.existsSync(profilesPath)) {
+
+                        const versionsDir = path.join(this.gamePath, 'versions');
+                        let actualVersion = versionFolderName;
+                        if (fs.existsSync(versionsDir)) {
                             try {
-                                const profiles = JSON.parse(fs.readFileSync(profilesPath, 'utf8'));
-                                for (const key in profiles.profiles) {
-                                    if (key.toLowerCase().includes('neoforge') || profiles.profiles[key].lastVersionId?.includes('neoforge')) {
-                                        installedVersionId = profiles.profiles[key].lastVersionId;
-                                    }
-                                }
+                                const entries = fs.readdirSync(versionsDir);
+                                const neoForgeEntry = entries.find(e =>
+                                    e.toLowerCase().includes(nfVersion.toLowerCase()) &&
+                                    fs.existsSync(path.join(versionsDir, e, `${e}.json`))
+                                );
+                                if (neoForgeEntry) actualVersion = neoForgeEntry;
                             } catch (e) {
-                                console.error('Error leyendo launcher_profiles.json:', e);
+                                console.error('Error scanning versions folder:', e);
                             }
                         }
 
-                        resolve(installedVersionId);
+                        resolve(actualVersion);
                     } else {
                         reject(new Error(`El instalador de NeoForge falló con el código ${code}`));
                     }

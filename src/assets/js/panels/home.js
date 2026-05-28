@@ -1,13 +1,15 @@
-import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, ModpackSync, NeoForgeSync, skin2D, accountSelect, Slider } from '../utils.js';
+import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, ModpackSync, NeoForgeSync, skin2D, accountSelect } from '../utils.js';
 
 const { Launch } = require('minecraft-java-core');
 const { shell, ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { default: fetch } = require('node-fetch');
 
 class Home {
     static id = "home";
+    _launching = false;
 
     async init(config) {
         this.config = config;
@@ -20,8 +22,27 @@ class Home {
         // Initialize user skin / head avatar
         await this.initUserAvatar();
 
+        // Account dropdown toggle
+        this.setupAccountDropdown();
+
         // 1. Load news section
         this.news();
+
+        // Render quick access
+        await this.renderQuickAccess();
+        await this.updateDmVisibility();
+
+        // Download queue floating panel
+        this.setupDownloadsPanel();
+
+        // Discord CTA button
+        const discordBtn = document.getElementById('discord-cta-btn');
+        if (discordBtn) {
+            discordBtn.addEventListener('click', () => {
+                const { shell } = require('electron');
+                shell.openExternal('https://discord.gg/yusup');
+            });
+        }
 
         // 2. Setup Navigation, Account View & Friends
         this.setupNavigation();
@@ -30,27 +51,41 @@ class Home {
         // 3. Render and initialize modpacks
         await this.initInstances();
 
+        // Refresh button
+        document.getElementById('btn-refresh-instances')?.addEventListener('click', () => {
+            this.initInstances();
+        });
+
         // 4. Initialize Settings
         await this.initSettings();
+
+        // Auto-refresh instances every 30s
+        this._refreshTimer = setInterval(() => {
+            this.initInstances();
+            this.renderQuickAccess();
+            this.updateDmVisibility();
+        }, 30000);
     }
 
     async initUserAvatar() {
         let configClient = await this.db.readData('configClient');
         let auth = await this.db.readData('accounts', configClient.account_selected);
-        const avatarEl = document.querySelector('#nav-btn-account .player-head-nav');
-        if (avatarEl) {
+        const setAvatar = async (el, clearChildren = true) => {
+            if (!el) return;
             if (auth && auth.profile && auth.profile.skins && auth.profile.skins[0]) {
                 try {
                     let headTex = await new skin2D().creatHeadTexture(auth.profile.skins[0].base64);
-                    avatarEl.style.backgroundImage = `url(${headTex})`;
-                    avatarEl.innerHTML = ''; // Remove default icon SVG
+                    el.style.backgroundImage = `url(${headTex})`;
+                    if (clearChildren) el.innerHTML = '';
                 } catch (e) {
-                    avatarEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
+                    el.style.backgroundImage = `url('assets/images/default/setve.png')`;
                 }
             } else {
-                avatarEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
+                el.style.backgroundImage = `url('assets/images/default/setve.png')`;
             }
-        }
+        };
+        setAvatar(document.querySelector('#top-bar-avatar'), true);
+        setAvatar(document.querySelector('#dd-header-avatar'), false);
     }
 
     async news() {
@@ -109,36 +144,43 @@ class Home {
     }
 
     setupNavigation() {
-        const navButtons = document.querySelectorAll('.sidebar-circle-btn.nav-btn, #nav-btn-account');
+        const navButtons = document.querySelectorAll('.sidebar-item.nav-btn');
         const views = document.querySelectorAll('.dashboard-view');
         const backBtn = document.getElementById('sidebar-back-btn');
 
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 let targetViewId = '';
-                if (btn.id === 'nav-btn-account') targetViewId = 'view-account';
-                else if (btn.id === 'nav-btn-home') targetViewId = 'view-home';
+                if (btn.id === 'nav-btn-home') targetViewId = 'view-home';
                 else if (btn.id === 'nav-btn-instances') targetViewId = 'view-instances';
                 else if (btn.id === 'nav-btn-settings') targetViewId = 'view-settings';
 
                 if (!targetViewId) return;
 
-                // Toggle active buttons
                 navButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
-                // Switch views
                 views.forEach(v => v.classList.remove('active'));
                 document.getElementById(targetViewId)?.classList.add('active');
 
-                // Hide back button on normal tabs
                 if (backBtn) backBtn.style.display = 'none';
 
-                // Close dropdown if open
                 const dropdown = document.getElementById('detail-options-dropdown');
                 if (dropdown) dropdown.style.display = 'none';
+
+                // Close account dropdown
+                const accDropdown = document.querySelector('.account-dropdown-overlay');
+                if (accDropdown) accDropdown.classList.remove('open');
             });
         });
+
+        // DM button: open Discord
+        const dmBtn = document.getElementById('sidebar-btn-dm');
+        if (dmBtn) {
+            dmBtn.addEventListener('click', () => {
+                shell.openExternal('https://discord.gg/yusup');
+            });
+        }
 
         // BIND: Sidebar details back button
         backBtn?.addEventListener('click', () => {
@@ -150,6 +192,310 @@ class Home {
 
             if (backBtn) backBtn.style.display = 'none';
         });
+    }
+
+    setupAccountDropdown() {
+        this._accountOverlay = document.querySelector('.account-dropdown-overlay');
+        const avatar = document.getElementById('top-bar-avatar');
+        if (!avatar || !this._accountOverlay) return;
+
+        avatar.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const isOpen = this._accountOverlay.classList.contains('open');
+            document.querySelectorAll('.account-dropdown-overlay').forEach(d => d.classList.remove('open'));
+            if (!isOpen) {
+                this._accountOverlay.classList.add('open');
+                await this.populateAccountDropdown();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#account-dropdown') && !e.target.closest('#top-bar-avatar')) {
+                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
+            }
+        });
+
+        // Close button in dropdown header
+        const closeBtn = document.getElementById('dd-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
+            });
+        }
+
+        // Add account button in dropdown
+        const addBtn = document.getElementById('dd-add-account-btn');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
+                document.querySelector('.cancel-home').style.display = 'inline';
+                changePanel('login');
+            });
+        }
+    }
+
+    async populateAccountDropdown() {
+        const overlay = this._accountOverlay;
+        let configClient = await this.db.readData('configClient');
+        let accounts = await this.db.readAllData('accounts');
+        const currentAccount = await this.db.readData('accounts', configClient.account_selected);
+
+        // Header info
+        const nameEl = document.getElementById('dd-header-name');
+        const typeEl = document.getElementById('dd-header-type');
+        if (currentAccount) {
+            if (nameEl) nameEl.textContent = currentAccount.name;
+            if (typeEl) typeEl.textContent = currentAccount.meta?.type || 'Offline';
+        }
+
+        // Account list
+        const listEl = document.getElementById('dd-accounts-list');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+
+        for (let acc of accounts) {
+            let skin = false;
+            if (acc?.profile?.skins[0]?.base64) {
+                try {
+                    skin = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
+                } catch (e) {}
+            }
+
+            const item = document.createElement('div');
+            item.className = 'dropdown-account-item' + (acc.ID === configClient.account_selected ? ' active-account' : '');
+            item.innerHTML = `
+                <div class="dropdown-account-avatar" ${skin ? `style="background-image: url(${skin});"` : ''}></div>
+                <div class="dropdown-account-info">
+                    <div class="dropdown-account-name">${acc.name}</div>
+                    <div class="dropdown-account-uuid">${acc.uuid || ''}</div>
+                </div>
+                <div class="dropdown-account-delete" data-id="${acc.ID}">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </div>
+            `;
+
+            // Switch account
+            item.addEventListener('click', async (e) => {
+                if (e.target.closest('.dropdown-account-delete')) return;
+                if (acc.ID === configClient.account_selected) return;
+
+                let popupSwitch = new popup();
+                popupSwitch.openPopup({ title: 'Conexión', content: 'Cargando cuenta...', color: 'var(--color)' });
+
+                let cc = await this.db.readData('configClient');
+                cc.account_selected = acc.ID;
+                let instancesList = await config.getInstanceList();
+                if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
+                await this.db.updateData('configClient', cc);
+                await accountSelect(acc);
+                await this.initUserAvatar();
+                await this.setupAccountView();
+                await this.initInstances();
+
+                popupSwitch.closePopup();
+                overlay.classList.remove('open');
+            });
+
+            // Delete account
+            item.querySelector('.dropdown-account-delete').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!confirm(`¿Eliminar la cuenta de ${acc.name}?`)) return;
+
+                await this.db.deleteData('accounts', acc.ID);
+                let remaining = await this.db.readAllData('accounts');
+                if (remaining.length === 0) {
+                    overlay.classList.remove('open');
+                    return changePanel('login');
+                }
+
+                let cc = await this.db.readData('configClient');
+                if (cc.account_selected === acc.ID) {
+                    cc.account_selected = remaining[0].ID;
+                    await accountSelect(remaining[0]);
+                    let instancesList = await config.getInstanceList();
+                    if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
+                    await this.db.updateData('configClient', cc);
+                    await this.initUserAvatar();
+                    await this.setupAccountView();
+                    await this.initInstances();
+                } else {
+                    await this.setupAccountView();
+                }
+
+                await this.populateAccountDropdown();
+            });
+
+            listEl.appendChild(item);
+        }
+    }
+
+    async updateDmVisibility() {
+        const dmBtn = document.getElementById('sidebar-btn-dm');
+        if (!dmBtn) return;
+        let sessions = await this.db.readAllData('sessions') || [];
+        const hasPlayed = sessions.some(s => (s.playtime_seconds || 0) > 0);
+        dmBtn.style.display = hasPlayed ? 'flex' : 'none';
+    }
+
+    /* ==========================================================================
+       DOWNLOAD QUEUE MANAGER (floating panel like Epic Games)
+       ========================================================================== */
+    _activeDownloads = new Map();
+
+    showDownload(instanceName, title) {
+        const panel = document.getElementById('downloads-floating-panel');
+        const body = document.getElementById('downloads-panel-body');
+        const badge = document.getElementById('downloads-badge');
+        if (!panel || !body) return;
+
+        if (!this._activeDownloads.has(instanceName)) {
+            const row = document.createElement('div');
+            row.className = 'downloads-row-item';
+            row.id = `download-item-${instanceName}`;
+            row.innerHTML = `
+                <div class="downloads-row-info">
+                    <span class="downloads-row-name">${title || instanceName}</span>
+                    <span class="downloads-row-status">Preparando...</span>
+                </div>
+                <div class="downloads-row-bar">
+                    <div class="downloads-row-fill" style="width:0%"></div>
+                </div>
+                <span class="downloads-row-pct">0%</span>
+            `;
+            body.appendChild(row);
+            this._activeDownloads.set(instanceName, { row, progress: 0 });
+        }
+
+        // Remove empty state
+        const empty = body.querySelector('.downloads-panel-empty');
+        if (empty) empty.remove();
+
+        panel.style.display = 'flex';
+        if (badge) {
+            badge.textContent = this._activeDownloads.size;
+            badge.style.display = 'flex';
+        }
+    }
+
+    updateDownload(instanceName, pct, message) {
+        const entry = this._activeDownloads.get(instanceName);
+        if (!entry) return;
+        const row = entry.row;
+        entry.progress = pct;
+        const fill = row.querySelector('.downloads-row-fill');
+        const status = row.querySelector('.downloads-row-status');
+        const pctEl = row.querySelector('.downloads-row-pct');
+        if (fill) fill.style.width = `${Math.min(pct, 100)}%`;
+        if (status) status.textContent = message || 'Descargando...';
+        if (pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+    }
+
+    hideDownload(instanceName) {
+        const panel = document.getElementById('downloads-floating-panel');
+        const body = document.getElementById('downloads-panel-body');
+        const badge = document.getElementById('downloads-badge');
+        const row = document.getElementById(`download-item-${instanceName}`);
+        if (row) row.remove();
+        this._activeDownloads.delete(instanceName);
+
+        if (this._activeDownloads.size === 0) {
+            if (body) body.innerHTML = '<div class="downloads-panel-empty">No hay descargas activas.</div>';
+            if (panel) panel.style.display = 'none';
+        }
+        if (badge) {
+            if (this._activeDownloads.size > 0) {
+                badge.textContent = this._activeDownloads.size;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    async setupDownloadsPanel() {
+        const panel = document.getElementById('downloads-floating-panel');
+        const btn = document.getElementById('nav-btn-downloads');
+        const closeBtn = document.getElementById('downloads-panel-close');
+        const badge = document.getElementById('downloads-badge');
+
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!panel) return;
+                const isOpen = panel.style.display === 'flex';
+                panel.style.display = isOpen ? 'none' : 'flex';
+            });
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                if (panel) panel.style.display = 'none';
+            });
+        }
+        document.addEventListener('click', (e) => {
+            if (panel && panel.style.display === 'flex') {
+                if (!e.target.closest('#downloads-floating-panel') && !e.target.closest('#nav-btn-downloads')) {
+                    panel.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    async renderQuickAccess() {
+        const container = document.getElementById('sidebar-quick-access-items');
+        const section = document.getElementById('sidebar-quick-access');
+        if (!container) return;
+
+        let sessions = await this.db.readAllData('sessions') || [];
+        let instanceMap = new Map();
+        for (let s of sessions) {
+            if (!s.instance || !s.playtime_seconds || s.playtime_seconds <= 0) continue;
+            if (!instanceMap.has(s.instance) || new Date(s.start_time) > new Date(instanceMap.get(s.instance).start_time)) {
+                instanceMap.set(s.instance, s);
+            }
+        }
+
+        const recent = Array.from(instanceMap.values())
+            .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+            .slice(0, 5);
+
+        container.innerHTML = '';
+        if (recent.length === 0) {
+            if (section) section.style.display = 'none';
+            return;
+        }
+        if (section) section.style.display = 'flex';
+
+        let instancesList = await config.getInstanceList();
+        for (let session of recent) {
+            const pack = instancesList.find(p => p.name === session.instance);
+            const title = pack?.title || pack?.name || session.instance;
+            const initial = title.charAt(0).toUpperCase();
+            const hue = this._nameToHue(title);
+            const bgColor = `hsl(${hue}, 55%, 85%)`;
+            const textColor = `hsl(${hue}, 60%, 30%)`;
+
+            const item = document.createElement('div');
+            item.className = 'sidebar-quick-access-item';
+            item.innerHTML = `
+                <div class="qa-avatar" style="background:${bgColor}; color:${textColor};">${initial}</div>
+                <span class="sidebar-quick-access-label">${title}</span>
+            `;
+            if (pack) {
+                item.addEventListener('click', () => { this.selectInstance(pack); });
+                item.style.cursor = 'pointer';
+            }
+            container.appendChild(item);
+        }
+    }
+
+    _nameToHue(name) {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return Math.abs(hash) % 360;
     }
 
     async setupAccountView() {
@@ -402,11 +748,36 @@ class Home {
         let instancesList = await config.getInstanceList();
         let currentSelect = configClient.instance_select;
 
+        // Get current account to check whitelist
+        const currentAccount = configClient.account_selected
+            ? await this.db.readData('accounts', configClient.account_selected)
+            : null;
+        const currentPlayerName = currentAccount?.name || '';
+
+        function isAdmin(pack, playerName) {
+            if (!pack.whitelistActive) return null; // null = no filter
+            const entry = (pack.whitelist || []).find(w => w.name.toLowerCase() === playerName.toLowerCase());
+            return entry ? entry.role : false;
+        }
+
+        // Filter instances based on whitelist
+        instancesList = instancesList.filter(pack => {
+            const role = isAdmin(pack, currentPlayerName);
+            if (role === null) return true;      // no whitelist → everyone sees it
+            if (role === 'admin') return true;    // admin sees all
+            if (role === 'player') return true;   // player sees their assigned ones
+            return false;                          // not in whitelist → hidden
+        });
+
         // Auto select first instance if none selected
         if (!currentSelect && instancesList.length > 0) {
             currentSelect = instancesList[0].name;
             configClient.instance_select = currentSelect;
             await this.db.updateData('configClient', configClient);
+        } else if (instancesList.length === 0) {
+            this.renderInstancesGrid([], 'instances-grid-installed');
+            this.renderInstancesGrid([], 'instances-grid-all');
+            return;
         }
 
         // 1. Separate installed vs available modpacks
@@ -414,32 +785,30 @@ class Home {
         let allPacks = [];
 
         for (let pack of instancesList) {
-            const localPackDir = path.join(this.gamePath, pack.name);
-            const hasDownloaded = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
-            if (hasDownloaded) {
+            const localPackDir = path.join(this.gamePath, 'instances', pack.name);
+            const hasVersion = configClient.instances_versions?.[pack.name];
+            const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
+            if (hasVersion || hasManifestFile) {
                 installedPacks.push(pack);
+            } else {
+                allPacks.push(pack);
             }
-            allPacks.push(pack);
         }
 
-        // 2. Render normal sections
-        this.renderInstancesGrid(installedPacks, 'instances-grid-installed');
-        this.renderInstancesGrid(allPacks, 'instances-grid-all');
-
-        // 3. Render creator tools modpacks (if any exist)
-        const adminSection = document.getElementById('instances-admin-section');
-        let creatorModpacks = [];
-        const creatorPath = path.resolve(__dirname, '..', '..', '..', 'data', 'creator-modpacks.json');
+        // 2. Merge creator tools modpacks into allPacks so they appear in "Todas las instancias"
+        const creatorPath = path.join(process.cwd(), 'data', 'creator-modpacks.json');
         if (fs.existsSync(creatorPath)) {
             try {
                 const fileData = fs.readFileSync(creatorPath, 'utf8');
                 let parsedData = JSON.parse(fileData);
-                creatorModpacks = parsedData.map(c => {
+                const creatorPacks = parsedData.map(c => {
                     const loaderType = (c.loader || 'none').toLowerCase();
-                    const isLocalInstalled = c.location && fs.existsSync(c.location);
+                    const localManifest = path.join(c.location, 'modpack.json');
                     return {
                         name: c.id,
                         title: c.title,
+                        description: c.description || '',
+                        tags: c.tags || [],
                         gameVersion: c.gameVersion,
                         loader: {
                             type: loaderType,
@@ -450,25 +819,24 @@ class Home {
                             minecraft_version: c.gameVersion
                         },
                         url: '',
-                        verify: false,
+                        verify: true,
                         ignored: [],
                         themeColor: 'lime',
                         playTime: '0.0h',
-                        creatorTools: true,
-                        localInstalled: isLocalInstalled,
-                        location: c.location
+                        modpack_url: fs.existsSync(localManifest) ? localManifest : undefined,
+                        whitelistActive: c.whitelistActive || false,
+                        whitelist: c.whitelist || []
                     };
                 });
+                allPacks.push(...creatorPacks);
             } catch (e) {
                 console.error('Error reading creator tools modpacks:', e);
             }
         }
-        if (creatorModpacks.length > 0) {
-            if (adminSection) adminSection.style.display = 'block';
-            this.renderInstancesGrid(creatorModpacks, 'instances-grid-creator');
-        } else {
-            if (adminSection) adminSection.style.display = 'none';
-        }
+
+        // 3. Render sections
+        this.renderInstancesGrid(installedPacks, 'instances-grid-installed');
+        this.renderInstancesGrid(allPacks, 'instances-grid-all');
     }
 
     renderInstancesGrid(packs, containerId) {
@@ -514,64 +882,68 @@ class Home {
         views.forEach(v => v.classList.remove('active'));
         document.getElementById('view-detail')?.classList.add('active');
 
+        // Hide progress card when switching instances (avoid leaking from another launch)
+        const progressContainer = document.getElementById('detail-progress');
+        if (progressContainer) progressContainer.style.display = 'none';
+        const playBtn = document.getElementById('detail-play-btn');
+        if (playBtn) {
+            playBtn.disabled = false;
+            playBtn.title = '';
+        }
+        const btnContent = document.getElementById('detail-play-btn-content');
+        const btnSpinner = document.getElementById('detail-play-btn-spinner');
+        if (btnContent) btnContent.style.display = 'flex';
+        if (btnSpinner) btnSpinner.style.display = 'none';
+
         // Show sidebar back button
         const backBtn = document.getElementById('sidebar-back-btn');
         if (backBtn) backBtn.style.display = 'flex';
 
         // Fill detail viewport floating card content
         document.getElementById('detail-title').textContent = pack.title || pack.name;
-        document.getElementById('detail-version').textContent = pack.gameVersion || pack.loader.minecraft_version;
-        document.getElementById('detail-playtime').textContent = pack.playTime || '0.0h';
+        document.getElementById('detail-version').textContent = pack.gameVersion || pack.loader?.minecraft_version || '';
+
+        // Calculate real playtime from sessions
+        try {
+            const allSessions = await this.db.readAllData('sessions') || [];
+            const packSessions = allSessions.filter(s => s.instance === pack.name);
+            const totalSeconds = packSessions.reduce((sum, s) => sum + (s.playtime_seconds || 0), 0);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            document.getElementById('detail-playtime').textContent = hours > 0 ? `${hours}.${minutes}h` : `${minutes}m`;
+        } catch (e) {
+            document.getElementById('detail-playtime').textContent = '0.0h';
+        }
 
         // Dynamic tags
         const tagsContainer = document.getElementById('detail-tags');
         if (tagsContainer) {
-            tagsContainer.innerHTML = `
-                <span>${(pack.loader?.type || pack.loader?.loader_type || 'vanilla').toUpperCase()}</span>
-                <span>Minecraft ${pack.gameVersion || pack.loader?.minecraft_version || ''}</span>
-                <span>Optimizado</span>
-            `;
+            const loaderName = (pack.loader?.type || pack.loader?.loader_type || 'vanilla').toUpperCase();
+            const mcVersion = pack.gameVersion || pack.loader?.minecraft_version || '';
+            const customTags = pack.tags || [];
+            let tagsHtml = `<span>${loaderName}</span>`;
+            if (mcVersion) tagsHtml += `<span>MC ${mcVersion}</span>`;
+            customTags.forEach(t => { tagsHtml += `<span>${t}</span>`; });
+            tagsContainer.innerHTML = tagsHtml;
         }
 
         // Dynamic Description
         const descEl = document.getElementById('detail-desc');
         if (descEl) {
-            descEl.innerHTML = pack.creatorTools 
-                ? `Esta es una instancia local del desarrollador creada con las herramientas del Creator Tools.<br><br><b>Ubicación local del proyecto:</b><br><code>${pack.location}</code>`
-                : `Un evento único y optimizado donde experimentarás la mejor jugabilidad en Minecraft. Disfruta de rendimiento superior, mods integrados y conectividad instantánea con el servidor principal.`;
+            descEl.innerHTML = pack.description || 'Un evento único y optimizado donde experimentarás la mejor jugabilidad en Minecraft. Disfruta de rendimiento superior, mods integrados y conectividad instantánea con el servidor principal.';
         }
 
-        // Verify if already downloaded/available to choose Jugar / Descargar label
+        // Verify if already downloaded
         let hasDownloaded = false;
         let effectiveGamePath = this.gamePath;
-
-        if (pack.creatorTools) {
-            // Creator Tools instances: use their local location folder directly
-            hasDownloaded = pack.localInstalled || (pack.location && fs.existsSync(pack.location));
-            // For local creator packs, the gamePath is the parent of the location folder
-            if (pack.location) effectiveGamePath = path.dirname(pack.location);
-        } else {
-            const localPackDir = path.join(this.gamePath, pack.name);
-            hasDownloaded = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
-        }
+        const localPackDir = path.join(this.gamePath, 'instances', pack.name);
+        const hasVersion = configClient.instances_versions?.[pack.name];
+        const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
+        hasDownloaded = hasVersion || hasManifestFile;
 
         const playBtnLabel = document.querySelector('#detail-play-btn-content span');
         if (playBtnLabel) {
-            if (pack.creatorTools) {
-                playBtnLabel.textContent = hasDownloaded ? 'Play (Local)' : 'Carpeta no encontrada';
-            } else {
-                playBtnLabel.textContent = hasDownloaded ? 'Play' : 'Descargar';
-            }
-        }
-
-        // Disable play for Creator Tools if location doesn't exist
-        const playBtn = document.getElementById('detail-play-btn');
-        if (playBtn && pack.creatorTools && !hasDownloaded) {
-            playBtn.disabled = true;
-            playBtn.title = `La carpeta del modpack no existe: ${pack.location}`;
-        } else if (playBtn) {
-            playBtn.disabled = false;
-            playBtn.title = '';
+            playBtnLabel.textContent = hasDownloaded ? 'Jugar' : 'Descargar';
         }
 
         // Setup launcher control listeners
@@ -587,6 +959,7 @@ class Home {
         playBtn.replaceWith(playBtn.cloneNode(true));
         const newPlayBtn = document.getElementById('detail-play-btn');
         newPlayBtn.addEventListener('click', () => {
+            if (this._launching) return;
             this.startGame(pack, gamePath);
         });
 
@@ -607,7 +980,7 @@ class Home {
         });
 
         // Dropdown Items Clicks Handlers
-        const localPackDir = path.join(gamePath, pack.name);
+        const localPackDir = path.join(gamePath, 'instances', pack.name);
         const openFolder = (subDir) => {
             if (dropdown) dropdown.style.display = 'none';
             const fullPath = path.join(localPackDir, subDir);
@@ -632,6 +1005,13 @@ class Home {
             if (confirm(`¿Estás completamente seguro de que quieres eliminar la instancia de ${pack.title || pack.name}?\nTodos tus mundos locales y capturas serán eliminados permanentemente.`)) {
                 try {
                     fs.rmSync(localPackDir, { recursive: true, force: true });
+
+                    // Clear stored version so it shows "Descargar" again
+                    let cc = await this.db.readData('configClient');
+                    if (cc.instances_versions) delete cc.instances_versions[pack.name];
+                    if (cc.instances_features) delete cc.instances_features[pack.name];
+                    await this.db.updateData('configClient', cc);
+
                     alert('Instancia eliminada con éxito. Ya puedes reinstalarla limpiamente.');
                     // Refresh view
                     await this.initInstances();
@@ -645,8 +1025,9 @@ class Home {
         // Dropdown Option: Force Close Game (Forzar Cierre)
         document.getElementById('opt-btn-kill').onclick = () => {
             if (dropdown) dropdown.style.display = 'none';
-            if (this.minecraftProcess) {
-                this.minecraftProcess.kill();
+            const proc = this.minecraftProcess?._process;
+            if (proc) {
+                proc.kill();
                 this.minecraftProcess = null;
                 new logger('Minecraft', '#ef4444').info('Minecraft finalizado por el usuario.');
                 alert('Minecraft ha sido cerrado de forma forzada.');
@@ -660,6 +1041,138 @@ class Home {
                 alert('Procesos de Java cerrados de forma forzada.');
             }
         };
+    }
+
+    async showFeaturesModal(modpackUrl) {
+        let manifest;
+        try {
+            if (fs.existsSync(modpackUrl)) {
+                manifest = JSON.parse(fs.readFileSync(modpackUrl, 'utf8'));
+            } else {
+                const controller = new AbortController();
+                const fetchTimeout = setTimeout(() => controller.abort(), 10000);
+                const res = await fetch(modpackUrl, { signal: controller.signal });
+                clearTimeout(fetchTimeout);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                manifest = await res.json();
+            }
+        } catch (e) {
+            return []; // Can't get features, proceed without selecting
+        }
+
+        const features = manifest.features;
+        if (!features || features.length === 0) return [];
+
+        let existing = document.getElementById('features-overlay');
+        if (existing) existing.remove();
+
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.id = 'features-overlay';
+            overlay.style.cssText = `
+                position:fixed; top:0; left:0; width:100%; height:100%;
+                background:rgba(0,0,0,0.7); z-index:9999;
+                display:flex; align-items:center; justify-content:center;
+                backdrop-filter:blur(4px);
+            `;
+
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                background:#1e293b; border-radius:12px; padding:24px;
+                width:420px; max-height:80vh; overflow-y:auto;
+                border:1px solid rgba(255,255,255,0.1);
+                color:#f1f5f9; font-family:inherit;
+            `;
+
+            const title = document.createElement('h3');
+            title.textContent = 'Características opcionales';
+            title.style.cssText = 'margin:0 0 4px 0; font-size:1.1em;';
+            modal.appendChild(title);
+
+            const subtitle = document.createElement('p');
+            subtitle.textContent = 'Seleccioná los mods y componentes que querés incluir:';
+            subtitle.style.cssText = 'margin:0 0 16px 0; font-size:0.85em; color:#94a3b8;';
+            modal.appendChild(subtitle);
+
+            const checkboxes = {};
+            for (const feat of features) {
+                const label = document.createElement('label');
+                label.style.cssText = `
+                    display:flex; align-items:center; gap:10px;
+                    padding:8px 12px; margin:4px 0;
+                    border-radius:8px; cursor:pointer;
+                    background:rgba(255,255,255,0.03);
+                    transition:background 0.2s;
+                `;
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = feat.selected !== false;
+                cb.style.cssText = 'accent-color:#3b82f6; width:16px; height:16px;';
+
+                const info = document.createElement('div');
+                info.style.cssText = 'display:flex; flex-direction:column; gap:2px;';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = feat.name;
+                nameSpan.style.cssText = 'font-weight:600; font-size:0.9em;';
+
+                const descSpan = document.createElement('span');
+                descSpan.textContent = feat.description || '';
+                descSpan.style.cssText = 'font-size:0.8em; color:#94a3b8;';
+
+                if (feat.recommendation === 'starred') {
+                    const badge = document.createElement('span');
+                    badge.textContent = '★ Recomendado';
+                    badge.style.cssText = 'font-size:0.75em; color:#f59e0b; margin-left:8px;';
+                    nameSpan.appendChild(badge);
+                }
+
+                info.appendChild(nameSpan);
+                info.appendChild(descSpan);
+                label.appendChild(cb);
+                label.appendChild(info);
+                modal.appendChild(label);
+
+                checkboxes[feat.name] = cb;
+            }
+
+            const btnRow = document.createElement('div');
+            btnRow.style.cssText = 'display:flex; justify-content:flex-end; gap:8px; margin-top:16px;';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancelar';
+            cancelBtn.style.cssText = `
+                padding:8px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);
+                background:transparent; color:#ccc; cursor:pointer; font-family:inherit;
+            `;
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Confirmar';
+            confirmBtn.style.cssText = `
+                padding:8px 16px; border-radius:8px; border:none;
+                background:#3b82f6; color:#fff; cursor:pointer; font-weight:600; font-family:inherit;
+            `;
+
+            cancelBtn.onclick = () => {
+                overlay.remove();
+                resolve(undefined); // User cancelled
+            };
+
+            confirmBtn.onclick = () => {
+                const selected = Object.entries(checkboxes)
+                    .filter(([, cb]) => cb.checked)
+                    .map(([name]) => name);
+                overlay.remove();
+                resolve(selected);
+            };
+
+            btnRow.appendChild(cancelBtn);
+            btnRow.appendChild(confirmBtn);
+            modal.appendChild(btnRow);
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+        });
     }
 
     async startGame(options, gamePath) {
@@ -678,21 +1191,30 @@ class Home {
 
         // Normalize loader fields: support both old (loader_type/loader_version) and new (type/build) formats
         const loaderType = (options.loader?.loader_type || options.loader?.type || 'none').toLowerCase();
-        const loaderVersion = options.loader?.loader_version || options.loader?.build || '';
+        let loaderVersion = options.loader?.loader_version || options.loader?.build || '';
         const mcVersion = options.loader?.minecraft_version || options.gameVersion || '1.20.1';
-        const loaderEnabled = loaderType !== 'none' && loaderType !== 'vanilla' && loaderVersion !== '';
 
-        // For Creator Tools instances: use the location as the instance folder directly
-        let effectivePath = gamePath;
-        let instanceName = options.name;
-        if (options.creatorTools && options.location) {
-            // The instance folder IS the location itself; gamePath is the parent
-            effectivePath = path.dirname(options.location);
-            instanceName = path.basename(options.location);
+        // For Forge, the build must include the MC version prefix (e.g. "1.20.1-47.4.10")
+        if (loaderType === 'forge' && loaderVersion && !loaderVersion.startsWith(mcVersion + '-')) {
+            loaderVersion = mcVersion + '-' + loaderVersion;
         }
 
+        const loaderEnabled = loaderType !== 'none' && loaderType !== 'vanilla' && loaderVersion !== '';
+
+        let effectivePath = gamePath;
+        let instanceName = options.name;
+
+        // Cap memory to safe limits
+        const totalMemGB = Math.trunc(os.totalmem() / 1073741824 * 10) / 10;
+        const maxSafeGB = Math.max(1, Math.trunc((60 * totalMemGB) / 100));
+        let minGB = configClient.java_config?.java_memory?.min || 1;
+        let maxGB = configClient.java_config?.java_memory?.max || 2;
+        if (maxGB > maxSafeGB) maxGB = maxSafeGB;
+        if (maxGB > 4) maxGB = 4;
+        if (minGB > maxGB) minGB = 1;
+
         let opt = {
-            url: options.url || undefined,  // undefined means no remote sync
+            url: options.url || undefined,
             authenticator: authenticator,
             timeout: 10000,
             path: effectivePath,
@@ -708,15 +1230,14 @@ class Home {
                 enable: loaderEnabled
             },
 
-            // Creator Tools local instances skip remote file verification
-            verify: options.creatorTools ? false : (options.verify ?? true),
+            verify: options.modpack_url ? false : (options.verify ?? true),
             ignored: options.ignored ? [...options.ignored] : [],
 
             java: {
                 path: configClient.java_config?.java_path || null,
             },
 
-            JVM_ARGS: options.jvm_args ? options.jvm_args : [],
+            JVM_ARGS: [...(configClient.java_config?.jvm_args || []), ...(options.jvm_args || [])],
             GAME_ARGS: options.game_args ? options.game_args : [],
 
             screen: {
@@ -725,10 +1246,40 @@ class Home {
             },
 
             memory: {
-                min: `${(configClient.java_config?.java_memory?.min || 1) * 1024}M`,
-                max: `${(configClient.java_config?.java_memory?.max || 2) * 1024}M`
+                min: `${minGB * 1024}M`,
+                max: `${maxGB * 1024}M`
             }
         };
+
+        // Prevent launching while already launching
+        if (this._launching) {
+            new popup().openPopup({
+                title: 'Ya hay una instancia iniciando',
+                content: 'Esperá a que la instancia actual termine de iniciarse.',
+                color: 'orange',
+                options: true
+            });
+            return;
+        }
+        this._launching = true;
+
+        // Migration: if version stored but new-path instance dir doesn't exist, reset version to force re-sync
+        const newPathDir = path.join(gamePath, 'instances', options.name);
+        const oldPathDir = path.join(gamePath, options.name);
+        if (configClient.instances_versions?.[options.name]) {
+            const hasNewFiles = fs.existsSync(newPathDir) && fs.readdirSync(newPathDir).length > 0;
+            const hasOldFiles = fs.existsSync(oldPathDir) && fs.readdirSync(oldPathDir).length > 0;
+            if (!hasNewFiles && hasOldFiles) {
+                // One-time migration: copy old game files to new instances/ path so settings are preserved
+                try {
+                    fs.cpSync(oldPathDir, newPathDir, { recursive: true, force: false });
+                } catch (e) {
+                    console.error('Migration copy failed:', e);
+                }
+                delete configClient.instances_versions[options.name];
+                await this.db.updateData('configClient', configClient);
+            }
+        }
 
         // Transition Play Button to Loading Spinner, show floating progress card
         if (btnContent) btnContent.style.display = 'none';
@@ -740,19 +1291,73 @@ class Home {
         progressPct.innerHTML = '0%';
         ipcRenderer.send('main-window-progress-load');
 
-        // 1. Sync modpack (if applicable)
+        // 1. Sync modpack (if applicable) — SKCraft-style with feature gating and version tracking
         if (options.modpack_url) {
             try {
+                // Ask user to select optional features before syncing
+                let enabledFeatures = configClient.instances_features?.[options.name] || [];
+                const selectedFeatures = await this.showFeaturesModal(options.modpack_url);
+                if (selectedFeatures === undefined) {
+                    // User cancelled the features dialog
+                    if (btnContent) btnContent.style.display = 'flex';
+                    if (btnSpinner) btnSpinner.style.display = 'none';
+                    playBtn.disabled = false;
+                    progressContainer.style.display = 'none';
+                    this._launching = false;
+                    return;
+                }
+                if (selectedFeatures.length > 0) {
+                    enabledFeatures = selectedFeatures;
+                    if (!configClient.instances_features) configClient.instances_features = {};
+                    configClient.instances_features[options.name] = enabledFeatures;
+                    await this.db.updateData('configClient', configClient);
+                }
+
                 progressText.innerHTML = `Sincronizando modpack con el servidor...`;
-                const modpackSync = new ModpackSync(options.modpack_url, `${gamePath}/${options.name}`);
-                await modpackSync.sync((progress, size, message) => {
+
+                // Read stored version for this instance
+                const storedVersion = configClient.instances_versions?.[options.name] || null;
+
+                const instancePath = path.join(gamePath, 'instances', options.name);
+
+                const modpackSync = new ModpackSync(options.modpack_url, instancePath, {
+                    enabledFeatures
+                });
+
+                this.showDownload(options.name, options.title || options.name);
+
+                const result = await modpackSync.sync((progress, size, message) => {
+                    const pct = ((progress / size) * 100).toFixed(0);
                     progressText.innerHTML = `${message} (${progress}/${size})`;
                     ipcRenderer.send('main-window-progress', { progress, size });
-                    const pct = ((progress / size) * 100).toFixed(0);
                     wavyBar.style.width = `${pct}%`;
                     progressPct.innerHTML = `${pct}%`;
-                });
+                    this.updateDownload(options.name, pct, message);
+                }, storedVersion);
+
+                this.hideDownload(options.name);
+
+                // Store the new version
+                if (!configClient.instances_versions) configClient.instances_versions = {};
+                configClient.instances_versions[options.name] = result.version;
+                await this.db.updateData('configClient', configClient);
+
+                // Refresh instances grid so installed pack moves from "Todas" to "Instaladas"
+                await this.initInstances();
+                await this.selectInstance(options);
+
+                // Re-acquire DOM references after selectInstance replaced the play button via cloneNode
+                playBtn = document.getElementById('detail-play-btn');
+                btnContent = document.getElementById('detail-play-btn-content');
+                btnSpinner = document.getElementById('detail-play-btn-spinner');
+                progressContainer.style.display = 'flex';
+
+                // Re-apply loading state for remaining phases (NeoForge install, game launch)
+                if (btnContent) btnContent.style.display = 'none';
+                if (btnSpinner) btnSpinner.style.display = 'flex';
+                if (playBtn) playBtn.disabled = true;
             } catch (err) {
+                this.hideDownload(options.name);
                 let popupError = new popup();
                 popupError.openPopup({
                     title: 'Error de Sincronización',
@@ -766,17 +1371,19 @@ class Home {
                 if (btnSpinner) btnSpinner.style.display = 'none';
                 playBtn.disabled = false;
                 progressContainer.style.display = 'none';
+                this._launching = false;
                 return;
             }
         }
 
-        // 2. Install NeoForge if specified
+        // 2. Install NeoForge if specified (externally via official installer)
         if (loaderType === 'neoforge') {
             try {
                 progressText.innerHTML = `Instalando NeoForge en curso...`;
                 const javaPath = configClient.java_config?.java_path || 'java';
                 const neoForgeSync = new NeoForgeSync(effectivePath, javaPath);
 
+                this.showDownload(options.name, options.title || options.name);
                 const versionName = await neoForgeSync.install(
                     mcVersion,
                     loaderVersion,
@@ -786,11 +1393,13 @@ class Home {
                         const pct = ((progress / size) * 100).toFixed(0);
                         wavyBar.style.width = `${pct}%`;
                         progressPct.innerHTML = `${pct}%`;
+                        this.updateDownload(options.name, pct, message);
                     }
                 );
+                this.hideDownload(options.name);
 
                 opt.version = versionName;
-                opt.loader.enable = false; // Bypass default forge in minecraft-java-core
+                opt.loader.enable = false;
             } catch (err) {
                 let popupError = new popup();
                 popupError.openPopup({
@@ -800,11 +1409,12 @@ class Home {
                     options: true
                 });
 
-                // Restore button state
+                this.hideDownload(options.name);
                 if (btnContent) btnContent.style.display = 'flex';
                 if (btnSpinner) btnSpinner.style.display = 'none';
                 playBtn.disabled = false;
                 progressContainer.style.display = 'none';
+                this._launching = false;
                 return;
             }
         }
@@ -840,8 +1450,8 @@ class Home {
 
         // 3. Launch game process
         progressText.innerHTML = `Lanzando proceso del juego...`;
-        const proc = launch.Launch(opt);
-        this.minecraftProcess = proc;
+        launch.Launch(opt);
+        this.minecraftProcess = launch;
 
         launch.on('extract', () => {
             ipcRenderer.send('main-window-progress-load');
@@ -873,6 +1483,7 @@ class Home {
             if (btnSpinner) btnSpinner.style.display = 'none';
             playBtn.disabled = false;
             progressContainer.style.display = 'none';
+            this._launching = false;
 
             if (configClient.launcher_config.closeLauncher == 'close-launcher') {
                 ipcRenderer.send("main-window-hide");
@@ -896,22 +1507,29 @@ class Home {
             if (btnSpinner) btnSpinner.style.display = 'none';
             playBtn.disabled = false;
             progressContainer.style.display = 'none';
+            this._launching = false;
 
             new logger(pkg.name, '#7289da');
             this.minecraftProcess = null;
 
             // Trigger instances grid to refresh in case playTime changed
             await this.initInstances();
+            await this.renderQuickAccess();
+            await this.updateDmVisibility();
             await this.selectInstance(options);
         });
 
         launch.on('error', async err => {
             await sessionEnd();
 
+            let errorMsg = err.error || err.message || err;
+            if (typeof errorMsg === 'string' && errorMsg.includes('Could not create the Java Virtual Machine')) {
+                errorMsg = 'No se pudo iniciar la máquina virtual de Java. Esto suele ocurrir cuando la memoria asignada es demasiado alta para tu sistema o cuando usas Java 32 bits.\n\nProbá reducir la memoria en Ajustes → RAM.';
+            }
             let popupError = new popup();
             popupError.openPopup({
                 title: 'Error de Inicio',
-                content: err.error || err.message || err,
+                content: errorMsg,
                 color: 'red',
                 options: true
             });
@@ -926,6 +1544,7 @@ class Home {
             if (btnSpinner) btnSpinner.style.display = 'none';
             playBtn.disabled = false;
             progressContainer.style.display = 'none';
+            this._launching = false;
 
             new logger(pkg.name, '#7289da');
             this.minecraftProcess = null;
@@ -947,38 +1566,84 @@ class Home {
         let totalMem = Math.trunc(os.totalmem() / 1073741824 * 10) / 10;
         let freeMem = Math.trunc(os.freemem() / 1073741824 * 10) / 10;
 
-        document.getElementById("total-ram").textContent = `${totalMem} Go`;
-        document.getElementById("free-ram").textContent = `${freeMem} Go`;
+        const totalEl = document.getElementById("total-ram");
+        const freeEl = document.getElementById("free-ram");
+        if (totalEl) totalEl.textContent = `${totalMem} GB`;
+        if (freeEl) freeEl.textContent = `${freeMem} GB`;
 
-        let sliderDiv = document.querySelector(".memory-slider");
-        if (sliderDiv) sliderDiv.setAttribute("max", Math.trunc((80 * totalMem) / 100));
+        const maxSlider = Math.max(1, Math.trunc((80 * totalMem) / 100));
 
-        let ram = activeConfig?.java_config?.java_memory ? {
-            ramMin: activeConfig.java_config.java_memory.min,
-            ramMax: activeConfig.java_config.java_memory.max
-        } : { ramMin: "1", ramMax: "2" };
+        let ram = activeConfig?.java_config?.java_memory || { min: 1, max: 2 };
 
-        if (totalMem < ram.ramMin) {
-            activeConfig.java_config.java_memory = { min: 1, max: 2 };
-            await this.db.updateData('configClient', activeConfig);
-            ram = { ramMin: "1", ramMax: "2" }
+        const minInput = document.querySelector('.ram-min-input');
+        const maxInput = document.querySelector('.ram-max-input');
+        const stepBtns = document.querySelectorAll('.ram-step-btn');
+
+        if (minInput) minInput.value = Math.round(ram.min * 10) / 10;
+        if (maxInput) maxInput.value = Math.round(ram.max * 10) / 10;
+
+        const clamp = (val) => Math.round(Math.min(Math.max(val, 0.5), maxSlider) * 10) / 10;
+
+        const saveRam = async (min, max) => {
+            let cfg = await this.db.readData('configClient');
+            if (!cfg.java_config) cfg.java_config = {};
+            cfg.java_config.java_memory = { min: clamp(min), max: clamp(max) };
+            await this.db.updateData('configClient', cfg);
+        };
+
+        if (minInput) {
+            const syncMax = () => {
+                const m = clamp(parseFloat(minInput.value) || 1);
+                const M = clamp(parseFloat(maxInput.value) || 2);
+                if (m > M) { minInput.value = M; }
+            };
+            minInput.addEventListener('change', async () => {
+                let val = clamp(parseFloat(minInput.value) || 1);
+                let M = clamp(parseFloat(maxInput.value) || 2);
+                if (val > M) val = M;
+                minInput.value = val;
+                await saveRam(val, M);
+            });
+            minInput.addEventListener('input', syncMax);
         }
 
-        let slider = new Slider(".memory-slider", parseFloat(ram.ramMin), parseFloat(ram.ramMax));
+        if (maxInput) {
+            const syncMin = () => {
+                const m = clamp(parseFloat(minInput?.value) || 1);
+                const M = clamp(parseFloat(maxInput.value) || 2);
+                if (M < m) { maxInput.value = m; }
+            };
+            maxInput.addEventListener('change', async () => {
+                let val = clamp(parseFloat(maxInput.value) || 2);
+                let m = clamp(parseFloat(minInput?.value) || 1);
+                if (val < m) val = m;
+                maxInput.value = val;
+                await saveRam(m, val);
+            });
+            maxInput.addEventListener('input', syncMin);
+        }
 
-        let minSpan = document.querySelector(".slider-touch-left span");
-        let maxSpan = document.querySelector(".slider-touch-right span");
-
-        minSpan.setAttribute("value", `${ram.ramMin} Go`);
-        maxSpan.setAttribute("value", `${ram.ramMax} Go`);
-
-        slider.on("change", async (min, max) => {
-            let currentConfig = await this.db.readData('configClient');
-            minSpan.setAttribute("value", `${min} Go`);
-            maxSpan.setAttribute("value", `${max} Go`);
-            currentConfig.java_config.java_memory = { min: min, max: max };
-            await this.db.updateData('configClient', currentConfig);
-        });
+        if (stepBtns) {
+            stepBtns.forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const target = btn.dataset.target;
+                    const dir = parseInt(btn.dataset.dir);
+                    const inp = target === 'min' ? minInput : maxInput;
+                    if (!inp) return;
+                    let current = clamp((parseFloat(inp.value) || 1) + dir * 0.5);
+                    let other = target === 'min'
+                        ? clamp(parseFloat(maxInput?.value) || 2)
+                        : clamp(parseFloat(minInput?.value) || 1);
+                    if (target === 'min' && current > other) current = other;
+                    if (target === 'max' && current < other) current = other;
+                    inp.value = current;
+                    await saveRam(
+                        clamp(parseFloat(minInput?.value) || 1),
+                        clamp(parseFloat(maxInput?.value) || 2)
+                    );
+                });
+            });
+        }
     }
 
     async settingsJavaPath() {

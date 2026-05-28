@@ -82,18 +82,21 @@ async function accountSelect(data) {
     if (activeAccount) activeAccount.classList.remove('account-select');
     if (accountElement) accountElement.classList.add('account-select');
     
-    // Update player head: try both legacy .player-head and new UI .player-head-nav
+    // Update player head: try .player-head, .player-head-nav, #top-bar-avatar, #dd-header-avatar
     const playerHeadEl = document.querySelector(".player-head") || document.querySelector(".player-head-nav");
+    const topBarAvatar = document.getElementById('top-bar-avatar');
+    const ddHeaderAvatar = document.getElementById('dd-header-avatar');
+    const targets = [playerHeadEl, topBarAvatar, ddHeaderAvatar].filter(Boolean);
     if (accountData?.profile?.skins && accountData.profile.skins[0] && accountData.profile.skins[0].base64) {
-        if (playerHeadEl) headplayer(accountData.profile.skins[0].base64, playerHeadEl);
+        targets.forEach(el => headplayer(accountData.profile.skins[0].base64, el));
     } else {
-        if (playerHeadEl) playerHeadEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
+        targets.forEach(el => el.style.backgroundImage = `url('assets/images/default/setve.png')`);
     }
 }
 
 async function headplayer(skinBase64, targetEl) {
     let skin = await new skin2D().creatHeadTexture(skinBase64);
-    let el = targetEl || document.querySelector(".player-head") || document.querySelector(".player-head-nav");
+    let el = targetEl || document.querySelector(".player-head") || document.querySelector(".player-head-nav") || document.getElementById('top-bar-avatar') || document.getElementById('dd-header-avatar');
     if (el) el.style.backgroundImage = `url(${skin})`;
 }
 

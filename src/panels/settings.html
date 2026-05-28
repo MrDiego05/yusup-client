@@ -25,21 +25,39 @@
                         <b>- RAM Mínima:</b> Memoria inicial al arrancar el juego.
                     </div>
                     
-                    <div class="settings-elements content-evenly">
-                        <div class="memory-slider" min="0.5" max="8" step="0.5">
-                            <div class="slider-touch-left">
-                                <span value="0 Go"></span>
-                            </div>
-                            <div class="slider-touch-right">
-                                <span value="0 Go"></span>
-                            </div>
-                            <div class="slider-line">
-                                <span></span>
-                            </div>
+                    <div class="ram-input-row">
+                        <div class="ram-input-group">
+                            <label>Mín (GB)</label>
+                            <input type="number" class="ram-min-input" min="0.5" step="0.5" value="1">
+                        </div>
+                        <div class="ram-input-group">
+                            <label>Máx (GB)</label>
+                            <input type="number" class="ram-max-input" min="0.5" step="0.5" value="2">
                         </div>
                         <div class="ram-info-block">
                             <b>RAM Total: <span id="total-ram">0 GB</span></b><br>
                             <b>RAM Libre: <span id="free-ram">0 GB</span></b>
+                        </div>
+                    </div>
+
+                    <div class="settings-elements content-evenly">
+                        <div class="ram-stepper-row">
+                            <div class="ram-input-box">
+                                <label class="ram-input-label">Mín (GB)</label>
+                                <div class="ram-stepper">
+                                    <button class="ram-step-btn" data-target="min" data-dir="-1">−</button>
+                                    <input type="number" class="ram-input ram-min-input" min="0.5" step="0.5" value="1">
+                                    <button class="ram-step-btn" data-target="min" data-dir="1">+</button>
+                                </div>
+                            </div>
+                            <div class="ram-input-box">
+                                <label class="ram-input-label">Máx (GB)</label>
+                                <div class="ram-stepper">
+                                    <button class="ram-step-btn" data-target="max" data-dir="-1">−</button>
+                                    <input type="number" class="ram-input ram-max-input" min="0.5" step="0.5" value="2">
+                                    <button class="ram-step-btn" data-target="max" data-dir="1">+</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -105,6 +123,29 @@
                         <div class="close-launcher close-btn">Cerrar launcher tras inicio</div>
                         <div class="close-none close-btn">Mantener launcher abierto</div>
                         <div class="close-all close-btn">Cerrar juego si el launcher cierra</div>
+                    </div>
+                </div>
+
+                <div class="titre-tab">Tema</div>
+                <div class="settings-elements-box">
+                    <div class="setting-text">
+                        Seleccioná el tema visual del launcher.
+                    </div>
+                    <div class="settings-elements content-evenly theme-box">
+                        <div class="theme-option theme-auto theme-active" data-theme="auto">Automático</div>
+                        <div class="theme-option theme-light" data-theme="light">Claro</div>
+                        <div class="theme-option theme-dark" data-theme="dark">Oscuro</div>
+                    </div>
+                </div>
+
+                <div class="titre-tab">Argumentos JVM</div>
+                <div class="settings-elements-box">
+                    <div class="setting-text">
+                        Argumentos adicionales para la máquina virtual de Java (avanzado).
+                    </div>
+                    <div class="settings-elements content-center" style="flex-direction:column; gap:8px; align-items:stretch;">
+                        <textarea class="jvm-args-input" rows="3" placeholder="-XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646"></textarea>
+                        <div class="jvm-args-reset jvm-args-btn">Por defecto</div>
                     </div>
                 </div>
             </div>

@@ -6,9 +6,9 @@ Electron app that launches Minecraft with modpack support (fork of Luuxis/Selvan
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Dev mode (hot reload, dev tools) |
-| `npm run creator` | Open modpack creator tool |
-| `npm run dev` | Dev mode with nodemon (auto-restart on JS/HTML/CSS changes) |
+| `npm start` | Dev mode (`NODE_ENV=dev`, no dev tools) |
+| `npm run dev` | Dev mode with nodemon auto-restart + DevTools (`DEV_TOOL=open`) |
+| `npm run creator` | Open modpack creator tool (`CREATOR_MODE=true`) |
 | `npm run build` | Production build (obfuscate + electron-builder) |
 | `npm run icon` | Generate .ico/.icns from `src/assets/images/icon/icon.png` |
 
@@ -42,11 +42,92 @@ Launcher fetches config from `package.json#url` (default: `https://mrdiego05.git
 - `instances.json` — modpack catalog (keyed by name, each entry has `loader`, `gameVersion`, `modpack_url`)
 - `articles.json` — news feed (optional, falls back to hardcoded defaults)
 
-## Analytics
+## SKCraft-style modpack format (v2)
 
-Play sessions are tracked locally in `electron-store` under the `sessions` table. Each record stores `username`, `instance`, `start_time`, `end_time`, `playtime_seconds`. No external server involved.
+Both the creator tool and `ModpackSync` now support a SKCraft-inspired manifest format alongside the legacy flat array.
 
-## Known issues
+### Manifest format
+
+```json
+{
+  "version": "20240526-a1b2c3",
+  "name": "mymodpack",
+  "title": "My Modpack",
+  "gameVersion": "1.20.1",
+  "baseUrl": "https://example.com/mods/",
+  "features": [
+    { "name": "SomeMinimap", "description": "A minimap mod", "selected": true, "recommendation": "starred" }
+  ],
+  "tasks": [
+    { "type": "file", "hash": "sha1hex", "location": "mods/MyMod.jar", "to": "mods/MyMod.jar", "size": 12345 },
+    { "type": "file", "hash": "...", "location": "config/myconfig.cfg", "to": "config/myconfig.cfg", "size": 456, "userFile": true },
+    { "type": "file", "when": { "if": "requireAny", "features": ["SomeMinimap"] }, "hash": "...", "to": "mods/SomeMinimap.jar", "size": 789 },
+    { "type": "file", "url": "https://external-cdn.com/mod.jar", "hash": "...", "to": "mods/external.jar", "size": 111 }
+  ]
+}
+```
+
+- `version` — change this to trigger client re-sync. Stored per-instance in `electron-store` → `configClient.instances_versions`
+- `tasks[].userFile` — if true and file already exists locally, it is never overwritten
+- `tasks[].when` — conditions for optional features (`requireAny` / `requireAll`)
+- `tasks[].url` — absolute URL override; if absent, resolved relative to `baseUrl` or manifest URL
+- Hashing uses **SHA1** (was MD5 in legacy format)
+
+### Source directory structure (`src/`)
+
+```
+pack-location/
+├── src/
+│   ├── config/              → .minecraft/config/
+│   ├── mods/                → .minecraft/mods/
+│   ├── resourcepacks/       → .minecraft/resourcepacks/
+│   ├── options.txt          → .minecraft/options.txt
+│   ├── _CLIENT/             → client-only (path stripped)
+│   │   └── mods/SpecialMod.jar
+│   ├── _SERVER/             → excluded from client builds entirely
+│   ├── _OPTIONAL/           → feature-gated (user chooses)
+│   │   └── mods/ToggleMod.jar
+│   ├── mods/SomeMod.jar.info.json    → defines feature for SomeMod.jar
+│   └── mods/SomeMod.jar.url.txt      → external URL override (first line = URL)
+```
+
+### Directory conventions in `src/`
+
+| Prefix | Behavior |
+|--------|----------|
+| `.` (dot) | Skipped entirely |
+| `_CLIENT/` | Included, path segment stripped in manifest |
+| `_SERVER/` | Excluded from client builds |
+| `_OPTIONAL/` | Included, feature-gated via `when` condition |
+| `*.info.json` | Sidecar: defines feature metadata for sibling file |
+| `*.url.txt` | Sidecar: first line = external download URL |
+
+### Builder behavior
+
+- If `src/` exists → **SKCraft build**: walks full tree, SHA1 hashes, supports conventions above
+- If only `mods/` exists → **Legacy build**: scans `.jar` files, SHA1 hashes, flat tasks
+- Builder copies files to `objects/` alongside the manifest for local serving
+- Both modes write `modpack.json` at the pack root
+
+### Content-addressed storage
+
+When `objects/` exists alongside the manifest, files are stored as `objects/{task.location}` (mirroring SKCraft's layout but without the two-level hash prefix for simplicity). The publisher also copies files to `docs/{task.location}` for direct URL access.
+
+### Client-side flow (ModpackSync)
+
+1. Fetch manifest from `modpack_url`
+2. If features exist, user is shown a modal to select/deselect optional mods
+3. Compare stored `version` against manifest `version` — skip if same
+4. For each task:
+   - Skip if `userFile: true` and file exists locally
+   - SHA1-check local file against `task.hash` — skip if match
+   - Queue for download otherwise
+5. Clean stale files across **all** subdirectories (not just `mods/`)
+6. Remove empty directories after cleanup
+7. Download queued files from `task.url` or resolved from manifest `baseUrl`
+8. Store new version in `configClient.instances_versions`
+
+### Known issues
 
 - `renderer-error.log` shows repeated `Cannot find module '../utils.js'` in `launcher.html` — stale/unfixed import resolution failure; renderer continues loading via import map in `src/assets/js/launcher.js`
 - `addAccount` fails with `Cannot read properties of null (reading 'appendChild')` when account list container elements are missing from the DOM

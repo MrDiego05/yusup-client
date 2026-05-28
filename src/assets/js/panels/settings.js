@@ -1,5 +1,5 @@
 
-import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground } from '../utils.js'
+import { changePanel, accountSelect, database, config, setStatus, popup, appdata, setBackground } from '../utils.js'
 const { ipcRenderer } = require('electron');
 const os = require('os');
 
@@ -66,38 +66,72 @@ class Settings {
         let totalMem = Math.trunc(os.totalmem() / 1073741824 * 10) / 10;
         let freeMem = Math.trunc(os.freemem() / 1073741824 * 10) / 10;
 
-        document.getElementById("total-ram").textContent = `${totalMem} Go`;
-        document.getElementById("free-ram").textContent = `${freeMem} Go`;
+        const totalEl = document.getElementById("total-ram");
+        const freeEl = document.getElementById("free-ram");
+        if (totalEl) totalEl.textContent = `${totalMem} GB`;
+        if (freeEl) freeEl.textContent = `${freeMem} GB`;
 
-        let sliderDiv = document.querySelector(".memory-slider");
-        sliderDiv.setAttribute("max", Math.trunc((80 * totalMem) / 100));
+        const maxSlider = Math.max(1, Math.trunc((80 * totalMem) / 100));
 
-        let ram = config?.java_config?.java_memory ? {
-            ramMin: config.java_config.java_memory.min,
-            ramMax: config.java_config.java_memory.max
-        } : { ramMin: "1", ramMax: "2" };
+        let ram = config?.java_config?.java_memory || { min: 1, max: 2 };
 
-        if (totalMem < ram.ramMin) {
-            config.java_config.java_memory = { min: 1, max: 2 };
-            this.db.updateData('configClient', config);
-            ram = { ramMin: "1", ramMax: "2" }
+        const minInput = document.querySelector('.ram-min-input');
+        const maxInput = document.querySelector('.ram-max-input');
+        const stepBtns = document.querySelectorAll('.ram-step-btn');
+
+        if (minInput) minInput.value = Math.round(ram.min * 10) / 10;
+        if (maxInput) maxInput.value = Math.round(ram.max * 10) / 10;
+
+        const clamp = (val) => Math.round(Math.min(Math.max(val, 0.5), maxSlider) * 10) / 10;
+
+        const saveRam = async (min, max) => {
+            let cfg = await this.db.readData('configClient');
+            if (!cfg.java_config) cfg.java_config = {};
+            cfg.java_config.java_memory = { min: clamp(min), max: clamp(max) };
+            await this.db.updateData('configClient', cfg);
         };
 
-        let slider = new Slider(".memory-slider", parseFloat(ram.ramMin), parseFloat(ram.ramMax));
+        if (minInput) {
+            minInput.addEventListener('change', async () => {
+                let val = clamp(parseFloat(minInput.value) || 1);
+                let M = clamp(parseFloat(maxInput.value) || 2);
+                if (val > M) val = M;
+                minInput.value = val;
+                await saveRam(val, M);
+            });
+        }
 
-        let minSpan = document.querySelector(".slider-touch-left span");
-        let maxSpan = document.querySelector(".slider-touch-right span");
+        if (maxInput) {
+            maxInput.addEventListener('change', async () => {
+                let val = clamp(parseFloat(maxInput.value) || 2);
+                let m = clamp(parseFloat(minInput?.value) || 1);
+                if (val < m) val = m;
+                maxInput.value = val;
+                await saveRam(m, val);
+            });
+        }
 
-        minSpan.setAttribute("value", `${ram.ramMin} Go`);
-        maxSpan.setAttribute("value", `${ram.ramMax} Go`);
-
-        slider.on("change", async (min, max) => {
-            let config = await this.db.readData('configClient');
-            minSpan.setAttribute("value", `${min} Go`);
-            maxSpan.setAttribute("value", `${max} Go`);
-            config.java_config.java_memory = { min: min, max: max };
-            this.db.updateData('configClient', config);
-        });
+        if (stepBtns) {
+            stepBtns.forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const target = btn.dataset.target;
+                    const dir = parseInt(btn.dataset.dir);
+                    const inp = target === 'min' ? minInput : maxInput;
+                    if (!inp) return;
+                    let current = clamp((parseFloat(inp.value) || 1) + dir * 0.5);
+                    let other = target === 'min'
+                        ? clamp(parseFloat(maxInput?.value) || 2)
+                        : clamp(parseFloat(minInput?.value) || 1);
+                    if (target === 'min' && current > other) current = other;
+                    if (target === 'max' && current < other) current = other;
+                    inp.value = current;
+                    await saveRam(
+                        clamp(parseFloat(minInput?.value) || 1),
+                        clamp(parseFloat(maxInput?.value) || 2)
+                    );
+                });
+            });
+        }
     }
 
     async javaPath() {
@@ -172,6 +206,7 @@ class Settings {
     async launcher() {
         let configClient = await this.db.readData('configClient');
 
+        // Downloads
         let maxDownloadFiles = configClient?.launcher_config?.download_multi || 5;
         let maxDownloadFilesInput = document.querySelector(".max-files");
         let maxDownloadFilesReset = document.querySelector(".max-files-reset");
@@ -190,6 +225,7 @@ class Settings {
             await this.db.updateData('configClient', configClient);
         })
 
+        // Close behavior
         let closeBox = document.querySelector(".close-box");
         let closeLauncher = configClient?.launcher_config?.closeLauncher || "close-launcher";
 
@@ -224,6 +260,53 @@ class Settings {
                 }
             }
         })
+
+        // Theme selector
+        const themeBox = document.querySelector('.theme-box');
+        const currentTheme = configClient?.launcher_config?.theme || 'auto';
+        if (themeBox) {
+            themeBox.querySelectorAll('.theme-option').forEach(el => {
+                if (el.dataset.theme === currentTheme) {
+                    el.classList.add('theme-active');
+                } else {
+                    el.classList.remove('theme-active');
+                }
+            });
+            themeBox.addEventListener('click', async (e) => {
+                const option = e.target.closest('.theme-option');
+                if (!option) return;
+                themeBox.querySelectorAll('.theme-option').forEach(el => el.classList.remove('theme-active'));
+                option.classList.add('theme-active');
+                let cfg = await this.db.readData('configClient');
+                if (!cfg.launcher_config) cfg.launcher_config = {};
+                cfg.launcher_config.theme = option.dataset.theme;
+                await this.db.updateData('configClient', cfg);
+                await setBackground(option.dataset.theme === 'dark' ? true : option.dataset.theme === 'light' ? false : undefined);
+            });
+        }
+
+        // JVM args
+        const jvmInput = document.querySelector('.jvm-args-input');
+        const jvmReset = document.querySelector('.jvm-args-reset');
+        const currentJvmArgs = configClient?.java_config?.jvm_args || '';
+        if (jvmInput) {
+            jvmInput.value = Array.isArray(currentJvmArgs) ? currentJvmArgs.join(' ') : currentJvmArgs;
+            jvmInput.addEventListener('change', async () => {
+                let cfg = await this.db.readData('configClient');
+                if (!cfg.java_config) cfg.java_config = {};
+                const raw = jvmInput.value.trim();
+                cfg.java_config.jvm_args = raw ? raw.split(/\s+/).filter(Boolean) : [];
+                await this.db.updateData('configClient', cfg);
+            });
+        }
+        if (jvmReset) {
+            jvmReset.addEventListener('click', async () => {
+                if (jvmInput) jvmInput.value = '';
+                let cfg = await this.db.readData('configClient');
+                if (cfg.java_config) cfg.java_config.jvm_args = [];
+                await this.db.updateData('configClient', cfg);
+            });
+        }
     }
 }
 export default Settings;

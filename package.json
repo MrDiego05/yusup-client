@@ -15,7 +15,8 @@
         "creator": "cross-env-shell NODE_ENV=dev CREATOR_MODE=true electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
         "build": "node build.js --obf=true --build=platform",
-        "icon": "node build.js --icon"
+        "icon": "node build.js --icon",
+        "postinstall": "patch-package"
     },
     "license": "CCANC",
     "nodemonConfig": {
@@ -38,7 +39,9 @@
         "javascript-obfuscator": "^5.1.0",
         "jimp": "^1.6.0",
         "nodemon": "^3.1.11",
-        "png2icons": "^2.0.1"
+        "patch-package": "^8.0.1",
+        "png2icons": "^2.0.1",
+        "postinstall-postinstall": "^2.1.0"
     },
     "repository": {
         "type": "git",
