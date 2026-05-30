@@ -754,7 +754,7 @@ class Home {
     }
 
     async initInstances() {
-        let configClient = await this.db.readData('configClient');
+        let configClient = await this.db.readData('configClient') || {};
         let instancesList = await config.getInstanceList();
         let currentSelect = configClient.instance_select;
 
@@ -854,12 +854,23 @@ class Home {
             }
         }
 
-        // 3. Render sections
-        this.renderInstancesGrid(installedPacks, 'instances-grid-installed');
-        this.renderInstancesGrid(allPacks, 'instances-grid-all');
+        // 3. Build playtime map from sessions
+        let playtimeMap = {};
+        try {
+            const allSessions = await this.db.readAllData('sessions') || [];
+            for (let pack of instancesList) {
+                const packSessions = allSessions.filter(s => s.instance === pack.name);
+                const totalSeconds = packSessions.reduce((sum, s) => sum + (s.playtime_seconds || 0), 0);
+                if (totalSeconds > 0) playtimeMap[pack.name] = totalSeconds;
+            }
+        } catch (e) {}
+
+        // 4. Render sections
+        this.renderInstancesGrid(installedPacks, 'instances-grid-installed', playtimeMap);
+        this.renderInstancesGrid(allPacks, 'instances-grid-all', playtimeMap);
     }
 
-    renderInstancesGrid(packs, containerId) {
+    renderInstancesGrid(packs, containerId, playtimeMap = {}) {
         const gridContainer = document.getElementById(containerId);
         if (!gridContainer) return;
         gridContainer.innerHTML = '';
@@ -872,6 +883,12 @@ class Home {
         packs.forEach(pack => {
             const card = document.createElement('div');
             card.classList.add('modpack-grid-card');
+
+            const totalSeconds = playtimeMap[pack.name] || 0;
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
             card.innerHTML = `
                 <div class="modpack-grid-thumb">
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -881,6 +898,7 @@ class Home {
                     </svg>
                 </div>
                 <h3 class="modpack-grid-name">${pack.title || pack.name}</h3>
+                ${totalSeconds > 0 ? `<span class="modpack-grid-playtime">${playtimeStr}</span>` : ''}
             `;
 
             card.addEventListener('click', () => {

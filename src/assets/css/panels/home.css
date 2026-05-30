@@ -1390,6 +1390,12 @@
     text-overflow: ellipsis;
 }
 
+.modpack-grid-playtime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: -4px;
+}
+
 /* ==========================================================================
    VIEW 4: INSTANCE / MODPACK DETAILS
    ========================================================================== */
