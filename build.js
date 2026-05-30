@@ -87,10 +87,6 @@ class Index {
                     target: [{
                         target: "nsis",
                         arch: "x64"
-                    },
-                    {
-                        target: "nsis",
-                        arch: "arm64"
                     }]
                 },
                 nsis: {

@@ -1,6 +1,6 @@
 {
-    "name": "Yusup-client",
-    "preductname": "Yusup Client",
+    "name": "yusup-client",
+    "productName": "Yusup Client",
     "version": "1.0.0",
     "url": "https://mrdiego05.github.io/yusup-client",
     "description": "Launcher Minecraft Yusup",
@@ -45,6 +45,6 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/luuxis/Selvania-Launcher.git"
+        "url": "git+https://github.com/mrdiego05/yusup-client.git"
     }
 }

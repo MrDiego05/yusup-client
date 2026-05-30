@@ -19,13 +19,22 @@ class database {
 
     async initStore() {
         if (!this.initialized) {
-            const userDataPath = await ipcRenderer.invoke('path-user-data');
-            this.store = new Store({
-                name: 'launcher-data',
-                cwd: userDataPath,
-                encryptionKey: dev ? undefined : (await this.getKey(32, userDataPath)),
-            });
-            this.initialized = true;
+            try {
+                const userDataPath = await ipcRenderer.invoke('path-user-data');
+                this.store = new Store({
+                    name: 'launcher-data',
+                    cwd: userDataPath,
+                    encryptionKey: dev ? undefined : (await this.getKey(32, userDataPath)),
+                });
+                this.initialized = true;
+            } catch (error) {
+                console.error('Failed to initialize store, using fallback:', error);
+                this.store = new Store({
+                    name: 'launcher-data',
+                    encryptionKey: undefined,
+                });
+                this.initialized = true;
+            }
         }
         return this.store;
     }

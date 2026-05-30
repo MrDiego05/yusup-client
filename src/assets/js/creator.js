@@ -11,25 +11,41 @@ let selectedPackId = null;
 let selectedNewLocation = null;
 let selectedGitLocation = null;
 let modpacks = [];
+let _dbPath = null;
+let _gitConfigPath = null;
+let _pathsInitialized = false;
 
-const dbPath = path.resolve('./data/creator-modpacks.json');
-const gitConfigPath = path.resolve('./data/creator-git-config.json');
-
-// Ensure db directory
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+async function ensurePaths() {
+    if (_pathsInitialized) return;
+    const userDataPath = await ipcRenderer.invoke('path-user-data');
+    _dbPath = path.join(userDataPath, 'creator-modpacks.json');
+    _gitConfigPath = path.join(userDataPath, 'creator-git-config.json');
+    const dbDir = path.dirname(_dbPath);
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+    _pathsInitialized = true;
 }
 
 // Load database
-function loadDb() {
-    if (fs.existsSync(dbPath)) {
+async function loadDb() {
+    await ensurePaths();
+    if (fs.existsSync(_dbPath)) {
         try {
-            modpacks = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+            modpacks = JSON.parse(fs.readFileSync(_dbPath, 'utf8'));
         } catch (e) {
             modpacks = [];
         }
     } else {
+        // Check legacy path for migration
+        const legacyPath = path.resolve('./data/creator-modpacks.json');
+        if (fs.existsSync(legacyPath)) {
+            try {
+                modpacks = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
+                saveDb();
+                return;
+            } catch (e) {}
+        }
         // Initial sample packs if empty
         modpacks = [
             {
@@ -46,24 +62,40 @@ function loadDb() {
 }
 
 function saveDb() {
-    fs.writeFileSync(dbPath, JSON.stringify(modpacks, null, 4));
+    if (!_dbPath) return;
+    fs.writeFileSync(_dbPath, JSON.stringify(modpacks, null, 4));
 }
 
 // Load git config
-function loadGitConfig() {
-    if (fs.existsSync(gitConfigPath)) {
+async function loadGitConfig() {
+    await ensurePaths();
+    if (fs.existsSync(_gitConfigPath)) {
         try {
-            const config = JSON.parse(fs.readFileSync(gitConfigPath, 'utf8'));
+            const config = JSON.parse(fs.readFileSync(_gitConfigPath, 'utf8'));
             if (config.gitDir) {
                 selectedGitLocation = config.gitDir;
                 document.getElementById('git-dir-path').textContent = config.gitDir;
             }
         } catch (e) {}
+    } else {
+        // Check legacy path for migration
+        const legacyPath = path.resolve('./data/creator-git-config.json');
+        if (fs.existsSync(legacyPath)) {
+            try {
+                const config = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
+                if (config.gitDir) {
+                    selectedGitLocation = config.gitDir;
+                    document.getElementById('git-dir-path').textContent = config.gitDir;
+                }
+                fs.writeFileSync(_gitConfigPath, JSON.stringify(config, null, 4));
+            } catch (e) {}
+        }
     }
 }
 
 function saveGitConfig(gitDir) {
-    fs.writeFileSync(gitConfigPath, JSON.stringify({ gitDir }, null, 4));
+    if (!_gitConfigPath) return;
+    fs.writeFileSync(_gitConfigPath, JSON.stringify({ gitDir }, null, 4));
 }
 
 // UI Logs utility
@@ -1074,7 +1106,8 @@ async function installPackInLauncher(pack) {
 
     // 2. Copiar al directorio de instancias del launcher
     progressStatus.textContent = `Copiando ${pack.id} al launcher...`;
-    const launcherDataDir = path.resolve('./data/modpacks');
+    await ensurePaths();
+    const launcherDataDir = path.join(path.dirname(_dbPath), 'modpacks');
     if (!fs.existsSync(launcherDataDir)) fs.mkdirSync(launcherDataDir, { recursive: true });
 
     const instanceDir = path.join(launcherDataDir, pack.id);
@@ -1105,10 +1138,10 @@ async function installPackInLauncher(pack) {
     }
 
     // 3. Registrar en creator-modpacks.json
-    const creatorPath = path.resolve('./data/creator-modpacks.json');
+    await ensurePaths();
     let creatorModpacks = [];
-    if (fs.existsSync(creatorPath)) {
-        try { creatorModpacks = JSON.parse(fs.readFileSync(creatorPath, 'utf8')); } catch (e) { creatorModpacks = []; }
+    if (fs.existsSync(_dbPath)) {
+        try { creatorModpacks = JSON.parse(fs.readFileSync(_dbPath, 'utf8')); } catch (e) { creatorModpacks = []; }
     }
 
     const existingIdx = creatorModpacks.findIndex(m => m.id === pack.id);
@@ -1120,7 +1153,7 @@ async function installPackInLauncher(pack) {
 
     if (existingIdx >= 0) creatorModpacks[existingIdx] = entry;
     else creatorModpacks.push(entry);
-    fs.writeFileSync(creatorPath, JSON.stringify(creatorModpacks, null, 4));
+    fs.writeFileSync(_dbPath, JSON.stringify(creatorModpacks, null, 4));
 
     // 4. Actualizar docs/ local
     progressStatus.textContent = `Actualizando docs/ para ${pack.id}...`;
@@ -1261,28 +1294,30 @@ function copyRecursive(src, dest) {
 }
 
 // Start up
-loadDb();
-loadGitConfig();
-renderModpacks();
-log('Yusup Modpack Creator cargado correctamente.', 'success');
-log('--- CONFIGURACIÓN REMOTA ---', 'info');
-try {
-    const pkg = JSON.parse(fs.readFileSync(path.resolve('./package.json'), 'utf8'));
-    const launcherUrl = pkg.url || 'No configurada';
-    log(`URL del launcher (package.json): ${launcherUrl}`, 'info');
-    log('Los archivos se publican en docs/ (GitHub Pages config /docs)', 'info');
-    if (selectedGitLocation) {
-        getGitHubPagesUrl(selectedGitLocation).then(ghUrl => {
-            log(`URL de GitHub Pages detectada: ${ghUrl}`, 'info');
-            if (launcherUrl !== ghUrl) {
-                log(`⚠️  Las URLs no coinciden. Edita package.json#url para que apunte a: ${ghUrl}`, 'error');
-            } else {
-                log('✅ Las URLs coinciden. El launcher ya puede ver estas instancias.', 'success');
-            }
-        });
-    } else {
-        log('ℹ️  No hay repo Git configurado. Usá "Subir a GitHub Pages" para configurar uno.', 'info');
+(async () => {
+    await loadDb();
+    await loadGitConfig();
+    renderModpacks();
+    log('Yusup Modpack Creator cargado correctamente.', 'success');
+    log('--- CONFIGURACIÓN REMOTA ---', 'info');
+    try {
+        const pkg = JSON.parse(fs.readFileSync(path.resolve('./package.json'), 'utf8'));
+        const launcherUrl = pkg.url || 'No configurada';
+        log(`URL del launcher (package.json): ${launcherUrl}`, 'info');
+        log('Los archivos se publican en docs/ (GitHub Pages config /docs)', 'info');
+        if (selectedGitLocation) {
+            getGitHubPagesUrl(selectedGitLocation).then(ghUrl => {
+                log(`URL de GitHub Pages detectada: ${ghUrl}`, 'info');
+                if (launcherUrl !== ghUrl) {
+                    log(`⚠️  Las URLs no coinciden. Edita package.json#url para que apunte a: ${ghUrl}`, 'error');
+                } else {
+                    log('✅ Las URLs coinciden. El launcher ya puede ver estas instancias.', 'success');
+                }
+            });
+        } else {
+            log('ℹ️  No hay repo Git configurado. Usá "Subir a GitHub Pages" para configurar uno.', 'info');
+        }
+    } catch (e) {
+        log('No se pudo leer package.json', 'error');
     }
-} catch (e) {
-    log('No se pudo leer package.json', 'error');
-}
+})();

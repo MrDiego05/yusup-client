@@ -100,16 +100,11 @@ app.on('window-all-closed', () => app.quit());
 autoUpdater.autoDownload = false;
 
 ipcMain.handle('update-app', async () => {
-    return await new Promise(async (resolve, reject) => {
-        autoUpdater.checkForUpdates().then(res => {
-            resolve(res);
-        }).catch(error => {
-            reject({
-                error: true,
-                message: error
-            })
-        })
-    })
+    try {
+        return await autoUpdater.checkForUpdates();
+    } catch (error) {
+        return { error: true, message: String(error.message || error) };
+    }
 })
 
 autoUpdater.on('update-available', () => {

@@ -5,7 +5,7 @@ const { shell, ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { default: fetch } = require('node-fetch');
+const fetch = require('node-fetch');
 
 class Home {
     static id = "home";
@@ -480,10 +480,20 @@ class Home {
             item.className = 'sidebar-quick-access-item';
             item.innerHTML = `
                 <div class="qa-avatar" style="background:${bgColor}; color:${textColor};">${initial}</div>
-                <span class="sidebar-quick-access-label">${title}</span>
+                <div class="qa-info">
+                    <span class="sidebar-quick-access-label">${title}</span>
+                    <span class="qa-play-hint">Iniciar modpack</span>
+                </div>
             `;
             if (pack) {
-                item.addEventListener('click', () => { this.selectInstance(pack); });
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.qa-play-hint')) {
+                        if (this._launching) return;
+                        this.startGame(pack, this.gamePath);
+                    } else {
+                        this.selectInstance(pack);
+                    }
+                });
                 item.style.cursor = 'pointer';
             }
             container.appendChild(item);
@@ -795,16 +805,19 @@ class Home {
             }
         }
 
-        // 2. Merge creator tools modpacks into allPacks so they appear in "Todas las instancias"
-        const creatorPath = path.join(process.cwd(), 'data', 'creator-modpacks.json');
-        if (fs.existsSync(creatorPath)) {
+        // 2. Merge creator tools modpacks — check each for installed status like remote instances
+        const userDataPath = await ipcRenderer.invoke('path-user-data');
+        const creatorPath = path.join(userDataPath, 'creator-modpacks.json');
+        const fallbackCreatorPath = path.join(process.cwd(), 'data', 'creator-modpacks.json');
+        const resolvedCreatorPath = fs.existsSync(creatorPath) ? creatorPath : (fs.existsSync(fallbackCreatorPath) ? fallbackCreatorPath : null);
+        if (resolvedCreatorPath) {
             try {
-                const fileData = fs.readFileSync(creatorPath, 'utf8');
+                const fileData = fs.readFileSync(resolvedCreatorPath, 'utf8');
                 let parsedData = JSON.parse(fileData);
-                const creatorPacks = parsedData.map(c => {
+                for (let c of parsedData) {
                     const loaderType = (c.loader || 'none').toLowerCase();
                     const localManifest = path.join(c.location, 'modpack.json');
-                    return {
+                    const pack = {
                         name: c.id,
                         title: c.title,
                         description: c.description || '',
@@ -827,8 +840,15 @@ class Home {
                         whitelistActive: c.whitelistActive || false,
                         whitelist: c.whitelist || []
                     };
-                });
-                allPacks.push(...creatorPacks);
+                    const localPackDir = path.join(this.gamePath, 'instances', pack.name);
+                    const hasVersion = configClient.instances_versions?.[pack.name];
+                    const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
+                    if (hasVersion || hasManifestFile) {
+                        installedPacks.push(pack);
+                    } else {
+                        allPacks.push(pack);
+                    }
+                }
             } catch (e) {
                 console.error('Error reading creator tools modpacks:', e);
             }
@@ -1462,7 +1482,20 @@ class Home {
             progressText.innerHTML = `Aplicando parches de inicio...`;
         });
 
-        launch.on('data', () => {
+        launch.on('data', async () => {
+            // Mark instance as installed on first successful launch (handles modpacks without modpack_url)
+            if (!configClient.instances_versions?.[options.name]) {
+                if (!configClient.instances_versions) configClient.instances_versions = {};
+                configClient.instances_versions[options.name] = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                await this.db.updateData('configClient', configClient);
+                await this.initInstances();
+                await this.selectInstance(options);
+                // Re-acquire DOM references after selectInstance replaced the play button
+                playBtn = document.getElementById('detail-play-btn');
+                btnContent = document.getElementById('detail-play-btn-content');
+                btnSpinner = document.getElementById('detail-play-btn-spinner');
+            }
+
             // Restore button state and hide progress card on launch data
             if (btnContent) btnContent.style.display = 'flex';
             if (btnSpinner) btnSpinner.style.display = 'none';
