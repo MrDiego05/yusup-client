@@ -401,6 +401,17 @@ document.getElementById('btn-new-pack').addEventListener('click', () => {
     document.getElementById('new-loader-version').innerHTML = '<option value="">Cargando...</option>';
     selectedNewLocation = null;
     document.getElementById('new-location-path').textContent = 'No seleccionada';
+    // Clear banner/poster
+    selectedBannerPath = null;
+    selectedPosterPath = null;
+    document.getElementById('new-banner-input').value = '';
+    document.getElementById('new-banner-path').textContent = 'No seleccionada';
+    document.getElementById('new-banner-preview').style.display = 'none';
+    document.getElementById('btn-clear-banner').style.display = 'none';
+    document.getElementById('new-poster-input').value = '';
+    document.getElementById('new-poster-path').textContent = 'No seleccionada';
+    document.getElementById('new-poster-preview').style.display = 'none';
+    document.getElementById('btn-clear-poster').style.display = 'none';
     modalNewPack.style.display = 'flex';
     updateLoaderVersions();
 });
@@ -415,6 +426,80 @@ document.getElementById('btn-select-new-location').addEventListener('click', asy
         selectedNewLocation = folder.replace(/\\/g, '/');
         document.getElementById('new-location-path').textContent = selectedNewLocation;
     }
+});
+
+// Banner file picker
+let selectedBannerPath = null;
+let selectedPosterPath = null;
+
+function copyImageToModpack(src, destDir, filename) {
+    if (!src || !destDir) return null;
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+    const dest = path.resolve(destDir, filename);
+    try {
+        const srcResolved = path.resolve(src);
+        if (srcResolved.toLowerCase() !== dest.toLowerCase()) {
+            fs.copyFileSync(src, dest);
+        }
+        return filename;
+    } catch (e) {
+        log(`Error copiando imagen: ${e.message}`, 'error');
+        return null;
+    }
+}
+
+document.getElementById('btn-select-banner').addEventListener('click', () => {
+    document.getElementById('new-banner-input').click();
+});
+
+document.getElementById('new-banner-input').addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    selectedBannerPath = file.path || file.name;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const preview = document.getElementById('new-banner-preview');
+        preview.style.backgroundImage = `url(${ev.target.result})`;
+        preview.style.display = 'block';
+        document.getElementById('new-banner-path').textContent = selectedBannerPath;
+        document.getElementById('btn-clear-banner').style.display = 'inline';
+    };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById('btn-clear-banner').addEventListener('click', () => {
+    selectedBannerPath = null;
+    document.getElementById('new-banner-input').value = '';
+    document.getElementById('new-banner-path').textContent = 'No seleccionada';
+    document.getElementById('new-banner-preview').style.display = 'none';
+    document.getElementById('btn-clear-banner').style.display = 'none';
+});
+
+document.getElementById('btn-select-poster').addEventListener('click', () => {
+    document.getElementById('new-poster-input').click();
+});
+
+document.getElementById('new-poster-input').addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    selectedPosterPath = file.path || file.name;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const preview = document.getElementById('new-poster-preview');
+        preview.style.backgroundImage = `url(${ev.target.result})`;
+        preview.style.display = 'block';
+        document.getElementById('new-poster-path').textContent = selectedPosterPath;
+        document.getElementById('btn-clear-poster').style.display = 'inline';
+    };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById('btn-clear-poster').addEventListener('click', () => {
+    selectedPosterPath = null;
+    document.getElementById('new-poster-input').value = '';
+    document.getElementById('new-poster-path').textContent = 'No seleccionada';
+    document.getElementById('new-poster-preview').style.display = 'none';
+    document.getElementById('btn-clear-poster').style.display = 'none';
 });
 
 // Dynamic loader version dropdown
@@ -452,6 +537,10 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
 
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
 
+    // Copy banner/poster images to the modpack folder
+    const bannerFile = copyImageToModpack(selectedBannerPath, selectedNewLocation, 'banner.png');
+    const posterFile = copyImageToModpack(selectedPosterPath, selectedNewLocation, 'poster.png');
+
     const newPack = {
         id,
         title,
@@ -460,7 +549,9 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
         gameVersion: gameVer,
         loader,
         loaderVersion: loaderVer,
-        location: selectedNewLocation
+        location: selectedNewLocation,
+        banner: bannerFile,
+        poster: posterFile
     };
 
     if (editingPackId) {
@@ -531,6 +622,53 @@ document.getElementById('btn-modify').addEventListener('click', () => {
     document.getElementById('new-loader-version').innerHTML = '<option value="">Cargando...</option>';
     selectedNewLocation = pack.location;
     document.getElementById('new-location-path').textContent = pack.location;
+    // Reset file inputs so change event always fires
+    document.getElementById('new-banner-input').value = '';
+    document.getElementById('new-poster-input').value = '';
+
+    // Pre-fill banner
+    const bannerPath = pack.banner ? path.join(pack.location, pack.banner) : null;
+    selectedBannerPath = bannerPath;
+    if (bannerPath && fs.existsSync(bannerPath)) {
+        const preview = document.getElementById('new-banner-preview');
+        try {
+            const buf = fs.readFileSync(bannerPath);
+            const ext = path.extname(bannerPath).toLowerCase();
+            const mime = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : 'image/png';
+            preview.style.backgroundImage = `url('data:${mime};base64,${buf.toString('base64')}')`;
+        } catch (_) {
+            preview.style.backgroundImage = '';
+        }
+        preview.style.display = 'block';
+        document.getElementById('new-banner-path').textContent = bannerPath;
+        document.getElementById('btn-clear-banner').style.display = 'inline';
+    } else {
+        document.getElementById('new-banner-preview').style.display = 'none';
+        document.getElementById('new-banner-path').textContent = 'No seleccionada';
+        document.getElementById('btn-clear-banner').style.display = 'none';
+    }
+
+    // Pre-fill poster
+    const posterPath = pack.poster ? path.join(pack.location, pack.poster) : null;
+    selectedPosterPath = posterPath;
+    if (posterPath && fs.existsSync(posterPath)) {
+        const preview = document.getElementById('new-poster-preview');
+        try {
+            const buf = fs.readFileSync(posterPath);
+            const ext = path.extname(posterPath).toLowerCase();
+            const mime = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : 'image/png';
+            preview.style.backgroundImage = `url('data:${mime};base64,${buf.toString('base64')}')`;
+        } catch (_) {
+            preview.style.backgroundImage = '';
+        }
+        preview.style.display = 'block';
+        document.getElementById('new-poster-path').textContent = posterPath;
+        document.getElementById('btn-clear-poster').style.display = 'inline';
+    } else {
+        document.getElementById('new-poster-preview').style.display = 'none';
+        document.getElementById('new-poster-path').textContent = 'No seleccionada';
+        document.getElementById('btn-clear-poster').style.display = 'none';
+    }
 
     modalNewPack.style.display = 'flex';
     updateLoaderVersions().then(() => {

@@ -10,6 +10,8 @@ const fetch = require('node-fetch');
 class Home {
     static id = "home";
     _launching = false;
+    _launchingInstance = null;
+    _instanceStatus = new Map(); // instanceName → 'downloading' | 'installing' | 'running'
 
     async init(config) {
         this.config = config;
@@ -84,8 +86,8 @@ class Home {
                 el.style.backgroundImage = `url('assets/images/default/setve.png')`;
             }
         };
-        setAvatar(document.querySelector('#top-bar-avatar'), true);
-        setAvatar(document.querySelector('#dd-header-avatar'), false);
+        setAvatar(document.querySelector('#top-profile-avatar'), true);
+        setAvatar(document.querySelector('#top-profile-avatar'), false);
     }
 
     async news() {
@@ -164,9 +166,8 @@ class Home {
                 document.getElementById(targetViewId)?.classList.add('active');
 
                 if (backBtn) backBtn.style.display = 'none';
-
-                const dropdown = document.getElementById('detail-options-dropdown');
-                if (dropdown) dropdown.style.display = 'none';
+                const optDropdown = document.getElementById('detail-fab-menu');
+                if (optDropdown) optDropdown.classList.remove('open');
 
                 // Close account dropdown
                 const accDropdown = document.querySelector('.account-dropdown-overlay');
@@ -196,7 +197,7 @@ class Home {
 
     setupAccountDropdown() {
         this._accountOverlay = document.querySelector('.account-dropdown-overlay');
-        const avatar = document.getElementById('top-bar-avatar');
+        const avatar = document.getElementById('top-profile-btn');
         if (!avatar || !this._accountOverlay) return;
 
         avatar.addEventListener('click', async (e) => {
@@ -210,26 +211,27 @@ class Home {
         });
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#account-dropdown') && !e.target.closest('#top-bar-avatar')) {
+            if (!e.target.closest('.account-dropdown-overlay') && !e.target.closest('#top-profile-btn')) {
                 if (this._accountOverlay) this._accountOverlay.classList.remove('open');
             }
         });
 
-        // Close button in dropdown header
-        const closeBtn = document.getElementById('dd-close-btn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
-            });
-        }
-
         // Add account button in dropdown
-        const addBtn = document.getElementById('dd-add-account-btn');
+        const addBtn = document.getElementById('dropdown-btn-add');
         if (addBtn) {
             addBtn.addEventListener('click', () => {
                 if (this._accountOverlay) this._accountOverlay.classList.remove('open');
-                document.querySelector('.cancel-home').style.display = 'inline';
+                const cancelBtn = document.querySelector('.cancel-home');
+                if (cancelBtn) cancelBtn.style.display = 'inline';
                 changePanel('login');
+            });
+        }
+
+        // Logout button
+        const logoutBtn = document.getElementById('dropdown-btn-logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
             });
         }
     }
@@ -240,16 +242,8 @@ class Home {
         let accounts = await this.db.readAllData('accounts');
         const currentAccount = await this.db.readData('accounts', configClient.account_selected);
 
-        // Header info
-        const nameEl = document.getElementById('dd-header-name');
-        const typeEl = document.getElementById('dd-header-type');
-        if (currentAccount) {
-            if (nameEl) nameEl.textContent = currentAccount.name;
-            if (typeEl) typeEl.textContent = currentAccount.meta?.type || 'Offline';
-        }
-
         // Account list
-        const listEl = document.getElementById('dd-accounts-list');
+        const listEl = document.getElementById('dropdown-accounts-list');
         if (!listEl) return;
         listEl.innerHTML = '';
 
@@ -346,6 +340,7 @@ class Home {
     _activeDownloads = new Map();
 
     showDownload(instanceName, title) {
+        this.refreshInstanceStatus(instanceName, 'downloading');
         const panel = document.getElementById('downloads-floating-panel');
         const body = document.getElementById('downloads-panel-body');
         const badge = document.getElementById('downloads-badge');
@@ -394,6 +389,7 @@ class Home {
     }
 
     hideDownload(instanceName) {
+        this.refreshInstanceStatus(instanceName, null);
         const panel = document.getElementById('downloads-floating-panel');
         const body = document.getElementById('downloads-panel-body');
         const badge = document.getElementById('downloads-badge');
@@ -519,9 +515,9 @@ class Home {
         const activeTypeEl = document.getElementById('acc-active-type');
 
         if (currentAccount) {
-            activeNameEl.textContent = currentAccount.name;
-            activeUuidEl.textContent = `UUID: ${currentAccount.uuid || '-'}`;
-            activeTypeEl.textContent = currentAccount.meta?.type || 'Offline';
+            if (activeNameEl) activeNameEl.textContent = currentAccount.name;
+            if (activeUuidEl) activeUuidEl.textContent = `UUID: ${currentAccount.uuid || '-'}`;
+            if (activeTypeEl) activeTypeEl.textContent = currentAccount.meta?.type || 'Offline';
 
             if (currentAccount.profile?.skins && currentAccount.profile.skins[0]) {
                 try {
@@ -539,7 +535,8 @@ class Home {
         const addAccBtn = document.getElementById('acc-btn-add-account');
         addAccBtn?.replaceWith(addAccBtn.cloneNode(true));
         document.getElementById('acc-btn-add-account')?.addEventListener('click', () => {
-            document.querySelector('.cancel-home').style.display = 'inline';
+            const cancelBtn = document.querySelector('.cancel-home');
+            if (cancelBtn) cancelBtn.style.display = 'inline';
             changePanel('login');
         });
 
@@ -883,11 +880,18 @@ class Home {
         packs.forEach(pack => {
             const card = document.createElement('div');
             card.classList.add('modpack-grid-card');
+            card.dataset.instanceName = pack.name;
 
             const totalSeconds = playtimeMap[pack.name] || 0;
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+            const status = this._instanceStatus.get(pack.name);
+            let statusTag = '';
+            if (status === 'downloading') statusTag = '<span class="modpack-grid-tag downloading">Descargando</span>';
+            else if (status === 'installing') statusTag = '<span class="modpack-grid-tag installing">Instalando</span>';
+            else if (status === 'running') statusTag = '<span class="modpack-grid-tag running">Ejecutando</span>';
 
             card.innerHTML = `
                 <div class="modpack-grid-thumb">
@@ -896,6 +900,7 @@ class Home {
                         <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                         <line x1="12" y1="22.08" x2="12" y2="12"></line>
                     </svg>
+                    ${statusTag}
                 </div>
                 <h3 class="modpack-grid-name">${pack.title || pack.name}</h3>
                 ${totalSeconds > 0 ? `<span class="modpack-grid-playtime">${playtimeStr}</span>` : ''}
@@ -906,6 +911,23 @@ class Home {
             });
 
             gridContainer.appendChild(card);
+        });
+    }
+
+    refreshInstanceStatus(name, status) {
+        if (status) this._instanceStatus.set(name, status);
+        else this._instanceStatus.delete(name);
+        const label = status === 'running' ? 'Ejecutando' : status === 'downloading' ? 'Descargando' : status === 'installing' ? 'Instalando' : '';
+        document.querySelectorAll(`.modpack-grid-card[data-instance-name="${name}"]`).forEach(card => {
+            const thumb = card.querySelector('.modpack-grid-thumb');
+            if (!thumb) return;
+            let existing = thumb.querySelector('.modpack-grid-tag');
+            if (existing) existing.remove();
+            if (!label) return;
+            const tag = document.createElement('span');
+            tag.className = `modpack-grid-tag ${status}`;
+            tag.textContent = label;
+            thumb.appendChild(tag);
         });
     }
 
@@ -920,25 +942,59 @@ class Home {
         views.forEach(v => v.classList.remove('active'));
         document.getElementById('view-detail')?.classList.add('active');
 
-        // Hide progress card when switching instances (avoid leaking from another launch)
         const progressContainer = document.getElementById('detail-progress');
-        if (progressContainer) progressContainer.style.display = 'none';
         const playBtn = document.getElementById('detail-play-btn');
-        if (playBtn) {
-            playBtn.disabled = false;
-            playBtn.title = '';
-        }
         const btnContent = document.getElementById('detail-play-btn-content');
         const btnSpinner = document.getElementById('detail-play-btn-spinner');
-        if (btnContent) btnContent.style.display = 'flex';
-        if (btnSpinner) btnSpinner.style.display = 'none';
+
+        // Keep button in loading state if this or another instance is currently launching
+        if (this._launching) {
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (playBtn) {
+                playBtn.disabled = true;
+                playBtn.title = this._launchingInstance === pack.name ? 'Instancia iniciando...' : `Ya hay una instancia en ejecución`;
+            }
+            if (btnContent) btnContent.style.display = 'none';
+            if (btnSpinner) btnSpinner.style.display = 'flex';
+        } else {
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (playBtn) {
+                playBtn.disabled = false;
+                playBtn.title = '';
+            }
+            if (btnContent) btnContent.style.display = 'flex';
+            if (btnSpinner) btnSpinner.style.display = 'none';
+        }
 
         // Show sidebar back button
         const backBtn = document.getElementById('sidebar-back-btn');
         if (backBtn) backBtn.style.display = 'flex';
 
+        // Wire up detail back button
+        const detailBackBtn = document.getElementById('detail-back-btn');
+        if (detailBackBtn) {
+            detailBackBtn.replaceWith(detailBackBtn.cloneNode(true));
+            const newDetailBack = document.getElementById('detail-back-btn');
+            newDetailBack.addEventListener('click', () => {
+                const navBtns = document.querySelectorAll('.sidebar-item.nav-btn');
+                navBtns.forEach(b => b.classList.remove('active'));
+                document.getElementById('nav-btn-instances')?.classList.add('active');
+                document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
+                document.getElementById('view-instances')?.classList.add('active');
+                const sbBackBtn = document.getElementById('sidebar-back-btn');
+                if (sbBackBtn) sbBackBtn.style.display = 'none';
+            });
+        }
+
         // Fill detail viewport floating card content
         document.getElementById('detail-title').textContent = pack.title || pack.name;
+
+        // Set poster image
+        const posterImg = document.getElementById('detail-poster-img');
+        if (posterImg) {
+            posterImg.src = pack.poster || pack.image || 'assets/images/default/setve.png';
+            posterImg.alt = (pack.title || pack.name) + ' poster';
+        }
         document.getElementById('detail-version').textContent = pack.gameVersion || pack.loader?.minecraft_version || '';
 
         // Calculate real playtime from sessions
@@ -991,7 +1047,7 @@ class Home {
     setupLauncherControls(pack, gamePath) {
         const playBtn = document.getElementById('detail-play-btn');
         const optionsBtn = document.getElementById('detail-options-btn');
-        const dropdown = document.getElementById('detail-options-dropdown');
+        const dropdown = document.getElementById('detail-fab-menu');
 
         // 1. Play Button Click
         playBtn.replaceWith(playBtn.cloneNode(true));
@@ -1007,20 +1063,19 @@ class Home {
         newOptionsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (dropdown) {
-                const isOpen = dropdown.style.display === 'flex';
-                dropdown.style.display = isOpen ? 'none' : 'flex';
+                dropdown.classList.toggle('open');
             }
         });
 
         // Close dropdown when clicking outside
         document.addEventListener('click', () => {
-            if (dropdown) dropdown.style.display = 'none';
+            if (dropdown) dropdown.classList.remove('open');
         });
 
         // Dropdown Items Clicks Handlers
         const localPackDir = path.join(gamePath, 'instances', pack.name);
         const openFolder = (subDir) => {
-            if (dropdown) dropdown.style.display = 'none';
+            if (dropdown) dropdown.classList.remove('open');
             const fullPath = path.join(localPackDir, subDir);
             if (!fs.existsSync(fullPath)) {
                 fs.mkdirSync(fullPath, { recursive: true });
@@ -1034,7 +1089,7 @@ class Home {
 
         // Dropdown Option: Clean / Reinstall (Eliminar Instancia)
         document.getElementById('opt-btn-reinstall').onclick = async () => {
-            if (dropdown) dropdown.style.display = 'none';
+            if (dropdown) dropdown.classList.remove('open');
             if (!fs.existsSync(localPackDir)) {
                 alert('Esta instancia aún no se ha instalado.');
                 return;
@@ -1082,7 +1137,7 @@ class Home {
 
         // Dropdown Option: Force Close Game (Forzar Cierre)
         document.getElementById('opt-btn-kill').onclick = () => {
-            if (dropdown) dropdown.style.display = 'none';
+            if (dropdown) dropdown.classList.remove('open');
             const proc = this.minecraftProcess?._process;
             if (proc) {
                 proc.kill();
@@ -1246,6 +1301,9 @@ class Home {
         let progressText = document.getElementById('detail-progress-text');
         let progressPct = document.getElementById('detail-progress-pct');
         const wavyBar = document.getElementById('detail-progress-wavy');
+        if (!progressContainer || !progressText || !progressPct || !wavyBar) {
+            console.error('Progress DOM elements missing — cannot show sync progress');
+        }
 
         // Normalize loader fields: support both old (loader_type/loader_version) and new (type/build) formats
         const loaderType = (options.loader?.loader_type || options.loader?.type || 'none').toLowerCase();
@@ -1320,6 +1378,7 @@ class Home {
             return;
         }
         this._launching = true;
+        this._launchingInstance = options.name;
 
         // Migration: if version stored but new-path instance dir doesn't exist, reset version to force re-sync
         const newPathDir = path.join(gamePath, 'instances', options.name);
@@ -1344,9 +1403,9 @@ class Home {
         if (btnSpinner) btnSpinner.style.display = 'flex';
         playBtn.disabled = true;
 
-        progressContainer.style.display = 'flex';
-        wavyBar.style.width = '0%';
-        progressPct.innerHTML = '0%';
+        if (progressContainer) progressContainer.style.display = 'flex';
+        if (wavyBar) wavyBar.style.width = '0%';
+        if (progressPct) progressPct.innerHTML = '0%';
         ipcRenderer.send('main-window-progress-load');
 
         // 1. Sync modpack (if applicable) — SKCraft-style with feature gating and version tracking
@@ -1360,7 +1419,7 @@ class Home {
                     if (btnContent) btnContent.style.display = 'flex';
                     if (btnSpinner) btnSpinner.style.display = 'none';
                     playBtn.disabled = false;
-                    progressContainer.style.display = 'none';
+                    if (progressContainer) progressContainer.style.display = 'none';
                     this._launching = false;
                     return;
                 }
@@ -1371,7 +1430,7 @@ class Home {
                     await this.db.updateData('configClient', configClient);
                 }
 
-                progressText.innerHTML = `Sincronizando modpack con el servidor...`;
+                    if (progressText) progressText.innerHTML = `Sincronizando modpack con el servidor...`;
 
                 // Read stored version for this instance
                 const storedVersion = configClient.instances_versions?.[options.name] || null;
@@ -1386,10 +1445,10 @@ class Home {
 
                 const result = await modpackSync.sync((progress, size, message) => {
                     const pct = ((progress / size) * 100).toFixed(0);
-                    progressText.innerHTML = `${message} (${progress}/${size})`;
+                    if (progressText) progressText.innerHTML = `${message} (${progress}/${size})`;
                     ipcRenderer.send('main-window-progress', { progress, size });
-                    wavyBar.style.width = `${pct}%`;
-                    progressPct.innerHTML = `${pct}%`;
+                    if (wavyBar) wavyBar.style.width = `${pct}%`;
+                    if (progressPct) progressPct.innerHTML = `${pct}%`;
                     this.updateDownload(options.name, pct, message);
                 }, storedVersion);
 
@@ -1409,7 +1468,10 @@ class Home {
                     playBtn = document.getElementById('detail-play-btn');
                     btnContent = document.getElementById('detail-play-btn-content');
                     btnSpinner = document.getElementById('detail-play-btn-spinner');
-                    progressContainer.style.display = 'flex';
+                    progressContainer = document.getElementById('detail-progress');
+                    progressText = document.getElementById('detail-progress-text');
+                    progressPct = document.getElementById('detail-progress-pct');
+                    if (progressContainer) progressContainer.style.display = 'flex';
 
                     // Re-apply loading state for remaining phases (NeoForge install, game launch)
                     if (btnContent) btnContent.style.display = 'none';
@@ -1433,130 +1495,85 @@ class Home {
                 if (btnContent) btnContent.style.display = 'flex';
                 if (btnSpinner) btnSpinner.style.display = 'none';
                 playBtn.disabled = false;
-                progressContainer.style.display = 'none';
+                if (progressContainer) progressContainer.style.display = 'none';
                 this._launching = false;
+                this._launchingInstance = null;
+
+                new logger(pkg.name, '#7289da');
+                this.minecraftProcess = null;
                 return;
             }
         }
 
-        // 2. NeoForge — use built-in loader (minecraft-java-core handles download + install)
-        // opt.loader.enable and opt.loader.build are already set above
+        const sessionStartTime = Date.now();
 
-        // Analytics: session tracking
-        let sessionId = null;
-        const sessionStart = async () => {
-            sessionId = Date.now();
-            const username = authenticator?.name || 'unknown';
-            const accountUuid = authenticator?.uuid || 'unknown';
-            await this.db.createData('sessions', {
-                username: username,
-                account_uuid: accountUuid,
-                instance: options.name || 'unknown',
-                start_time: new Date().toISOString(),
-                end_time: null,
-                playtime_seconds: 0
-            });
-        };
-        const sessionEnd = async () => {
-            if (!sessionId) return;
-            let sessions = await this.db.readAllData('sessions');
-            let session = sessions.find(s => s.ID === sessionId);
-            if (session) {
-                let start = new Date(session.start_time);
-                let end = new Date();
-                session.end_time = end.toISOString();
-                session.playtime_seconds = Math.floor((end - start) / 1000);
-                await this.db.updateData('sessions', session, sessionId);
+        const endSession = async () => {
+            try {
+                const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+                if (elapsed > 5) {
+                    let sessions = await this.db.readAllData('sessions') || [];
+                    const existing = sessions.find(s => s.instance === options.name && !s.endTime);
+                    if (!existing) {
+                        await this.db.createData('sessions', {
+                            instance: options.name,
+                            playtime_seconds: elapsed,
+                            startTime: sessionStartTime,
+                            endTime: Date.now()
+                        });
+                    } else {
+                        existing.playtime_seconds += elapsed;
+                        existing.endTime = Date.now();
+                        await this.db.updateData('sessions', existing, existing.ID);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to save session:', e);
             }
-            sessionId = null;
         };
 
-        // 3. Launch game process
-        progressText.innerHTML = `Lanzando proceso del juego...`;
         launch.Launch(opt);
-        this.minecraftProcess = launch;
 
-        launch.on('extract', () => {
-            ipcRenderer.send('main-window-progress-load');
-        });
+        this.minecraftProcess = launch;
 
         launch.on('progress', (progress, size) => {
             const pct = ((progress / size) * 100).toFixed(0);
-            progressText.innerHTML = `Descargando recursos: ${pct}%`;
+            if (progressText) progressText.innerHTML = `Descargando dependencias (${progress}/${size})`;
+            if (wavyBar) wavyBar.style.width = `${pct}%`;
+            if (progressPct) progressPct.innerHTML = `${pct}%`;
             ipcRenderer.send('main-window-progress', { progress, size });
-            wavyBar.style.width = `${pct}%`;
-            progressPct.innerHTML = `${pct}%`;
         });
 
         launch.on('check', (progress, size) => {
             const pct = ((progress / size) * 100).toFixed(0);
-            progressText.innerHTML = `Verificando integridad: ${pct}%`;
+            if (progressText) progressText.innerHTML = `Verificando archivos (${progress}/${size})`;
+            if (wavyBar) wavyBar.style.width = `${pct}%`;
+            if (progressPct) progressPct.innerHTML = `${pct}%`;
             ipcRenderer.send('main-window-progress', { progress, size });
-            wavyBar.style.width = `${pct}%`;
-            progressPct.innerHTML = `${pct}%`;
         });
 
-        launch.on('patch', () => {
-            progressText.innerHTML = `Aplicando parches de inicio...`;
+        launch.on('data', (e) => {
+            new logger('Minecraft', '#7289da').info(e.trim());
         });
 
-        launch.on('data', async () => {
-            // Mark instance as installed on first successful launch (handles modpacks without modpack_url)
-            if (!configClient.instances_versions?.[options.name]) {
-                if (!configClient.instances_versions) configClient.instances_versions = {};
-                configClient.instances_versions[options.name] = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                await this.db.updateData('configClient', configClient);
-                await this.initInstances();
-                await this.selectInstance(options);
-                // Re-acquire DOM references after selectInstance replaced the play button
-                playBtn = document.getElementById('detail-play-btn');
-                btnContent = document.getElementById('detail-play-btn-content');
-                btnSpinner = document.getElementById('detail-play-btn-spinner');
-            }
-
-            // Restore button state and hide progress card on launch data
-            if (btnContent) btnContent.style.display = 'flex';
-            if (btnSpinner) btnSpinner.style.display = 'none';
-            playBtn.disabled = false;
-            progressContainer.style.display = 'none';
-            this._launching = false;
-
+        launch.on('close', async code => {
+            await endSession();
             if (configClient.launcher_config.closeLauncher == 'close-launcher') {
-                ipcRenderer.send("main-window-hide");
-            }
-            new logger('Minecraft', '#36b030');
-            ipcRenderer.send('main-window-progress-load');
-
-            sessionStart();
-        });
-
-        launch.on('close', async () => {
-            await sessionEnd();
-
-            if (configClient.launcher_config.closeLauncher == 'close-launcher') {
-                ipcRenderer.send("main-window-show");
+                ipcRenderer.send('main-window-show');
             }
             ipcRenderer.send('main-window-progress-reset');
 
-            // Restore button state
             if (btnContent) btnContent.style.display = 'flex';
             if (btnSpinner) btnSpinner.style.display = 'none';
             playBtn.disabled = false;
-            progressContainer.style.display = 'none';
+            if (progressContainer) progressContainer.style.display = 'none';
             this._launching = false;
 
-            new logger(pkg.name, '#7289da');
+            new logger(pkg.name, '#7289da').info(`Minecraft cerrado (código ${code})`);
             this.minecraftProcess = null;
-
-            // Trigger instances grid to refresh in case playTime changed
-            await this.initInstances();
-            await this.renderQuickAccess();
-            await this.updateDmVisibility();
-            await this.selectInstance(options);
         });
 
         launch.on('error', async err => {
-            await sessionEnd();
+            await endSession();
 
             let errorMsg = err.error || err.message || err;
             if (typeof errorMsg === 'string' && errorMsg.includes('Could not create the Java Virtual Machine')) {
@@ -1575,11 +1592,10 @@ class Home {
             }
             ipcRenderer.send('main-window-progress-reset');
 
-            // Restore button state
             if (btnContent) btnContent.style.display = 'flex';
             if (btnSpinner) btnSpinner.style.display = 'none';
             playBtn.disabled = false;
-            progressContainer.style.display = 'none';
+            if (progressContainer) progressContainer.style.display = 'none';
             this._launching = false;
 
             new logger(pkg.name, '#7289da');
@@ -1591,7 +1607,7 @@ class Home {
        MERGED GENERAL SETTINGS CONTROLLER LOGIC
        ========================================================================== */
     async initSettings() {
-        this.settingsRam();
+        await this.settingsRam();
         await this.settingsJavaPath();
         await this.settingsResolution();
         await this.settingsLauncher();
@@ -1680,7 +1696,7 @@ class Home {
                 });
             });
         }
-    }
+    };
 
     async settingsJavaPath() {
         let javaPathText = document.querySelector(".java-path-txt");
@@ -1843,7 +1859,7 @@ class Home {
         let day = date.getDate();
         let allMonth = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         return { year: year, month: allMonth[month - 1], day: day };
-    }
+    };
 }
 
 export default Home;

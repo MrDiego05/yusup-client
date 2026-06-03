@@ -24,7 +24,7 @@
             color: var(--text-color);
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: auto;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -275,6 +275,7 @@
         }
 
         .modal-content {
+            overflow: auto;
             background-color: var(--card-color);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
@@ -527,6 +528,32 @@
             <div class="input-group">
                 <label>Tags (separadas por coma)</label>
                 <input type="text" id="new-tags" placeholder="ej. PVP, Terror, Amistad, Optimizado">
+            </div>
+
+            <div class="input-group">
+                <label>Banner para tarjeta (recomendado: 262×162 px)</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn-select-dir" id="btn-select-banner"
+                        style="background:#020618; border:1px solid var(--border-color);">Seleccionar imagen...</button>
+                    <button class="btn-select-dir" id="btn-clear-banner"
+                        style="background:transparent; border:1px solid #ef4444; color:#ef4444; display:none;">✕</button>
+                </div>
+                <input type="file" id="new-banner-input" accept="image/png,image/jpeg,image/webp" style="display:none;">
+                <span id="new-banner-path" style="font-size:0.75em; color:#94a3b8; word-break:break-all;">No seleccionada</span>
+                <div id="new-banner-preview" style="display:none; margin-top:8px; width:262px; height:162px; border-radius:12px; background-size:cover; background-position:center; border:1px solid var(--border-color);"></div>
+            </div>
+
+            <div class="input-group">
+                <label>Poster para fondo del modpack</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn-select-dir" id="btn-select-poster"
+                        style="background:#020618; border:1px solid var(--border-color);">Seleccionar imagen...</button>
+                    <button class="btn-select-dir" id="btn-clear-poster"
+                        style="background:transparent; border:1px solid #ef4444; color:#ef4444; display:none;">✕</button>
+                </div>
+                <input type="file" id="new-poster-input" accept="image/png,image/jpeg,image/webp" style="display:none;">
+                <span id="new-poster-path" style="font-size:0.75em; color:#94a3b8; word-break:break-all;">No seleccionada</span>
+                <div id="new-poster-preview" style="display:none; margin-top:8px; max-width:100%; height:120px; border-radius:8px; background-size:cover; background-position:center; border:1px solid var(--border-color);"></div>
             </div>
 
             <div class="input-group">

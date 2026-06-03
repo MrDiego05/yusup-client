@@ -1,0 +1,53 @@
+[RENDERER ERROR] Uncaught SyntaxError: Unexpected reserved word at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:99:35
+SyntaxError: Unexpected reserved word
+
+[RENDERER ERROR] Uncaught SyntaxError: Unexpected identifier 'initSettings' at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1520:11
+SyntaxError: Unexpected identifier 'initSettings'
+
+[RENDERER ERROR] Uncaught SyntaxError: The requested module './panels/home.js' does not provide an export named 'default' at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:7:8
+SyntaxError: The requested module './panels/home.js' does not provide an export named 'default'
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.setupAccountView (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:527:38)
+    at async Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:51:9)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.setupAccountView (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:527:38)
+    at async Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:51:9)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'textContent')
+TypeError: Cannot set properties of null (setting 'textContent')
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:976:63)
+
+[UNHANDLED REJECTION] TypeError: (intermediate value).info is not a function
+TypeError: (intermediate value).info is not a function
+    at Launch.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1555:48)
+    at Launch.emit (node:events:509:28)
+    at Launch.start (C:\Users\Diego\Documents\Proyects\yusup-client\node_modules\minecraft-java-core\build\Launch.js:117:14)
+

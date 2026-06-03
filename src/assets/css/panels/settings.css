@@ -26,7 +26,7 @@
     height: 520px;
     box-shadow: 0 30px 60px var(--shadow);
     overflow: hidden;
-    animation: settings-pop-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: settings-pop-up var(--m3-duration-spatial) var(--m3-spring-spatial);
     box-sizing: border-box;
 }
 
@@ -132,7 +132,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    transition: opacity 0.25s ease-out;
+    transition: opacity var(--m3-duration-fade) var(--m3-easing-emphasized-decelerate);
 }
 
 .active-container-settings {
@@ -431,7 +431,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    transition: background var(--m3-duration-micro) var(--m3-easing-emphasized);
     font-family: inherit;
     line-height: 1;
 }
@@ -522,7 +522,7 @@
     font-weight: 500;
     cursor: pointer;
     text-align: center;
-    transition: all 0.15s;
+    transition: all var(--m3-duration-micro) var(--m3-easing-emphasized);
 }
 
 .theme-option:hover {
@@ -565,7 +565,7 @@
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all var(--m3-duration-micro) var(--m3-easing-emphasized);
     width: auto;
 }
 

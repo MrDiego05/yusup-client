@@ -1,7 +1,17 @@
 @import "font.css";
 
+:root {
+    --m3-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --m3-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --m3-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --m3-duration-enter: 400ms;
+    --m3-duration-exit: 200ms;
+    --m3-duration-fade: 300ms;
+    --m3-duration-micro: 150ms;
+}
+
 body {
-    background-color: #F1F5F9;
+    background-color: #F3F4EB;
     font-family: "Google Sans Flex", sans-serif;
     letter-spacing: 0px;
 }
@@ -18,7 +28,7 @@ img {
     transform: translate(-50%);
     width: 140px;
     height: 140px;
-    transition: opacity .3s, top 1.5s;
+    transition: opacity var(--m3-duration-enter) var(--m3-easing-emphasized-decelerate), top 1.5s var(--m3-easing-emphasized-decelerate);
     opacity: 0;
 }
 
@@ -38,7 +48,7 @@ img {
     font: normal normal bold 19px/29px Poppins;
     text-align: center;
     letter-spacing: 0px;
-    transition: opacity 1.5s;
+    transition: opacity 1.5s var(--m3-easing-emphasized-decelerate);
     color: var(--color);
     opacity: 0;
 }
@@ -53,7 +63,7 @@ img {
     left: 0px;
     width: 400px;
     text-align: center;
-    transition: opacity 1.5s;
+    transition: opacity 1.5s var(--m3-easing-emphasized-decelerate);
     font: normal normal normal 9px/13px Poppins;
     color: var(--color);
     opacity: 0;
@@ -73,8 +83,10 @@ img {
     left: 0px;
     width: 400px;
     text-align: center;
-    transition: opacity 1.5s;
-    font: normal normal bold 18px/27px Poppins;
+    transition: opacity 1.5s var(--m3-easing-emphasized-decelerate);
+    font: normal normal bold 19px/29px Poppins;
+    text-align: center;
+    letter-spacing: 0px;
     color: var(--color);
     opacity: 0;
 }
@@ -88,7 +100,7 @@ img {
     color: var(--color);
     border: 2px solid var(--color);
     border-radius: 15px;
-    transition: background-color .2s, color .2s;
+    transition: background-color var(--m3-duration-micro) var(--m3-easing-emphasized), color var(--m3-duration-micro) var(--m3-easing-emphasized);
 }
 
 .download-update:hover {
@@ -108,7 +120,7 @@ img {
     width: 189px;
     height: 10px;
     appearance: none;
-    transition: opacity .2s;
+    transition: opacity var(--m3-duration-exit) var(--m3-easing-emphasized-accelerate);
     opacity: 0;
 }
 

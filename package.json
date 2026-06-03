@@ -3,12 +3,11 @@
     "productName": "Yusup Client",
     "version": "1.0.0",
     "url": "https://mrdiego05.github.io/yusup-client",
-    "description": "Launcher Minecraft Yusup",
+    "description": "Yusup Minecraft Client",
     "main": "src/app.js",
     "author": {
         "name": "Mr_Diego05",
-        "email": "[EMAIL_ADDRESS]",
-        "url": ""
+        "email": "[EMAIL_ADDRESS]"
     },
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",

@@ -9,8 +9,8 @@ body {
     height: 100%;
     overflow: hidden;
     user-select: none;
-    color: --var(--text);
-    background-color: #F0F4F9;
+    color: var(--text);
+    background-color: #f3f4eb;
     font-family: 'Google Sans Flex', sans-serif;
     font-weight: 500;
     box-sizing: border-box;
@@ -57,7 +57,7 @@ input::-webkit-inner-spin-button {
     display: table-cell;
     width: 20px;
     height: 26px;
-    transition: color .2s, background-color .2s;
+    transition: color var(--m3-duration-micro) var(--m3-easing-emphasized), background-color var(--m3-duration-micro) var(--m3-easing-emphasized);
 }
 
 .other .button-frame {
@@ -67,7 +67,7 @@ input::-webkit-inner-spin-button {
     justify-content: center;
     width: 30px;
     height: 26px;
-    transition: color .2s, background-color .2s;
+    transition: color var(--m3-duration-micro) var(--m3-easing-emphasized), background-color var(--m3-duration-micro) var(--m3-easing-emphasized);
     color: var(--text);
     cursor: pointer;
 }
@@ -133,19 +133,14 @@ input::-webkit-inner-spin-button {
 .loading-overlay.hidden {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease;
+    transition: opacity var(--m3-duration-fade) var(--m3-easing-emphasized-decelerate);
 }
 
 .loading-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-}
-
-.loading-icon {
-    color: var(--select-secundary);
-    animation: loading-pulse 1.5s ease-in-out infinite;
+    gap: 30px;
 }
 
 .loading-status {
@@ -164,20 +159,20 @@ input::-webkit-inner-spin-button {
 }
 
 .loading-bar-track {
-    width: 240px;
-    height: 4px;
-    background: var(--background-tertiary);
-    border-radius: 4px;
+    width: 316px;
+    height: 10px;
+    background: #D7E8CC;
+    border-radius: 10px;
     overflow: hidden;
-    margin-top: 8px;
+    margin: 0px;
 }
 
 .loading-bar-fill {
     height: 100%;
     width: 0%;
     background: var(--select-secundary);
-    border-radius: 4px;
-    transition: width 0.3s ease;
+    border-radius: 10px;
+    transition: width var(--m3-duration-fade) var(--m3-easing-standard-decelerate);
 }
 
 @keyframes loading-pulse {
@@ -241,6 +236,7 @@ input::-webkit-inner-spin-button {
     opacity: 0;
     z-index: 0;
     pointer-events: none;
+    transition: opacity var(--m3-duration-fade) var(--m3-easing-emphasized-decelerate);
 }
 
 .active {
