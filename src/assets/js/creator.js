@@ -2,24 +2,267 @@ const { ipcRenderer, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { exec } = require('child_process');
+const http = require('http');
+const os = require('os');
 const { Launch } = require('minecraft-java-core');
 const nodeFetch = require('node-fetch');
 
 // State
 let selectedPackId = null;
 let selectedNewLocation = null;
-let selectedGitLocation = null;
 let modpacks = [];
 let _dbPath = null;
-let _gitConfigPath = null;
 let _pathsInitialized = false;
+
+// HTTP server
+const SERVER_PORT = 3456;
+let _httpServer = null;
+let _serverPort = 0;
+let _serverConfigPath = null;
+
+function getLocalIP() {
+    const ifaces = os.networkInterfaces();
+    for (const name of Object.keys(ifaces)) {
+        for (const iface of ifaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+        }
+    }
+    return '127.0.0.1';
+}
+
+function startServer() {
+    if (_httpServer) {
+        log('El servidor ya está en ejecución.', 'error');
+        return;
+    }
+
+    if (modpacks.length === 0 || !modpacks.some(m => m.location)) {
+        log('No hay modpacks con ubicación válida para servir.', 'error');
+        return;
+    }
+
+    _httpServer = http.createServer((req, res) => {
+        const urlPath = req.url.split('?')[0];
+
+        // Status endpoint
+        if (urlPath === '/status' || urlPath === '/') {
+            const status = {
+                status: 'ok',
+                modpacks: modpacks.filter(m => m.location).map(m => ({
+                    id: m.id,
+                    title: m.title,
+                    gameVersion: m.gameVersion,
+                    loader: m.loader
+                })),
+                timestamp: new Date().toISOString()
+            };
+            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify(status, null, 2));
+            return;
+        }
+
+        // Instances list
+        if (urlPath === '/instances.json') {
+            const base = `http://${getLocalIP()}:${SERVER_PORT}`;
+            const instances = modpacks.filter(m => m.location).map(m => ({
+                name: m.id,
+                title: m.title,
+                description: m.description || '',
+                tags: m.tags || [],
+                gameVersion: m.gameVersion,
+                loader: {
+                    type: m.loader,
+                    build: m.loaderVersion || '',
+                    enable: m.loader !== 'vanilla'
+                },
+                poster: m.poster ? `${base}/${m.id}/${m.poster}` : null,
+                banner: m.banner ? `${base}/${m.id}/${m.banner}` : null,
+                modpack_url: `${base}/${m.id}/modpack.json`
+            }));
+            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify(instances, null, 2));
+            return;
+        }
+
+        // Route: /<pack-id>/modpack.json or /<pack-id>/objects/<path>
+        const match = urlPath.match(/^\/([^/]+)\/(.+)$/);
+        if (match) {
+            const packId = match[1];
+            const fileSubPath = match[2];
+            const pack = modpacks.find(m => m.id === packId && m.location);
+            if (!pack) {
+                res.writeHead(404);
+                res.end('Modpack not found');
+                return;
+            }
+            const fullPath = path.join(pack.location, fileSubPath);
+            if (!fullPath.startsWith(path.resolve(pack.location))) {
+                res.writeHead(403);
+                res.end('Forbidden');
+                return;
+            }
+            if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+                const ext = path.extname(fullPath).toLowerCase();
+                const mimeTypes = {
+                    '.json': 'application/json',
+                    '.jar': 'application/java-archive',
+                    '.png': 'image/png',
+                    '.jpg': 'image/jpeg',
+                    '.jpeg': 'image/jpeg',
+                    '.txt': 'text/plain',
+                    '.cfg': 'text/plain',
+                    '.toml': 'text/plain'
+                };
+                res.writeHead(200, {
+                    'Content-Type': mimeTypes[ext] || 'application/octet-stream',
+                    'Access-Control-Allow-Origin': '*'
+                });
+                fs.createReadStream(fullPath).pipe(res);
+            } else {
+                res.writeHead(404);
+                res.end('Not Found');
+            }
+            return;
+        }
+
+        res.writeHead(404);
+        res.end('Not Found');
+    });
+
+    _httpServer.listen(SERVER_PORT, '0.0.0.0', () => {
+        _serverPort = SERVER_PORT;
+        const ip = getLocalIP();
+        const serverUrl = `http://${ip}:${SERVER_PORT}`;
+
+        // Write server config file for the launcher
+        try {
+            fs.writeFileSync(_serverConfigPath, JSON.stringify({ url: serverUrl }, null, 4));
+        } catch (e) {
+            log(`❌ No se pudo escribir ${_serverConfigPath}: ${e.message}`, 'error');
+        }
+
+        // Update UI
+        const serverStatus = document.getElementById('server-status');
+        const serverDot = document.getElementById('server-dot');
+        const serverLabel = document.getElementById('server-label');
+        const serverInfo = document.getElementById('server-info');
+        if (serverStatus) serverStatus.style.display = 'flex';
+        if (serverDot) serverDot.className = 'server-dot online';
+        if (serverLabel) serverLabel.textContent = 'Servidor activo';
+        if (serverInfo) serverInfo.textContent = serverUrl;
+        document.getElementById('btn-start-server').textContent = '🛑 Detener Servidor';
+        log(`🌐 Servidor HTTP iniciado en ${serverUrl}`, 'success');
+        log(`   Archivo de configuración escrito: ${_serverConfigPath}`, 'info');
+    });
+
+    _httpServer.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            log(`❌ El puerto ${SERVER_PORT} ya está en uso. Cerrá el otro programa o cambiá SERVER_PORT.`, 'error');
+        } else {
+            log(`❌ Error del servidor: ${err.message}`, 'error');
+        }
+        stopServer();
+    });
+}
+
+function stopServer() {
+    if (!_httpServer) return;
+    _httpServer.close(() => {
+        _httpServer = null;
+        _serverPort = 0;
+
+        // Delete server config file so the launcher knows it's offline
+        try {
+            if (fs.existsSync(_serverConfigPath)) fs.unlinkSync(_serverConfigPath);
+        } catch (e) {}
+
+        const serverStatus = document.getElementById('server-status');
+        const serverDot = document.getElementById('server-dot');
+        const serverLabel = document.getElementById('server-label');
+        const serverInfo = document.getElementById('server-info');
+        if (serverDot) serverDot.className = 'server-dot offline';
+        if (serverLabel) serverLabel.textContent = 'Servidor detenido';
+        if (serverInfo) serverInfo.textContent = '';
+        document.getElementById('btn-start-server').textContent = '🌐 Iniciar Servidor';
+        log('🛑 Servidor HTTP detenido.', 'info');
+    });
+}
+
+function checkForUpdates(pack) {
+    if (!pack || !pack.location) {
+        log('Selecciona un modpack primero.', 'error');
+        return;
+    }
+    const modpackJsonPath = path.join(pack.location, 'modpack.json');
+    if (!fs.existsSync(modpackJsonPath)) {
+        log(`ℹ️  "${pack.title}" aún no ha sido compilado. Usá "Compilar Modpack" primero.`, 'info');
+        return;
+    }
+
+    const manifest = JSON.parse(fs.readFileSync(modpackJsonPath, 'utf8'));
+    const manifestMtime = fs.statSync(modpackJsonPath).mtimeMs;
+
+    // Check src/ directory if it exists (SKCraft mode)
+    const srcDir = path.join(pack.location, 'src');
+    const modsDir = path.join(pack.location, 'mods');
+
+    let latestMtime = manifestMtime;
+
+    const checkDirs = [];
+    if (fs.existsSync(srcDir)) checkDirs.push(srcDir);
+    if (fs.existsSync(modsDir)) checkDirs.push(modsDir);
+
+    if (checkDirs.length === 0) {
+        log(`ℹ️  No se encontraron src/ ni mods/ en "${pack.title}". No se puede verificar.`, 'error');
+        return;
+    }
+
+    // Walk directories to find newest file
+    function walkDir(dir) {
+        let newest = 0;
+        try {
+            const entries = fs.readdirSync(dir);
+            for (const entry of entries) {
+                const entryPath = path.join(dir, entry);
+                if (entry === '_SERVER') continue; // Skip server-only files
+                try {
+                    const stat = fs.statSync(entryPath);
+                    if (stat.isDirectory()) {
+                        const sub = walkDir(entryPath);
+                        if (sub > newest) newest = sub;
+                    } else {
+                        if (stat.mtimeMs > newest) newest = stat.mtimeMs;
+                    }
+                } catch (e) {}
+            }
+        } catch (e) {}
+        return newest;
+    }
+
+    for (const d of checkDirs) {
+        const dirNewest = walkDir(d);
+        if (dirNewest > latestMtime) latestMtime = dirNewest;
+    }
+
+    const buildDate = new Date(manifestMtime).toLocaleString();
+    const sourceDate = new Date(latestMtime).toLocaleString();
+
+    if (latestMtime > manifestMtime) {
+        log(`🔄 ¡Actualización disponible para "${pack.title}"!`, 'error');
+        log(`   Última compilación: ${buildDate}`, 'info');
+        log(`   Archivos modificados: ${sourceDate}`, 'info');
+        log(`   Recomendación: Usá "Compilar Modpack" para actualizar.`, 'info');
+    } else {
+        log(`✅ "${pack.title}" está actualizado.`, 'success');
+        log(`   Última compilación: ${buildDate}`, 'info');
+    }
+}
 
 async function ensurePaths() {
     if (_pathsInitialized) return;
     const userDataPath = await ipcRenderer.invoke('path-user-data');
     _dbPath = path.join(userDataPath, 'creator-modpacks.json');
-    _gitConfigPath = path.join(userDataPath, 'creator-git-config.json');
+    _serverConfigPath = path.join(userDataPath, 'creator-server.json');
     const dbDir = path.dirname(_dbPath);
     if (!fs.existsSync(dbDir)) {
         fs.mkdirSync(dbDir, { recursive: true });
@@ -64,38 +307,6 @@ async function loadDb() {
 function saveDb() {
     if (!_dbPath) return;
     fs.writeFileSync(_dbPath, JSON.stringify(modpacks, null, 4));
-}
-
-// Load git config
-async function loadGitConfig() {
-    await ensurePaths();
-    if (fs.existsSync(_gitConfigPath)) {
-        try {
-            const config = JSON.parse(fs.readFileSync(_gitConfigPath, 'utf8'));
-            if (config.gitDir) {
-                selectedGitLocation = config.gitDir;
-                document.getElementById('git-dir-path').textContent = config.gitDir;
-            }
-        } catch (e) {}
-    } else {
-        // Check legacy path for migration
-        const legacyPath = path.resolve('./data/creator-git-config.json');
-        if (fs.existsSync(legacyPath)) {
-            try {
-                const config = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
-                if (config.gitDir) {
-                    selectedGitLocation = config.gitDir;
-                    document.getElementById('git-dir-path').textContent = config.gitDir;
-                }
-                fs.writeFileSync(_gitConfigPath, JSON.stringify(config, null, 4));
-            } catch (e) {}
-        }
-    }
-}
-
-function saveGitConfig(gitDir) {
-    if (!_gitConfigPath) return;
-    fs.writeFileSync(_gitConfigPath, JSON.stringify({ gitDir }, null, 4));
 }
 
 // UI Logs utility
@@ -349,14 +560,17 @@ async function fetchLoaderVersions(loader, mcVersion) {
             const data = await res.json();
             versions = data.map(e => e.loader.version);
         } else if (loader === 'forge') {
-            const res = await nodeFetch('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json');
+            const res = await nodeFetch('https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml');
             if (res.status !== 200) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            const mapped = new Set();
-            for (const [key, ver] of Object.entries(data.promos || {})) {
-                if (key.startsWith(mcVersion + '-')) mapped.add(ver);
+            const xml = await res.text();
+            const matches = xml.match(/<version>([^<]+)<\/version>/g);
+            if (matches) {
+                const prefix = mcVersion + '-';
+                versions = matches
+                    .map(m => m.replace(/<\/?version>/g, ''))
+                    .filter(v => v.startsWith(prefix))
+                    .sort();
             }
-            versions = [...mapped].sort();
         } else if (loader === 'neoforge') {
             const res = await nodeFetch('https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml');
             const xml = await res.text();
@@ -985,206 +1199,7 @@ document.getElementById('btn-build').addEventListener('click', async () => {
     }
 });
 
-// --- GITHUB PAGES PUBLISH FLOW ---
-const modalGithub = document.getElementById('modal-github');
 
-document.getElementById('btn-github').addEventListener('click', () => {
-    modalGithub.style.display = 'flex';
-});
-
-document.getElementById('btn-cancel-github').addEventListener('click', () => {
-    modalGithub.style.display = 'none';
-});
-
-document.getElementById('btn-select-git-dir').addEventListener('click', async () => {
-    const folder = await ipcRenderer.invoke('select-directory');
-    if (folder) {
-        selectedGitLocation = folder.replace(/\\/g, '/');
-        document.getElementById('git-dir-path').textContent = selectedGitLocation;
-        saveGitConfig(selectedGitLocation);
-    }
-});
-
-// Obtener la URL de GitHub Pages a partir del Git Remote origin
-function getGitHubPagesUrl(gitDir) {
-    return new Promise((resolve) => {
-        exec('git remote get-url origin', { cwd: gitDir }, (err, stdout) => {
-            if (err || !stdout) {
-                resolve('https://usuario.github.io/repositorio');
-                return;
-            }
-            const remote = stdout.trim();
-            // Match git@github.com:username/repo.git o https://github.com/username/repo.git
-            const match = remote.match(/github\.com[:/]([^/]+)\/([^.]+)/);
-            if (match) {
-                const username = match[1];
-                let repo = match[2];
-                if (repo.endsWith('.git')) {
-                    repo = repo.slice(0, -4);
-                }
-                resolve(`https://${username}.github.io/${repo}`);
-            } else {
-                resolve('https://usuario.github.io/repositorio');
-            }
-        });
-    });
-}
-
-// Core publish to GitHub Pages (reusable)
-async function publishToGitHubPages(pack, commitMsg, onDone) {
-    const ghPagesUrl = await getGitHubPagesUrl(selectedGitLocation);
-    log(`[GitHub Pages] URL base: ${ghPagesUrl}`, 'info');
-
-    const pagesDir = path.join(selectedGitLocation, 'docs');
-    if (!fs.existsSync(pagesDir)) fs.mkdirSync(pagesDir, { recursive: true });
-
-    // 1. Leer compilar si no existe modpack.json
-    const srcJson = path.join(pack.location, 'modpack.json');
-    if (!fs.existsSync(srcJson)) {
-        progressStatus.textContent = 'Compilando antes de publicar...';
-        const srcDir = path.join(pack.location, 'src');
-        const modsDir = path.join(pack.location, 'mods');
-        
-        let manifest;
-        if (fs.existsSync(srcDir)) {
-            const cb = (msg) => { progressStatus.textContent = msg; };
-            manifest = await buildSKCraftManifest(pack, cb);
-        } else if (fs.existsSync(modsDir)) {
-            const files = fs.readdirSync(modsDir);
-            const jarFiles = files.filter(f => f.toLowerCase().endsWith('.jar'));
-            if (jarFiles.length === 0) throw new Error('La carpeta mods/ está vacía.');
-            const tasks = [];
-            for (const file of jarFiles) {
-                progressStatus.textContent = `Hasheando: ${file}...`;
-                const sha1 = await calculateSHA1(path.join(modsDir, file));
-                const stat = fs.statSync(path.join(modsDir, file));
-                tasks.push({ type: 'file', hash: sha1, location: `mods/${file}`, to: `mods/${file}`, size: stat.size });
-            }
-            const version = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' +
-                Math.random().toString(36).slice(2, 8);
-            manifest = { version, name: pack.id, title: pack.title, gameVersion: pack.gameVersion, tasks };
-        } else {
-            throw new Error('No existe src/ ni mods/ en el modpack.');
-        }
-        fs.writeFileSync(srcJson, JSON.stringify(manifest, null, 4));
-        log('Compilación automática completada.', 'success');
-    }
-
-    const manifest = JSON.parse(fs.readFileSync(srcJson, 'utf8'));
-
-    // Build the remote manifest with absolute URLs
-    const remoteManifest = JSON.parse(JSON.stringify(manifest));
-
-    // Set baseUrl for relative path resolution
-    remoteManifest.baseUrl = ghPagesUrl + '/';
-
-    for (const task of remoteManifest.tasks) {
-        if (!task.url) {
-            task.url = ghPagesUrl + '/' + task.location;
-        }
-    }
-
-    // Escribir {pack.id}.json
-    fs.writeFileSync(path.join(pagesDir, `${pack.id}.json`), JSON.stringify(remoteManifest, null, 4));
-    log(`Manifest copiado a docs/${pack.id}.json`);
-
-    // Copiar archivos (objects/ o mods/)
-    progressStatus.textContent = 'Copiando archivos...';
-
-    // Use source: prefer src/ over mods/
-    const srcDir = path.join(pack.location, 'src');
-    const modsDir = path.join(pack.location, 'mods');
-    const objectsDir = path.join(pack.location, 'objects');
-
-    if (fs.existsSync(objectsDir)) {
-        // Copy objects/ content-addressed structure
-        const destObjects = path.join(pagesDir, 'objects');
-        copyRecursive(objectsDir, destObjects);
-        log('Archivos copiados desde objects/');
-    } else if (fs.existsSync(srcDir)) {
-        // Flat copy from src/
-        for (const task of manifest.tasks) {
-            const srcFile = path.join(srcDir, task.to);
-            const destFile = path.join(pagesDir, task.location);
-            const destDir = path.dirname(destFile);
-            if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-            fs.copyFileSync(srcFile, destFile);
-        }
-        log('Archivos copiados desde src/');
-    } else if (fs.existsSync(modsDir)) {
-        // Legacy: just copy mods/
-        const destMods = path.join(pagesDir, 'mods');
-        if (!fs.existsSync(destMods)) fs.mkdirSync(destMods, { recursive: true });
-        fs.readdirSync(modsDir).forEach(mod => {
-            if (mod.toLowerCase().endsWith('.jar')) {
-                fs.copyFileSync(path.join(modsDir, mod), path.join(destMods, mod));
-            }
-        });
-        log('Mods copiados desde mods/');
-    }
-
-    // Actualizar instances.json
-    const destInstancesPath = path.join(pagesDir, 'instances.json');
-    let instancesObj = {};
-    if (fs.existsSync(destInstancesPath)) {
-        try { instancesObj = JSON.parse(fs.readFileSync(destInstancesPath, 'utf8')); } catch (e) {}
-    }
-    instancesObj[pack.id] = {
-        name: pack.id, title: pack.title, description: pack.description || '', tags: pack.tags || [],
-        status: "operationnel", gameVersion: pack.gameVersion,
-        modpack_url: `${ghPagesUrl}/${pack.id}.json`,
-        loader: { type: pack.loader, build: pack.loaderVersion, enable: pack.loader !== 'vanilla',
-            loader_type: pack.loader, loader_version: pack.loaderVersion, minecraft_version: pack.gameVersion },
-        verify: true, ignored: [], themeColor: 'lime', playTime: '0.0h',
-        whitelistActive: pack.whitelistActive || false, whitelist: pack.whitelist || []
-    };
-    fs.writeFileSync(destInstancesPath, JSON.stringify(instancesObj, null, 4));
-    log(`docs/instances.json actualizado.`);
-
-    // Crear config/articles por defecto si no existen
-    for (const [file, content] of [
-        ['config.json', { rss: null, status: { server: { ip: "127.0.0.1", port: 25565 } }, maintenance: false }],
-        ['articles.json', [{ title: `¡Modpack ${pack.title} listo!`, content: 'Publicado desde Yusup Creator Tools.', author: 'Yusup Creator Tools', publish_date: 'Ahora' }]]
-    ]) {
-        const fp = path.join(pagesDir, file);
-        if (!fs.existsSync(fp)) fs.writeFileSync(fp, JSON.stringify(content, null, 4));
-    }
-
-    // Git commands
-    progressStatus.textContent = 'Ejecutando Git...';
-    exec(`git add .`, { cwd: selectedGitLocation }, (err) => {
-        if (err) { log(`[Git Error] add: ${err.message}`, 'error'); if (onDone) onDone(false); return; }
-        exec(`git commit -m "${commitMsg || 'Modpack update'}"`, { cwd: selectedGitLocation }, (err) => {
-            if (err && !err.message.includes('nothing to commit')) {
-                log(`[Git Error] commit: ${err.message}`, 'error');
-                if (onDone) onDone(false); return;
-            }
-            exec(`git push`, { cwd: selectedGitLocation }, (err) => {
-                if (err) {
-                    log(`[Git Error] push: ${err.message}. Verificá permisos SSH/HTTPS.`, 'error');
-                } else {
-                    log('🚀 Publicado en GitHub Pages con éxito!', 'success');
-                    log(`📋 URL del launcher: ${ghPagesUrl}`, 'info');
-                }
-                if (onDone) onDone(!err);
-            });
-        });
-    });
-}
-
-// Deploy / Push to GitHub Pages
-document.getElementById('btn-push-github').addEventListener('click', async () => {
-    const pack = getSelectedPack();
-    if (!pack) { log('Error: Selecciona un modpack.', 'error'); return; }
-    if (!selectedGitLocation) { log('Error: Configurá el repo Git primero.', 'error'); return; }
-
-    progressContainer.style.display = 'flex';
-    progressStatus.textContent = 'Publicando...';
-    await publishToGitHubPages(pack, document.getElementById('git-commit-msg').value.trim() || 'Modpack update', (ok) => {
-        modalGithub.style.display = 'none';
-        progressStatus.textContent = ok ? '¡Publicado!' : 'Error al publicar';
-    });
-});
 
 function findPackFiles(pack) {
     const srcDir = path.join(pack.location, 'src');
@@ -1245,7 +1260,18 @@ async function installPackInLauncher(pack) {
     // 2. Copiar al directorio de instancias del launcher
     progressStatus.textContent = `Copiando ${pack.id} al launcher...`;
     await ensurePaths();
-    const launcherDataDir = path.join(path.dirname(_dbPath), 'modpacks');
+    
+    const Store = require('electron-store');
+    const appDataPath = await ipcRenderer.invoke('appData');
+    const store = new Store({
+        name: 'launcher-data',
+        cwd: path.dirname(_dbPath)
+    });
+    const configClient = store.get('configClient', []);
+    const configObj = Array.isArray(configClient) ? configClient[0] : configClient;
+    const gamePath = configObj?.gamePath || path.join(appDataPath, '.yusup');
+
+    const launcherDataDir = path.join(gamePath, 'instances');
     if (!fs.existsSync(launcherDataDir)) fs.mkdirSync(launcherDataDir, { recursive: true });
 
     const instanceDir = path.join(launcherDataDir, pack.id);
@@ -1275,6 +1301,20 @@ async function installPackInLauncher(pack) {
         });
     }
 
+    // 2.5 Copy poster/banner images to instance directory
+    if (pack.banner) {
+        const srcBanner = path.join(pack.location || packFiles.path, pack.banner);
+        if (fs.existsSync(srcBanner)) {
+            fs.copyFileSync(srcBanner, path.join(instanceDir, pack.banner));
+        }
+    }
+    if (pack.poster) {
+        const srcPoster = path.join(pack.location || packFiles.path, pack.poster);
+        if (fs.existsSync(srcPoster)) {
+            fs.copyFileSync(srcPoster, path.join(instanceDir, pack.poster));
+        }
+    }
+
     // 3. Registrar en creator-modpacks.json
     await ensurePaths();
     let creatorModpacks = [];
@@ -1286,81 +1326,15 @@ async function installPackInLauncher(pack) {
     const entry = {
         id: pack.id, title: pack.title, description: pack.description || '', tags: pack.tags || [],
         gameVersion: pack.gameVersion, loader: pack.loader, loaderVersion: pack.loaderVersion,
-        location: instanceDir, whitelist: pack.whitelist || [], whitelistActive: pack.whitelistActive || false
+        location: instanceDir, whitelist: pack.whitelist || [], whitelistActive: pack.whitelistActive || false,
+        banner: pack.banner || null, poster: pack.poster || null
     };
 
     if (existingIdx >= 0) creatorModpacks[existingIdx] = entry;
     else creatorModpacks.push(entry);
     fs.writeFileSync(_dbPath, JSON.stringify(creatorModpacks, null, 4));
 
-    // 4. Actualizar docs/ local
-    progressStatus.textContent = `Actualizando docs/ para ${pack.id}...`;
-    const projectRoot = path.resolve(__dirname, '..', '..', '..');
-    const pagesDir = path.join(projectRoot, 'docs');
-    if (!fs.existsSync(pagesDir)) fs.mkdirSync(pagesDir, { recursive: true });
-
-    const localManifest = JSON.parse(JSON.stringify(manifest));
-    for (const task of localManifest.tasks) {
-        if (!task.url) task.url = task.location;
-    }
-    fs.writeFileSync(path.join(pagesDir, `${pack.id}.json`), JSON.stringify(localManifest, null, 4));
-
-    if (packFiles.type === 'src') {
-        const objectsDir = path.join(pack.location, 'objects');
-        if (fs.existsSync(objectsDir)) {
-            copyRecursive(objectsDir, path.join(pagesDir, 'objects'));
-        }
-        for (const task of manifest.tasks) {
-            if (task.url) continue;
-            const srcFile = path.join(packFiles.path, task.to);
-            const destFile = path.join(pagesDir, task.location);
-            const destDir = path.dirname(destFile);
-            if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-            fs.copyFileSync(srcFile, destFile);
-        }
-    } else {
-        const docsMods = path.join(pagesDir, 'mods');
-        if (!fs.existsSync(docsMods)) fs.mkdirSync(docsMods, { recursive: true });
-        fs.readdirSync(packFiles.path).forEach(mod => {
-            fs.copyFileSync(path.join(packFiles.path, mod), path.join(docsMods, mod));
-        });
-    }
-
-    // Actualizar docs/instances.json
-    const destInstancesPath = path.join(pagesDir, 'instances.json');
-    let instancesObj = {};
-    if (fs.existsSync(destInstancesPath)) {
-        try { instancesObj = JSON.parse(fs.readFileSync(destInstancesPath, 'utf8')); } catch (e) {}
-    }
-    instancesObj[pack.id] = {
-        name: pack.id, title: pack.title, description: pack.description || '', tags: pack.tags || [],
-        status: "operationnel", gameVersion: pack.gameVersion,
-        modpack_url: `${pack.id}.json`,
-        loader: { type: pack.loader, build: pack.loaderVersion, enable: pack.loader !== 'vanilla',
-            loader_type: pack.loader, loader_version: pack.loaderVersion, minecraft_version: pack.gameVersion },
-        verify: true, ignored: [], themeColor: 'lime', playTime: '0.0h',
-        whitelistActive: pack.whitelistActive || false, whitelist: pack.whitelist || []
-    };
-    fs.writeFileSync(destInstancesPath, JSON.stringify(instancesObj, null, 4));
-
     log(`✅ "${pack.title}" instalado en el launcher (${instanceDir})`, 'success');
-
-    // Push to GitHub Pages if configured
-    if (selectedGitLocation && selectedGitLocation === projectRoot) {
-        progressStatus.textContent = `Subiendo ${pack.id} a GitHub Pages...`;
-        exec(`git add docs/`, { cwd: projectRoot }, (err) => {
-            if (err) { log(`[Git Error] add: ${err.message}`, 'error'); return; }
-            exec(`git commit -m "Instalación automática: ${pack.title}"`, { cwd: projectRoot }, (err) => {
-                if (err && !err.message.includes('nothing to commit')) {
-                    log(`[Git Error] commit: ${err.message}`, 'error'); return;
-                }
-                exec(`git push`, { cwd: projectRoot }, (err) => {
-                    if (err) log(`[Git Error] push: ${err.message}`, 'error');
-                    else log(`🚀 ${pack.id} publicado en GitHub Pages`, 'success');
-                });
-            });
-        });
-    }
 }
 
 // Install checked packs
@@ -1416,6 +1390,41 @@ document.getElementById('btn-install-all').addEventListener('click', async () =>
     document.getElementById('btn-install-launcher').click();
 });
 
+// HTTP server toggle
+document.getElementById('btn-start-server').addEventListener('click', () => {
+    if (_httpServer) stopServer();
+    else startServer();
+});
+
+// Check for updates
+document.getElementById('btn-check-updates').addEventListener('click', () => {
+    const pack = getSelectedPack();
+    if (!pack) {
+        log('Error: Selecciona un modpack primero.', 'error');
+        return;
+    }
+    checkForUpdates(pack);
+});
+
+// Launch client (switch from creator to launcher)
+document.getElementById('btn-launch-client').addEventListener('click', () => {
+    if (!_httpServer) {
+        log('Iniciando servidor automáticamente...', 'info');
+        startServer();
+    }
+    if (_httpServer) {
+        log('Abriendo el launcher...', 'info');
+        ipcRenderer.send('open-launcher-from-creator');
+    } else {
+        log('Error: No se pudo iniciar el servidor.', 'error');
+    }
+});
+
+// Auto-stop server on window close
+document.getElementById('close').addEventListener('click', () => {
+    if (_httpServer) stopServer();
+});
+
 // Recursive directory copy helper
 function copyRecursive(src, dest) {
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
@@ -1434,28 +1443,11 @@ function copyRecursive(src, dest) {
 // Start up
 (async () => {
     await loadDb();
-    await loadGitConfig();
+    await ensurePaths();
     renderModpacks();
     log('Yusup Modpack Creator cargado correctamente.', 'success');
-    log('--- CONFIGURACIÓN REMOTA ---', 'info');
-    try {
-        const pkg = JSON.parse(fs.readFileSync(path.resolve('./package.json'), 'utf8'));
-        const launcherUrl = pkg.url || 'No configurada';
-        log(`URL del launcher (package.json): ${launcherUrl}`, 'info');
-        log('Los archivos se publican en docs/ (GitHub Pages config /docs)', 'info');
-        if (selectedGitLocation) {
-            getGitHubPagesUrl(selectedGitLocation).then(ghUrl => {
-                log(`URL de GitHub Pages detectada: ${ghUrl}`, 'info');
-                if (launcherUrl !== ghUrl) {
-                    log(`⚠️  Las URLs no coinciden. Edita package.json#url para que apunte a: ${ghUrl}`, 'error');
-                } else {
-                    log('✅ Las URLs coinciden. El launcher ya puede ver estas instancias.', 'success');
-                }
-            });
-        } else {
-            log('ℹ️  No hay repo Git configurado. Usá "Subir a GitHub Pages" para configurar uno.', 'info');
-        }
-    } catch (e) {
-        log('No se pudo leer package.json', 'error');
-    }
+    log('--- SERVIDOR HTTP ---', 'info');
+    log(`Puerto: ${SERVER_PORT}`, 'info');
+    log('Iniciá el servidor con el botón "🌐 Iniciar Servidor" en la barra de herramientas.', 'info');
+    log('El launcher se conectará automáticamente al servidor cuando esté activo.', 'info');
 })();

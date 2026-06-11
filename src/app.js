@@ -48,6 +48,10 @@ ipcMain.on('main-window-progress-load', () => { const w = MainWindow.getWindow()
 ipcMain.on('main-window-minimize', () => { const w = MainWindow.getWindow(); if (w) w.minimize(); })
 
 ipcMain.on('creator-window-close', () => CreatorWindow.destroyWindow())
+ipcMain.on('open-launcher-from-creator', () => {
+    CreatorWindow.closeWindow();
+    MainWindow.createWindow();
+})
 ipcMain.on('creator-window-minimize', () => { const w = CreatorWindow.getWindow(); if (w) w.minimize(); })
 ipcMain.on('creator-window-maximize', () => {
     const w = CreatorWindow.getWindow();
@@ -65,6 +69,7 @@ ipcMain.on('update-window-progress-load', () => { const w = UpdateWindow.getWind
 
 ipcMain.handle('path-user-data', () => app.getPath('userData'))
 ipcMain.handle('appData', e => app.getPath('appData'))
+ipcMain.handle('get-app-path', () => app.getAppPath())
 ipcMain.handle('select-directory', async () => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory']

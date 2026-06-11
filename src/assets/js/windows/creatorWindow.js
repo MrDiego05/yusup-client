@@ -14,6 +14,12 @@ function destroyWindow() {
     creatorWindow = undefined;
 }
 
+function closeWindow() {
+    if (!creatorWindow) return;
+    creatorWindow.close();
+    creatorWindow = undefined;
+}
+
 function createWindow() {
     destroyWindow();
     creatorWindow = new BrowserWindow({
@@ -44,4 +50,5 @@ module.exports = {
     getWindow,
     createWindow,
     destroyWindow,
+    closeWindow,
 };

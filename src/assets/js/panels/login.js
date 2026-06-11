@@ -46,10 +46,20 @@ class Login {
             this.getAZauth();
         }
         
-        document.querySelector('.cancel-home').addEventListener('click', () => {
-            document.querySelector('.cancel-home').style.display = 'none'
-            changePanel('home')
-        })
+        // Mostrar botón cancelar solo si hay cuentas guardadas
+        (async () => {
+            const accounts = await this.db.readAllData('accounts');
+            const show = accounts && accounts.length > 0;
+            document.querySelectorAll('.cancel-login').forEach(el => {
+                el.style.display = show ? 'inline' : 'none';
+            });
+        })();
+
+        document.querySelectorAll('.cancel-login').forEach(el => {
+            el.addEventListener('click', () => {
+                changePanel('home');
+            });
+        });
     }
 
     async getMicrosoft() {
@@ -252,6 +262,7 @@ class Login {
         await addAccount(account);
         await accountSelect(account);
         changePanel('home');
+        document.dispatchEvent(new CustomEvent('accounts-changed'));
     }
 }
 export default Login;

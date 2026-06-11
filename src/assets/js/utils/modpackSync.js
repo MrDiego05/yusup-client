@@ -9,6 +9,7 @@ class ModpackSync {
         this.modpackUrl = modpackUrl;
         this.instancePath = instancePath;
         this.enabledFeatures = options.enabledFeatures || [];
+        this.serverBaseUrl = options.serverBaseUrl || '';
         this.manifest = null;
         this.isLocal = false;
         this.manifestBaseDir = null;
@@ -35,8 +36,10 @@ class ModpackSync {
             return;
         }
 
-        const response = await fetch(fileUrl);
-        if (!response.ok) throw new Error(`Error al descargar ${fileUrl}: ${response.statusText}`);
+        // Resolve relative URLs against serverBaseUrl
+        const absoluteUrl = fileUrl.startsWith('http') ? fileUrl : `${this.serverBaseUrl}/${fileUrl}`;
+        const response = await fetch(absoluteUrl);
+        if (!response.ok) throw new Error(`Error al descargar ${absoluteUrl}: ${response.statusText}`);
 
         const fileStream = fs.createWriteStream(destPath);
         return new Promise((resolve, reject) => {

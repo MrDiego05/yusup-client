@@ -57,7 +57,6 @@ class Launcher {
     initLog() {
         document.addEventListener('keydown', e => {
             if (e.ctrlKey && e.shiftKey && e.keyCode == 73 || e.keyCode == 123) {
-                ipcRenderer.send('main-window-dev-tools-close');
                 ipcRenderer.send('main-window-dev-tools');
             }
         })
@@ -318,6 +317,7 @@ class Launcher {
             this.showLoading('Listo', 'Cargando interfaz principal', 95);
             popupRefresh.closePopup()
             this.hideLoading();
+            document.dispatchEvent(new CustomEvent('accounts-changed'));
             changePanel("home");
         } else {
             popupRefresh.closePopup()

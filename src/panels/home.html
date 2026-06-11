@@ -16,20 +16,37 @@
         </button>
         <div class="account-dropdown-overlay" id="account-dropdown-overlay">
             <div class="account-dropdown-menu" id="account-dropdown-menu">
-                <button class="dropdown-account-action" id="dropdown-btn-add">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-                    </svg>
-                    Añadir cuenta
-                </button>
-                <button class="dropdown-account-action" id="dropdown-btn-logout">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    Cerrar sesión
-                </button>
-                <div class="dropdown-accounts-divider"></div>
-                <div class="dropdown-accounts-list" id="dropdown-accounts-list"></div>
+                <div class="dropdown-current-account" id="dropdown-current-account">
+                    <div class="dropdown-avatar-large" id="dropdown-avatar-large"></div>
+                    <div class="dropdown-current-info">
+                        <span class="dropdown-current-name" id="dropdown-current-name"></span>
+                    </div>
+                </div>
+                <div class="dropdown-accounts-section" id="dropdown-accounts-section">
+                    <button class="dropdown-section-toggle" id="dropdown-section-toggle">
+                        <span>Cambiar de cuenta</span>
+                        <svg class="dropdown-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="dropdown-accounts-body" id="dropdown-accounts-body">
+                        <div class="dropdown-accounts-list" id="dropdown-accounts-list"></div>
+                    </div>
+                </div>
+                <div class="dropdown-actions">
+                    <button class="dropdown-account-action add-btn" id="dropdown-btn-add">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                        </svg>
+                        Añadir cuenta
+                    </button>
+                    <button class="dropdown-account-action" id="dropdown-btn-logout">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -60,20 +77,7 @@
                 </svg>
                 <span class="sidebar-item-label">Ajustes</span>
             </button>
-            <button class="sidebar-dm" id="sidebar-btn-dm" title="DesfioMine" style="display:none">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L2 7L12 12L22 7L12 2ZM2 17L12 22L22 17M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" fill="none"/>
-                </svg>
-                <span>DesfioMine</span>
-                <span class="sidebar-dm-badge">DM</span>
-            </button>
         </nav>
-
-        <!-- Quick Access -->
-        <section class="sidebar-quick-access" id="sidebar-quick-access">
-            <span class="sidebar-quick-access-title">Accesos rápidos</span>
-            <div class="sidebar-quick-access-items" id="sidebar-quick-access-items"></div>
-        </section>
 
         <!-- Quick Play -->
         <button class="sidebar-quick-play" id="sidebar-quick-play" style="display:none" title="Juego rápido">
@@ -101,12 +105,6 @@
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="dashboard-content">
-
-        <button class="back-circle-btn" id="sidebar-back-btn" style="display: none;" title="Volver">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M10.4 12L15 16.6L13.6 18L7.6 12L13.6 6L15 7.4L10.4 12Z" fill="currentColor"/>
-            </svg>
-        </button>
 
         <section class="main-card-viewport">
 
@@ -184,7 +182,7 @@
                                     </span>
                                     <div class="detail-btn-status" id="detail-btn-status" style="display: none;">Preparando...</div>
                                     <div class="detail-play-btn-spinner" id="detail-play-btn-spinner" style="display: none;">
-                                        <img src="assets/images/loading-icon.svg" alt="Cargando" class="spinner-img">
+                                        <img src="assets/images/loading-icon.png" alt="Cargando" class="spinner-img">
                                     </div>
                                     <div class="detail-btn-progress-track" id="detail-btn-progress-track" style="display: none;">
                                         <svg class="detail-btn-progress-svg" id="detail-btn-progress-svg" preserveAspectRatio="none" viewBox="0 0 220 10">
@@ -228,6 +226,12 @@
                                             <circle cx="12" cy="13" r="4"/>
                                         </svg>
                                         <span>Capturas</span>
+                                    </button>
+                                    <button class="detail-fab-item" id="opt-btn-update">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                                        </svg>
+                                        <span>Actualizar</span>
                                     </button>
                                     <button class="detail-fab-item danger-item" id="opt-btn-reinstall">
                                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

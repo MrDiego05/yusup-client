@@ -11,6 +11,8 @@ let console_error = console.error;
 
 class logger {
     constructor(name, color) {
+        this.name = name;
+        this.color = color;
         this.Logger(name, color)
     }
 
@@ -34,6 +36,26 @@ class logger {
         console.error = value => {
             console_error.call(console, `%c[${name}]:`, `color: ${color};`, value);
         };
+    }
+
+    log(value) {
+        console_log.call(console, `%c[${this.name}]:`, `color: ${this.color};`, value);
+    }
+
+    info(value) {
+        console_info.call(console, `%c[${this.name}]:`, `color: ${this.color};`, value);
+    }
+
+    warn(value) {
+        console_warn.call(console, `%c[${this.name}]:`, `color: ${this.color};`, value);
+    }
+
+    error(value) {
+        console_error.call(console, `%c[${this.name}]:`, `color: ${this.color};`, value);
+    }
+
+    debug(value) {
+        console_debug.call(console, `%c[${this.name}]:`, `color: ${this.color};`, value);
     }
 }
 

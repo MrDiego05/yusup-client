@@ -1,7 +1,8 @@
 
-import { changePanel, accountSelect, database, config, setStatus, popup, appdata, setBackground } from '../utils.js'
+import { changePanel, accountSelect, database, config, setStatus, popup, appdata, setBackground, skin2D } from '../utils.js'
 const { ipcRenderer } = require('electron');
 const os = require('os');
+const fetch = require('node-fetch');
 
 class Settings {
     static id = "settings";
@@ -13,6 +14,7 @@ class Settings {
         this.javaPath()
         this.resolution()
         this.launcher()
+        await this.accounts()
     }
 
     navBTN() {
@@ -285,6 +287,52 @@ class Settings {
             });
         }
 
+        // Toggles & Selects
+        const settingConsole = document.getElementById('setting-console');
+        const settingAutoUpdate = document.getElementById('setting-auto-update');
+        const settingDedicatedGpu = document.getElementById('setting-dedicated-gpu');
+        const settingAutoUpdateInterval = document.getElementById('setting-auto-update-interval');
+
+        if (settingConsole) {
+            settingConsole.checked = !!configClient?.launcher_config?.console;
+            settingConsole.addEventListener('change', async () => {
+                let cfg = await this.db.readData('configClient');
+                if (!cfg.launcher_config) cfg.launcher_config = {};
+                cfg.launcher_config.console = settingConsole.checked;
+                await this.db.updateData('configClient', cfg);
+            });
+        }
+
+        if (settingAutoUpdate) {
+            settingAutoUpdate.checked = !!configClient?.launcher_config?.autoUpdate;
+            settingAutoUpdate.addEventListener('change', async () => {
+                let cfg = await this.db.readData('configClient');
+                if (!cfg.launcher_config) cfg.launcher_config = {};
+                cfg.launcher_config.autoUpdate = settingAutoUpdate.checked;
+                await this.db.updateData('configClient', cfg);
+            });
+        }
+
+        if (settingDedicatedGpu) {
+            settingDedicatedGpu.checked = !!configClient?.launcher_config?.dedicatedGpu;
+            settingDedicatedGpu.addEventListener('change', async () => {
+                let cfg = await this.db.readData('configClient');
+                if (!cfg.launcher_config) cfg.launcher_config = {};
+                cfg.launcher_config.dedicatedGpu = settingDedicatedGpu.checked;
+                await this.db.updateData('configClient', cfg);
+            });
+        }
+
+        if (settingAutoUpdateInterval) {
+            settingAutoUpdateInterval.value = configClient?.launcher_config?.autoUpdateInterval || '60';
+            settingAutoUpdateInterval.addEventListener('change', async () => {
+                let cfg = await this.db.readData('configClient');
+                if (!cfg.launcher_config) cfg.launcher_config = {};
+                cfg.launcher_config.autoUpdateInterval = settingAutoUpdateInterval.value;
+                await this.db.updateData('configClient', cfg);
+            });
+        }
+
         // JVM args
         const jvmInput = document.querySelector('.jvm-args-input');
         const jvmReset = document.querySelector('.jvm-args-reset');
@@ -306,6 +354,118 @@ class Settings {
                 if (cfg.java_config) cfg.java_config.jvm_args = [];
                 await this.db.updateData('configClient', cfg);
             });
+        }
+    }
+
+    async accounts() {
+        const listEl = document.getElementById('settings-accounts-list');
+        if (!listEl) return;
+        listEl.innerHTML = '<div class="settings-accounts-loading" style="text-align:center;padding:20px;color:var(--text-secondary);">Cargando cuentas...</div>';
+        try {
+            let configClient = await this.db.readData('configClient');
+            let accounts = await this.db.readAllData('accounts');
+            listEl.innerHTML = '';
+
+            if (accounts.length === 0) {
+                listEl.innerHTML = '<div class="settings-accounts-empty" style="text-align:center;padding:30px;color:var(--text-secondary);"><p>No hay cuentas vinculadas.</p><p style="font-size:0.85em;margin-top:8px;">Agregá una cuenta desde el menú de perfil o iniciando sesión.</p></div>';
+                return;
+            }
+
+            // Compute total playtime per account
+            let totalPlaytime = {};
+            try {
+                const allSessions = await this.db.readAllData('sessions') || [];
+                for (let s of allSessions) {
+                    if (!totalPlaytime[s.instance]) totalPlaytime[s.instance] = 0;
+                    totalPlaytime[s.instance] += s.playtime_seconds || 0;
+                }
+            } catch (_) {}
+
+            for (let acc of accounts) {
+                const isActive = acc.ID === configClient.account_selected;
+                const card = document.createElement('div');
+                card.className = 'settings-account-card' + (isActive ? ' active' : '');
+                const accPlaytime = totalPlaytime[acc.name] || 0;
+                const hours = Math.floor(accPlaytime / 3600);
+                const minutes = Math.floor((accPlaytime % 3600) / 60);
+                const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                card.innerHTML = `
+                    <div class="settings-account-avatar" style="background-image: url('assets/images/default/setve.png'); background-size: cover; background-position: center;"></div>
+                    <div class="settings-account-info">
+                        <div class="settings-account-name">${acc.name}</div>
+                        <div class="settings-account-detail">UUID: ${acc.uuid ? acc.uuid.substring(0, 8) + '...' : 'N/A'}</div>
+                        <div class="settings-account-detail">${acc.meta?.type || 'Desconocido'}</div>
+                        <div class="settings-account-detail">Tiempo jugado: ${playtimeStr}</div>
+                        <div class="settings-account-status">${isActive ? '✓ Cuenta activa' : 'Hacé clic para usar esta cuenta'}</div>
+                    </div>
+                    <button class="settings-account-delete" title="Eliminar cuenta">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                `;
+
+                // Lazy load avatar
+                this._getSkinUrl(acc).then(url => {
+                    if (url) {
+                        const av = card.querySelector('.settings-account-avatar');
+                        if (av) av.style.backgroundImage = `url(${url})`;
+                    }
+                }).catch(() => {});
+
+                card.addEventListener('click', async (e) => {
+                    if (e.target.closest('.settings-account-delete')) return;
+                    if (acc.ID === configClient.account_selected) return;
+
+                    let cc = await this.db.readData('configClient');
+                    cc.account_selected = acc.ID;
+                    let instancesList = await config.getInstanceList();
+                    if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
+                    await this.db.updateData('configClient', cc);
+                    await accountSelect(acc);
+                    await this.accounts();
+                    document.dispatchEvent(new CustomEvent('accounts-changed'));
+                });
+
+                const delBtn = card.querySelector('.settings-account-delete');
+                delBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (!confirm(`¿Eliminar la cuenta ${acc.name}?`)) return;
+                    await this.db.deleteData('accounts', acc.ID);
+                    document.dispatchEvent(new CustomEvent('accounts-changed'));
+                    this.accounts();
+                });
+
+                listEl.appendChild(card);
+            }
+        } catch (e) {
+            console.error('Settings accounts error:', e);
+            listEl.innerHTML = '<div class="settings-accounts-error" style="text-align:center;padding:20px;color:#ef4444;">Error al cargar cuentas: ' + e.message + '</div>';
+        }
+    }
+
+    async _getSkinUrl(acc) {
+        try {
+            let url = null;
+            if (acc?.profile?.skins?.[0]?.base64) {
+                const headTex = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
+                if (headTex) url = headTex;
+            }
+            if (!url && acc?.profile?.skins?.[0]?.url) {
+                url = acc.profile.skins[0].url;
+            }
+            if (!url && acc.uuid) {
+                const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${acc.uuid.replace(/-/g, '')}`);
+                if (res.ok) {
+                    const profile = await res.json();
+                    const texProp = profile.properties?.find(p => p.name === 'textures');
+                    if (texProp?.value) {
+                        const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
+                        if (tex.textures?.SKIN?.url) url = tex.textures.SKIN.url;
+                    }
+                }
+            }
+            return url;
+        } catch (e) {
+            return null;
         }
     }
 }

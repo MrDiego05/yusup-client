@@ -18,7 +18,7 @@ class Home {
         this.db = new database();
         this.minecraftProcess = null;
 
-        const gamePath = `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}`;
+        const gamePath = `${await appdata()}/.yusup`;
         this.gamePath = gamePath;
 
         // Initialize user skin / head avatar
@@ -29,10 +29,6 @@ class Home {
 
         // 1. Load news section
         this.news();
-
-        // Render quick access
-        await this.renderQuickAccess();
-        await this.updateDmVisibility();
 
         // Download queue floating panel
         this.setupDownloadsPanel();
@@ -53,6 +49,14 @@ class Home {
         // 3. Render and initialize modpacks
         await this.initInstances();
 
+        // Check if there's a persisted running instance (survived a crash)
+        const ccCheck = await this.db.readData('configClient');
+        if (ccCheck && ccCheck.running_instance) {
+            this._launching = true;
+            this._launchingInstance = ccCheck.running_instance;
+            this.refreshInstanceStatus(ccCheck.running_instance, 'running');
+        }
+
         // Refresh button
         document.getElementById('btn-refresh-instances')?.addEventListener('click', () => {
             this.initInstances();
@@ -64,30 +68,56 @@ class Home {
         // Auto-refresh instances every 30s
         this._refreshTimer = setInterval(() => {
             this.initInstances();
-            this.renderQuickAccess();
-            this.updateDmVisibility();
         }, 30000);
     }
 
     async initUserAvatar() {
         let configClient = await this.db.readData('configClient');
         let auth = await this.db.readData('accounts', configClient.account_selected);
-        const setAvatar = async (el, clearChildren = true) => {
+        if (!auth) return;
+        const setAvatar = async (el) => {
             if (!el) return;
-            if (auth && auth.profile && auth.profile.skins && auth.profile.skins[0]) {
+            const defaultFace = 'url("assets/images/default/setve.png")';
+            let skinUrl = null;
+            if (auth.profile?.skins?.[0]?.base64) {
                 try {
                     let headTex = await new skin2D().creatHeadTexture(auth.profile.skins[0].base64);
-                    el.style.backgroundImage = `url(${headTex})`;
-                    if (clearChildren) el.innerHTML = '';
-                } catch (e) {
-                    el.style.backgroundImage = `url('assets/images/default/setve.png')`;
-                }
-            } else {
-                el.style.backgroundImage = `url('assets/images/default/setve.png')`;
+                    skinUrl = headTex;
+                } catch (e) {}
             }
+            if (!skinUrl && auth.profile?.skins?.[0]?.url) {
+                skinUrl = auth.profile.skins[0].url;
+            }
+            if (!skinUrl && auth.uuid) {
+                try {
+                    const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${auth.uuid.replace(/-/g, '')}`);
+                    if (res.ok) {
+                        const profile = await res.json();
+                        const texProp = profile.properties?.find(p => p.name === 'textures');
+                        if (texProp?.value) {
+                            const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
+                            if (tex.textures?.SKIN?.url) {
+                                const skinFetch = await fetch(tex.textures.SKIN.url);
+                                if (skinFetch.ok) {
+                                    const blob = await skinFetch.blob();
+                                    skinUrl = URL.createObjectURL(blob);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+            if (skinUrl) {
+                el.style.backgroundImage = `url(${skinUrl})`;
+            } else {
+                el.style.backgroundImage = defaultFace;
+            }
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+            el.innerHTML = '';
         };
-        setAvatar(document.querySelector('#top-profile-avatar'), true);
-        setAvatar(document.querySelector('#top-profile-avatar'), false);
+        setAvatar(document.querySelector('#top-profile-avatar'));
+        setAvatar(document.querySelector('#dropdown-avatar-large'));
     }
 
     async news() {
@@ -148,14 +178,46 @@ class Home {
     setupNavigation() {
         const navButtons = document.querySelectorAll('.sidebar-item.nav-btn');
         const views = document.querySelectorAll('.dashboard-view');
-        const backBtn = document.getElementById('sidebar-back-btn');
+
+        const ensureStaticChevron = (breadcrumb) => {
+            const existing = breadcrumb.querySelector('.top-chevron');
+            if (!existing) {
+                const ch = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                ch.setAttribute('viewBox', '0 0 24 24');
+                ch.setAttribute('width', '30');
+                ch.setAttribute('height', '30');
+                ch.setAttribute('fill', 'none');
+                ch.setAttribute('stroke', 'currentColor');
+                ch.setAttribute('stroke-width', '2.5');
+                ch.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+                ch.classList.add('top-chevron');
+                const logo = breadcrumb.querySelector('#top-logo-btn');
+                if (logo && logo.nextSibling) {
+                    breadcrumb.insertBefore(ch, logo.nextSibling);
+                } else {
+                    breadcrumb.appendChild(ch);
+                }
+            }
+        };
+
+        const setViewTitle = (text) => {
+            const titleEl = document.getElementById('top-page-title');
+            const breadcrumb = document.getElementById('top-breadcrumb');
+            if (!titleEl || !breadcrumb) return;
+            breadcrumb.querySelectorAll('.top-chevron:not(.initial)').forEach(el => el.remove());
+            breadcrumb.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
+            ensureStaticChevron(breadcrumb);
+            titleEl.style.display = '';
+            titleEl.textContent = text;
+        };
 
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 let targetViewId = '';
-                if (btn.id === 'nav-btn-home') targetViewId = 'view-home';
-                else if (btn.id === 'nav-btn-instances') targetViewId = 'view-instances';
-                else if (btn.id === 'nav-btn-settings') targetViewId = 'view-settings';
+                let titleText = '';
+                if (btn.id === 'nav-btn-home') { targetViewId = 'view-home'; titleText = 'Inicio'; }
+                else if (btn.id === 'nav-btn-instances') { targetViewId = 'view-instances'; titleText = 'Librería'; }
+                else if (btn.id === 'nav-btn-settings') { targetViewId = 'view-settings'; titleText = 'Ajustes'; }
 
                 if (!targetViewId) return;
 
@@ -165,9 +227,7 @@ class Home {
                 views.forEach(v => v.classList.remove('active'));
                 document.getElementById(targetViewId)?.classList.add('active');
 
-                if (backBtn) backBtn.style.display = 'none';
-                const optDropdown = document.getElementById('detail-fab-menu');
-                if (optDropdown) optDropdown.classList.remove('open');
+                setViewTitle(titleText);
 
                 // Close account dropdown
                 const accDropdown = document.querySelector('.account-dropdown-overlay');
@@ -175,24 +235,28 @@ class Home {
             });
         });
 
-        // DM button: open Discord
-        const dmBtn = document.getElementById('sidebar-btn-dm');
-        if (dmBtn) {
-            dmBtn.addEventListener('click', () => {
-                shell.openExternal('https://discord.gg/yusup');
+        // Logo click -> Home
+        const logoBtn = document.getElementById('top-logo-btn');
+        if (logoBtn) {
+            logoBtn.addEventListener('click', () => {
+                navButtons.forEach(b => b.classList.remove('active'));
+                document.getElementById('nav-btn-home')?.classList.add('active');
+                views.forEach(v => v.classList.remove('active'));
+                document.getElementById('view-home')?.classList.add('active');
+                const titleEl = document.getElementById('top-page-title');
+                if (titleEl) {
+                    titleEl.style.display = '';
+                    titleEl.textContent = 'Inicio';
+                }
+                const breadcrumb = document.getElementById('top-breadcrumb');
+                if (breadcrumb) {
+                    breadcrumb.querySelectorAll('.top-chevron:not(.initial)').forEach(el => el.remove());
+                    breadcrumb.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
+                    ensureStaticChevron(breadcrumb);
+                }
             });
         }
 
-        // BIND: Sidebar details back button
-        backBtn?.addEventListener('click', () => {
-            navButtons.forEach(b => b.classList.remove('active'));
-            document.getElementById('nav-btn-instances')?.classList.add('active');
-
-            views.forEach(v => v.classList.remove('active'));
-            document.getElementById('view-instances')?.classList.add('active');
-
-            if (backBtn) backBtn.style.display = 'none';
-        });
     }
 
     setupAccountDropdown() {
@@ -219,119 +283,190 @@ class Home {
         // Add account button in dropdown
         const addBtn = document.getElementById('dropdown-btn-add');
         if (addBtn) {
-            addBtn.addEventListener('click', () => {
+            addBtn.addEventListener('click', async () => {
                 if (this._accountOverlay) this._accountOverlay.classList.remove('open');
-                const cancelBtn = document.querySelector('.cancel-home');
-                if (cancelBtn) cancelBtn.style.display = 'inline';
+                const accounts = await this.db.readAllData('accounts');
+                const show = accounts?.length > 0;
+                document.querySelectorAll('.cancel-login').forEach(el => {
+                    el.style.display = show ? 'inline' : 'none';
+                });
                 changePanel('login');
             });
         }
 
-        // Logout button
+        // Logout button: delete current account and go to login
         const logoutBtn = document.getElementById('dropdown-btn-logout');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
+            logoutBtn.addEventListener('click', async () => {
                 if (this._accountOverlay) this._accountOverlay.classList.remove('open');
+                let configClient = await this.db.readData('configClient');
+                const selectedId = configClient.account_selected;
+
+                // Remove DOM elements for the deleted account
+                if (selectedId) {
+                    document.getElementById(selectedId)?.remove();
+                    document.getElementById(`delete-${selectedId}`)?.closest('.account')?.remove();
+                    document.getElementById(`switch-${selectedId}`)?.remove();
+                    await this.db.deleteData('accounts', selectedId);
+                }
+
+                configClient.account_selected = null;
+                await this.db.updateData('configClient', configClient);
+
+                // Reset avatars to default
+                const avatarEl = document.querySelector('#top-profile-avatar');
+                if (avatarEl) {
+                    avatarEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
+                    avatarEl.innerHTML = '';
+                }
+                const largeAvatar = document.querySelector('#dropdown-avatar-large');
+                if (largeAvatar) {
+                    largeAvatar.style.backgroundImage = `url('assets/images/default/setve.png')`;
+                    largeAvatar.innerHTML = '';
+                }
+
+                // Auto-switch to another account or go to login
+                let accounts = await this.db.readAllData('accounts');
+                if (accounts.length > 0) {
+                    configClient.account_selected = accounts[0].ID;
+                    await this.db.updateData('configClient', configClient);
+                    await this.populateAccountDropdown();
+                    document.querySelectorAll('.cancel-login').forEach(el => {
+                        el.style.display = 'inline';
+                    });
+                } else {
+                    await this.db.updateData('configClient', configClient);
+                    changePanel('login');
+                }
             });
         }
+
+        // Listen for account changes and refresh the dropdown
+        document.addEventListener('accounts-changed', () => {
+            if (this._accountOverlay && this._accountOverlay.classList.contains('open')) {
+                this.populateAccountDropdown();
+            }
+        });
     }
 
     async populateAccountDropdown() {
         const overlay = this._accountOverlay;
         let configClient = await this.db.readData('configClient');
         let accounts = await this.db.readAllData('accounts');
-        const currentAccount = await this.db.readData('accounts', configClient.account_selected);
+        const currentAccount = configClient.account_selected
+            ? accounts.find(a => a.ID === configClient.account_selected)
+            : null;
 
-        // Account list
+        // Update current account header
+        const nameEl = document.getElementById('dropdown-current-name');
+        if (nameEl) nameEl.textContent = currentAccount?.name || 'Sin cuenta';
+        this._loadAvatarToEl('dropdown-avatar-large', currentAccount);
+
+        // Setup expandable section
+        const section = document.getElementById('dropdown-accounts-section');
+        const toggle = document.getElementById('dropdown-section-toggle');
+        const body = document.getElementById('dropdown-accounts-body');
         const listEl = document.getElementById('dropdown-accounts-list');
-        if (!listEl) return;
-        listEl.innerHTML = '';
+        if (!section || !toggle || !body || !listEl) return;
 
-        for (let acc of accounts) {
-            let skin = false;
-            if (acc?.profile?.skins[0]?.base64) {
-                try {
-                    skin = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
-                } catch (e) {}
+        // Remove old listeners by cloning
+        const newToggle = toggle.cloneNode(true);
+        toggle.replaceWith(newToggle);
+
+        newToggle.addEventListener('click', () => {
+            section.classList.toggle('expanded');
+            if (section.classList.contains('expanded')) {
+                this._renderAccountList(listEl, accounts, configClient.account_selected, overlay);
             }
+        });
+    }
 
-            const item = document.createElement('div');
-            item.className = 'dropdown-account-item' + (acc.ID === configClient.account_selected ? ' active-account' : '');
-            item.innerHTML = `
-                <div class="dropdown-account-avatar" ${skin ? `style="background-image: url(${skin});"` : ''}></div>
-                <div class="dropdown-account-info">
-                    <div class="dropdown-account-name">${acc.name}</div>
-                    <div class="dropdown-account-uuid">${acc.uuid || ''}</div>
-                </div>
-                <div class="dropdown-account-delete" data-id="${acc.ID}">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                </div>
-            `;
+    // Helper: load avatar into any element
+    _loadAvatarToEl(elId, account) {
+        const el = document.getElementById(elId);
+        if (!el || !account) {
+            if (el) el.style.backgroundImage = `url('assets/images/default/setve.png')`;
+            return;
+        }
+        el.style.backgroundImage = `url('assets/images/default/setve.png')`;
+        // Load avatar in background
+        this._getSkinUrl(account).then(url => {
+            if (url) el.style.backgroundImage = `url(${url})`;
+        }).catch(() => {});
+    }
 
-            // Switch account
-            item.addEventListener('click', async (e) => {
-                if (e.target.closest('.dropdown-account-delete')) return;
-                if (acc.ID === configClient.account_selected) return;
-
-                let popupSwitch = new popup();
-                popupSwitch.openPopup({ title: 'Conexión', content: 'Cargando cuenta...', color: 'var(--color)' });
-
-                let cc = await this.db.readData('configClient');
-                cc.account_selected = acc.ID;
-                let instancesList = await config.getInstanceList();
-                if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
-                await this.db.updateData('configClient', cc);
-                await accountSelect(acc);
-                await this.initUserAvatar();
-                await this.setupAccountView();
-                await this.initInstances();
-
-                popupSwitch.closePopup();
-                overlay.classList.remove('open');
-            });
-
-            // Delete account
-            item.querySelector('.dropdown-account-delete').addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (!confirm(`¿Eliminar la cuenta de ${acc.name}?`)) return;
-
-                await this.db.deleteData('accounts', acc.ID);
-                let remaining = await this.db.readAllData('accounts');
-                if (remaining.length === 0) {
-                    overlay.classList.remove('open');
-                    return changePanel('login');
+    // Cache skin URLs to avoid repeated fetches
+    _skinCache = new Map();
+    async _getSkinUrl(acc) {
+        if (this._skinCache.has(acc.ID)) return this._skinCache.get(acc.ID);
+        try {
+            let url = null;
+            if (acc?.profile?.skins?.[0]?.base64) {
+                const headTex = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
+                if (headTex) url = headTex;
+            }
+            if (!url && acc?.profile?.skins?.[0]?.url) {
+                url = acc.profile.skins[0].url;
+            }
+            if (!url && acc.uuid) {
+                const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${acc.uuid.replace(/-/g, '')}`);
+                if (res.ok) {
+                    const profile = await res.json();
+                    const texProp = profile.properties?.find(p => p.name === 'textures');
+                    if (texProp?.value) {
+                        const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
+                        if (tex.textures?.SKIN?.url) url = tex.textures.SKIN.url;
+                    }
                 }
-
-                let cc = await this.db.readData('configClient');
-                if (cc.account_selected === acc.ID) {
-                    cc.account_selected = remaining[0].ID;
-                    await accountSelect(remaining[0]);
-                    let instancesList = await config.getInstanceList();
-                    if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
-                    await this.db.updateData('configClient', cc);
-                    await this.initUserAvatar();
-                    await this.setupAccountView();
-                    await this.initInstances();
-                } else {
-                    await this.setupAccountView();
-                }
-
-                await this.populateAccountDropdown();
-            });
-
-            listEl.appendChild(item);
+            }
+            this._skinCache.set(acc.ID, url);
+            return url;
+        } catch (e) {
+            return null;
         }
     }
 
-    async updateDmVisibility() {
-        const dmBtn = document.getElementById('sidebar-btn-dm');
-        if (!dmBtn) return;
-        let sessions = await this.db.readAllData('sessions') || [];
-        const hasPlayed = sessions.some(s => (s.playtime_seconds || 0) > 0);
-        dmBtn.style.display = hasPlayed ? 'flex' : 'none';
+    async _renderAccountList(listEl, accounts, selectedId, overlay) {
+        listEl.innerHTML = '';
+        for (let acc of accounts) {
+            const item = document.createElement('div');
+            const isActive = acc.ID === selectedId;
+            item.className = 'dropdown-account-item' + (isActive ? ' active-account' : '');
+            item.innerHTML = `
+                <div class="dropdown-account-avatar" style="background-image: url('assets/images/default/setve.png'); background-size: cover; background-position: center;"></div>
+                <div class="dropdown-account-name">${acc.name}</div>
+            `;
+
+            // Lazy load avatar
+            this._getSkinUrl(acc).then(url => {
+                if (url) {
+                    const av = item.querySelector('.dropdown-account-avatar');
+                    if (av) av.style.backgroundImage = `url(${url})`;
+                }
+            }).catch(() => {});
+
+            if (!isActive) {
+                item.addEventListener('click', async (e) => {
+                    let popupSwitch = new popup();
+                    popupSwitch.openPopup({ title: 'Conexión', content: 'Cargando cuenta...', color: 'var(--color)' });
+
+                    let cc = await this.db.readData('configClient');
+                    cc.account_selected = acc.ID;
+                    let instancesList = await config.getInstanceList();
+                    if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
+                    await this.db.updateData('configClient', cc);
+                    await accountSelect(acc);
+                    await this.initUserAvatar();
+                    await this.setupAccountView();
+                    await this.initInstances();
+
+                    popupSwitch.closePopup();
+                    overlay.classList.remove('open');
+                });
+            }
+
+            listEl.appendChild(item);
+        }
     }
 
     /* ==========================================================================
@@ -438,64 +573,6 @@ class Home {
         });
     }
 
-    async renderQuickAccess() {
-        const container = document.getElementById('sidebar-quick-access-items');
-        const section = document.getElementById('sidebar-quick-access');
-        if (!container) return;
-
-        let sessions = await this.db.readAllData('sessions') || [];
-        let instanceMap = new Map();
-        for (let s of sessions) {
-            if (!s.instance || !s.playtime_seconds || s.playtime_seconds <= 0) continue;
-            if (!instanceMap.has(s.instance) || new Date(s.start_time) > new Date(instanceMap.get(s.instance).start_time)) {
-                instanceMap.set(s.instance, s);
-            }
-        }
-
-        const recent = Array.from(instanceMap.values())
-            .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
-            .slice(0, 5);
-
-        container.innerHTML = '';
-        if (recent.length === 0) {
-            if (section) section.style.display = 'none';
-            return;
-        }
-        if (section) section.style.display = 'flex';
-
-        let instancesList = await config.getInstanceList();
-        for (let session of recent) {
-            const pack = instancesList.find(p => p.name === session.instance);
-            const title = pack?.title || pack?.name || session.instance;
-            const initial = title.charAt(0).toUpperCase();
-            const hue = this._nameToHue(title);
-            const bgColor = `hsl(${hue}, 55%, 85%)`;
-            const textColor = `hsl(${hue}, 60%, 30%)`;
-
-            const item = document.createElement('div');
-            item.className = 'sidebar-quick-access-item';
-            item.innerHTML = `
-                <div class="qa-avatar" style="background:${bgColor}; color:${textColor};">${initial}</div>
-                <div class="qa-info">
-                    <span class="sidebar-quick-access-label">${title}</span>
-                    <span class="qa-play-hint">Iniciar modpack</span>
-                </div>
-            `;
-            if (pack) {
-                item.addEventListener('click', (e) => {
-                    if (e.target.closest('.qa-play-hint')) {
-                        if (this._launching) return;
-                        this.startGame(pack, this.gamePath);
-                    } else {
-                        this.selectInstance(pack);
-                    }
-                });
-                item.style.cursor = 'pointer';
-            }
-            container.appendChild(item);
-        }
-    }
-
     _nameToHue(name) {
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
@@ -505,48 +582,8 @@ class Home {
     }
 
     async setupAccountView() {
-        let configClient = await this.db.readData('configClient');
-        let currentAccount = await this.db.readData('accounts', configClient.account_selected);
-
-        // Fill Active Profile Info
-        const activeAvatarEl = document.getElementById('acc-active-avatar');
-        const activeNameEl = document.getElementById('acc-active-name');
-        const activeUuidEl = document.getElementById('acc-active-uuid');
-        const activeTypeEl = document.getElementById('acc-active-type');
-
-        if (currentAccount) {
-            if (activeNameEl) activeNameEl.textContent = currentAccount.name;
-            if (activeUuidEl) activeUuidEl.textContent = `UUID: ${currentAccount.uuid || '-'}`;
-            if (activeTypeEl) activeTypeEl.textContent = currentAccount.meta?.type || 'Offline';
-
-            if (currentAccount.profile?.skins && currentAccount.profile.skins[0]) {
-                try {
-                    let headTex = await new skin2D().creatHeadTexture(currentAccount.profile.skins[0].base64);
-                    if (activeAvatarEl) activeAvatarEl.style.backgroundImage = `url(${headTex})`;
-                } catch (e) {
-                    if (activeAvatarEl) activeAvatarEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
-                }
-            } else {
-                if (activeAvatarEl) activeAvatarEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
-            }
-        }
-
-        // BIND: Add account button switches to login
-        const addAccBtn = document.getElementById('acc-btn-add-account');
-        addAccBtn?.replaceWith(addAccBtn.cloneNode(true));
-        document.getElementById('acc-btn-add-account')?.addEventListener('click', () => {
-            const cancelBtn = document.querySelector('.cancel-home');
-            if (cancelBtn) cancelBtn.style.display = 'inline';
-            changePanel('login');
-        });
-
-        // Load list of accounts to switch
-        await this.loadAccountsSwitcherList(configClient.account_selected);
-
-        // Load Friends list
-        await this.loadFriendsList();
-
-        // BIND: Add Friend
+        // Account view removed from settings.
+        // Still bind the Add Friend button (called during init).
         const addFriendBtn = document.getElementById('add-friend-btn');
         addFriendBtn?.replaceWith(addFriendBtn.cloneNode(true));
         document.getElementById('add-friend-btn')?.addEventListener('click', async () => {
@@ -561,7 +598,6 @@ class Home {
                 return;
             }
 
-            // Save friend to DB
             let friends = await this.db.readAllData('friends');
             if (friends.find(f => f.name.toLowerCase() === username.toLowerCase())) {
                 alert('Este usuario ya está en tu lista de amigos.');
@@ -576,7 +612,6 @@ class Home {
             inputEl.value = '';
             await this.loadFriendsList();
         });
-
     }
 
     async loadAccountsSwitcherList(selectedId) {
@@ -755,6 +790,39 @@ class Home {
         let instancesList = await config.getInstanceList();
         let currentSelect = configClient.instance_select;
 
+        // Detect creator server URL
+        this._serverUrl = '';
+        try {
+            const userDataPath = await ipcRenderer.invoke('path-user-data');
+            const serverConfigPath = path.join(userDataPath, 'creator-server.json');
+            if (fs.existsSync(serverConfigPath)) {
+                const sc = JSON.parse(fs.readFileSync(serverConfigPath, 'utf8'));
+                if (sc.url) this._serverUrl = sc.url.replace(/\/+$/, '');
+            }
+        } catch (e) {}
+
+        // Cache instances for offline use
+        const serverOnline = instancesList.length > 0;
+        if (serverOnline) {
+            configClient.creator_server_cache = instancesList;
+            await this.db.updateData('configClient', configClient);
+        } else if (configClient.creator_server_cache) {
+            instancesList = configClient.creator_server_cache;
+        }
+        this._serverOnline = serverOnline;
+
+        // Normalize loader: support both string (legacy) and object formats
+        instancesList = instancesList.map(pack => {
+            if (typeof pack.loader === 'string') {
+                pack.loader = {
+                    type: pack.loader,
+                    build: pack.loaderVersion || '',
+                    enable: pack.loader !== 'vanilla'
+                };
+            }
+            return pack;
+        });
+
         // Get current account to check whitelist
         const currentAccount = configClient.account_selected
             ? await this.db.readData('accounts', configClient.account_selected)
@@ -802,7 +870,9 @@ class Home {
             }
         }
 
-        // 2. Merge creator tools modpacks — check each for installed status like remote instances
+        // 2. Merge creator tools modpacks — only when creator server is OFFLINE
+        //    (when server is online, instancesList already includes them)
+        if (!this._serverOnline) {
         const userDataPath = await ipcRenderer.invoke('path-user-data');
         const creatorPath = path.join(userDataPath, 'creator-modpacks.json');
         const fallbackCreatorPath = path.join(process.cwd(), 'data', 'creator-modpacks.json');
@@ -835,7 +905,9 @@ class Home {
                         playTime: '0.0h',
                         modpack_url: fs.existsSync(localManifest) ? localManifest : undefined,
                         whitelistActive: c.whitelistActive || false,
-                        whitelist: c.whitelist || []
+                        whitelist: c.whitelist || [],
+                        poster: c.poster ? `file:///${path.resolve(c.location, c.poster).replace(/\\/g, '/')}` : null,
+                        banner: c.banner ? `file:///${path.resolve(c.location, c.banner).replace(/\\/g, '/')}` : null
                     };
                     const localPackDir = path.join(this.gamePath, 'instances', pack.name);
                     const hasVersion = configClient.instances_versions?.[pack.name];
@@ -850,6 +922,20 @@ class Home {
                 console.error('Error reading creator tools modpacks:', e);
             }
         }
+        }
+
+        // Deduplicate: remove packs with duplicate names (prefer remote over creator-local)
+        const seen = new Set();
+        installedPacks = installedPacks.filter(p => {
+            if (seen.has(p.name)) return false;
+            seen.add(p.name);
+            return true;
+        });
+        allPacks = allPacks.filter(p => {
+            if (seen.has(p.name)) return false;
+            seen.add(p.name);
+            return true;
+        });
 
         // 3. Build playtime map from sessions
         let playtimeMap = {};
@@ -873,7 +959,11 @@ class Home {
         gridContainer.innerHTML = '';
 
         if (packs.length === 0) {
-            gridContainer.innerHTML = `<div style="grid-column: span 4; color: #64748b; font-size: 0.85em; text-align: center; padding: 20px;">No hay instancias en esta sección.</div>`;
+            const isAll = containerId === 'instances-grid-all';
+            const msg = isAll && !this._serverOnline
+                ? 'Servidor del Creator apagado. Abrí el Creator Tools e iniciá el servidor HTTP.'
+                : 'No hay modpacks en esta sección.';
+            gridContainer.innerHTML = `<div style="grid-column: span 4; color: #64748b; font-size: 0.85em; text-align: center; padding: 20px;">${msg}</div>`;
             return;
         }
 
@@ -888,22 +978,35 @@ class Home {
             const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
             const status = this._instanceStatus.get(pack.name);
+            const statusClassMap = { downloading: 'descargando', installing: 'instalando', running: 'ejecutando' };
             let statusTag = '';
-            if (status === 'downloading') statusTag = '<span class="modpack-grid-tag downloading">Descargando</span>';
-            else if (status === 'installing') statusTag = '<span class="modpack-grid-tag installing">Instalando</span>';
-            else if (status === 'running') statusTag = '<span class="modpack-grid-tag running">Ejecutando</span>';
+            if (status === 'downloading') statusTag = '<span class="modpack-grid-tag descargando">Descargando</span>';
+            else if (status === 'installing') statusTag = '<span class="modpack-grid-tag instalando">Instalando</span>';
+            else if (status === 'running') statusTag = '<span class="modpack-grid-tag ejecutando">Ejecutando</span>';
 
+            const tags = pack.tags || [];
+            let tagsHtml = '';
+            if (tags.length > 0) {
+                tagsHtml = `<div class="modpack-grid-tags">${tags.slice(0, 3).map(t => `<span class="modpack-grid-tag-item">${t}</span>`).join('')}${tags.length > 3 ? `<span class="modpack-grid-tag-overflow">+${tags.length - 3}</span>` : ''}</div>`;
+            }
+
+            const thumbStyle = pack.poster ? `style="background-image: url('${pack.poster}'); background-size: cover; background-position: center;"` : '';
             card.innerHTML = `
-                <div class="modpack-grid-thumb">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+                <div class="modpack-grid-thumb" ${thumbStyle}>
+                    ${!pack.poster ? `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                         <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                         <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
+                    </svg>` : ''}
                     ${statusTag}
                 </div>
-                <h3 class="modpack-grid-name">${pack.title || pack.name}</h3>
-                ${totalSeconds > 0 ? `<span class="modpack-grid-playtime">${playtimeStr}</span>` : ''}
+                <div class="modpack-grid-info">
+                    <div class="modpack-grid-info-top">
+                        <h3 class="modpack-grid-name">${pack.title || pack.name}</h3>
+                        ${totalSeconds > 0 ? `<span class="modpack-grid-playtime">${playtimeStr}</span>` : ''}
+                    </div>
+                    ${tagsHtml}
+                </div>
             `;
 
             card.addEventListener('click', () => {
@@ -917,7 +1020,8 @@ class Home {
     refreshInstanceStatus(name, status) {
         if (status) this._instanceStatus.set(name, status);
         else this._instanceStatus.delete(name);
-        const label = status === 'running' ? 'Ejecutando' : status === 'downloading' ? 'Descargando' : status === 'installing' ? 'Instalando' : '';
+        const statusClassMap = { running: 'ejecutando', downloading: 'descargando', installing: 'instalando', closing: 'cerrando', playing: 'jugando' };
+        const label = status === 'running' ? 'Ejecutando' : status === 'downloading' ? 'Descargando' : status === 'installing' ? 'Instalando' : status === 'closing' ? 'Cerrando' : status === 'playing' ? 'Jugando' : '';
         document.querySelectorAll(`.modpack-grid-card[data-instance-name="${name}"]`).forEach(card => {
             const thumb = card.querySelector('.modpack-grid-thumb');
             if (!thumb) return;
@@ -925,7 +1029,7 @@ class Home {
             if (existing) existing.remove();
             if (!label) return;
             const tag = document.createElement('span');
-            tag.className = `modpack-grid-tag ${status}`;
+            tag.className = `modpack-grid-tag ${statusClassMap[status] || status}`;
             tag.textContent = label;
             thumb.appendChild(tag);
         });
@@ -943,32 +1047,11 @@ class Home {
         document.getElementById('view-detail')?.classList.add('active');
 
         const progressContainer = document.getElementById('detail-progress');
-        const playBtn = document.getElementById('detail-play-btn');
-        const btnContent = document.getElementById('detail-play-btn-content');
-        const btnSpinner = document.getElementById('detail-play-btn-spinner');
-
-        // Keep button in loading state if this or another instance is currently launching
         if (this._launching) {
             if (progressContainer) progressContainer.style.display = 'none';
-            if (playBtn) {
-                playBtn.disabled = true;
-                playBtn.title = this._launchingInstance === pack.name ? 'Instancia iniciando...' : `Ya hay una instancia en ejecución`;
-            }
-            if (btnContent) btnContent.style.display = 'none';
-            if (btnSpinner) btnSpinner.style.display = 'flex';
         } else {
             if (progressContainer) progressContainer.style.display = 'none';
-            if (playBtn) {
-                playBtn.disabled = false;
-                playBtn.title = '';
-            }
-            if (btnContent) btnContent.style.display = 'flex';
-            if (btnSpinner) btnSpinner.style.display = 'none';
         }
-
-        // Show sidebar back button
-        const backBtn = document.getElementById('sidebar-back-btn');
-        if (backBtn) backBtn.style.display = 'flex';
 
         // Wire up detail back button
         const detailBackBtn = document.getElementById('detail-back-btn');
@@ -981,8 +1064,13 @@ class Home {
                 document.getElementById('nav-btn-instances')?.classList.add('active');
                 document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
                 document.getElementById('view-instances')?.classList.add('active');
-                const sbBackBtn = document.getElementById('sidebar-back-btn');
-                if (sbBackBtn) sbBackBtn.style.display = 'none';
+                const titleEl2 = document.getElementById('top-page-title');
+                if (titleEl2) { titleEl2.style.display = ''; titleEl2.textContent = 'Librería'; }
+                const bc = document.getElementById('top-breadcrumb');
+                if (bc) {
+                    bc.querySelectorAll('.top-chevron').forEach(el => el.remove());
+                    bc.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
+                }
             });
         }
 
@@ -995,19 +1083,6 @@ class Home {
             posterImg.src = pack.poster || pack.image || 'assets/images/default/setve.png';
             posterImg.alt = (pack.title || pack.name) + ' poster';
         }
-        document.getElementById('detail-version').textContent = pack.gameVersion || pack.loader?.minecraft_version || '';
-
-        // Calculate real playtime from sessions
-        try {
-            const allSessions = await this.db.readAllData('sessions') || [];
-            const packSessions = allSessions.filter(s => s.instance === pack.name);
-            const totalSeconds = packSessions.reduce((sum, s) => sum + (s.playtime_seconds || 0), 0);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            document.getElementById('detail-playtime').textContent = hours > 0 ? `${hours}.${minutes}h` : `${minutes}m`;
-        } catch (e) {
-            document.getElementById('detail-playtime').textContent = '0.0h';
-        }
 
         // Dynamic tags
         const tagsContainer = document.getElementById('detail-tags');
@@ -1015,16 +1090,10 @@ class Home {
             const loaderName = (pack.loader?.type || pack.loader?.loader_type || 'vanilla').toUpperCase();
             const mcVersion = pack.gameVersion || pack.loader?.minecraft_version || '';
             const customTags = pack.tags || [];
-            let tagsHtml = `<span>${loaderName}</span>`;
+            let tagsHtml = '';
             if (mcVersion) tagsHtml += `<span>MC ${mcVersion}</span>`;
             customTags.forEach(t => { tagsHtml += `<span>${t}</span>`; });
             tagsContainer.innerHTML = tagsHtml;
-        }
-
-        // Dynamic Description
-        const descEl = document.getElementById('detail-desc');
-        if (descEl) {
-            descEl.innerHTML = pack.description || 'Un evento único y optimizado donde experimentarás la mejor jugabilidad en Minecraft. Disfruta de rendimiento superior, mods integrados y conectividad instantánea con el servidor principal.';
         }
 
         // Verify if already downloaded
@@ -1042,12 +1111,80 @@ class Home {
 
         // Setup launcher control listeners
         this.setupLauncherControls(pack, effectiveGamePath);
+
+        // Update breadcrumb
+        this.updateBreadcrumb(pack.title || pack.name);
+    }
+
+    updateBreadcrumb(subPage) {
+        const titleEl = document.getElementById('top-page-title');
+        const breadcrumb = document.getElementById('top-breadcrumb');
+        if (!titleEl || !breadcrumb) return;
+
+        // Remove ALL dynamic breadcrumb elements
+        breadcrumb.querySelectorAll('.top-chevron').forEach(el => el.remove());
+        breadcrumb.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
+
+        if (subPage) {
+            // Hide the static titleEl, use breadcrumb segments instead
+            titleEl.style.display = 'none';
+
+            const ch = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            ch.setAttribute('viewBox', '0 0 24 24');
+            ch.setAttribute('width', '30');
+            ch.setAttribute('height', '30');
+            ch.setAttribute('fill', 'none');
+            ch.setAttribute('stroke', 'currentColor');
+            ch.setAttribute('stroke-width', '2.5');
+            ch.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+            ch.classList.add('top-chevron');
+
+            const seg = document.createElement('span');
+            seg.classList.add('top-page-title', 'breadcrumb-segment');
+            seg.style.cursor = 'pointer';
+            seg.textContent = 'Librería';
+            seg.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-item.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('nav-btn-instances')?.classList.add('active');
+                document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
+                document.getElementById('view-instances')?.classList.add('active');
+                const t = document.getElementById('top-page-title');
+                if (t) { t.style.display = ''; t.textContent = 'Librería'; }
+                const br = document.getElementById('top-breadcrumb');
+                if (br) {
+                    br.querySelectorAll('.top-chevron').forEach(el => el.remove());
+                    br.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
+                }
+            });
+
+            const seg2 = document.createElement('span');
+            seg2.classList.add('top-page-title', 'breadcrumb-segment');
+            seg2.textContent = subPage;
+
+            breadcrumb.appendChild(ch);
+            breadcrumb.appendChild(seg);
+            const ch2 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            ch2.setAttribute('viewBox', '0 0 24 24');
+            ch2.setAttribute('width', '30');
+            ch2.setAttribute('height', '30');
+            ch2.setAttribute('fill', 'none');
+            ch2.setAttribute('stroke', 'currentColor');
+            ch2.setAttribute('stroke-width', '2.5');
+            ch2.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+            ch2.classList.add('top-chevron');
+            breadcrumb.appendChild(ch2);
+            breadcrumb.appendChild(seg2);
+        } else {
+            titleEl.style.display = '';
+        }
     }
 
     setupLauncherControls(pack, gamePath) {
         const playBtn = document.getElementById('detail-play-btn');
         const optionsBtn = document.getElementById('detail-options-btn');
         const dropdown = document.getElementById('detail-fab-menu');
+
+        if (!playBtn || !optionsBtn || !dropdown) return;
 
         // 1. Play Button Click
         playBtn.replaceWith(playBtn.cloneNode(true));
@@ -1062,9 +1199,7 @@ class Home {
         const newOptionsBtn = document.getElementById('detail-options-btn');
         newOptionsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (dropdown) {
-                dropdown.classList.toggle('open');
-            }
+            if (dropdown) dropdown.classList.toggle('open');
         });
 
         // Close dropdown when clicking outside
@@ -1099,13 +1234,11 @@ class Home {
                 try {
                     fs.rmSync(localPackDir, { recursive: true, force: true });
 
-                    // Clear stored version so it shows "Descargar" again
                     let cc = await this.db.readData('configClient');
                     if (cc.instances_versions) delete cc.instances_versions[pack.name];
                     if (cc.instances_features) delete cc.instances_features[pack.name];
                     await this.db.updateData('configClient', cc);
 
-                    // Also remove NeoForge version folder for this instance, if any
                     const nfVersion = pack.loader?.build || pack.loader?.loader_version;
                     if (nfVersion) {
                         const versionsDir = path.join(gamePath, 'versions');
@@ -1126,7 +1259,6 @@ class Home {
                     }
 
                     alert('Instancia eliminada con éxito. Ya puedes reinstalarla limpiamente.');
-                    // Refresh view
                     await this.initInstances();
                     await this.selectInstance(pack);
                 } catch (err) {
@@ -1134,6 +1266,66 @@ class Home {
                 }
             }
         };
+
+        // Dropdown Option: Update modpack (re-sync without deleting user data)
+        const updateBtn = document.getElementById('opt-btn-update');
+        if (updateBtn) {
+            updateBtn.onclick = async () => {
+                if (dropdown) dropdown.classList.remove('open');
+                if (!pack.modpack_url) {
+                    alert('Este modpack no tiene una URL de sincronización configurada.');
+                    return;
+                }
+                if (this._launching) {
+                    alert('No se puede actualizar mientras el juego está en ejecución.');
+                    return;
+                }
+                if (!fs.existsSync(localPackDir)) {
+                    if (confirm('Esta instancia aún no se instaló. ¿Querés descargarla ahora?')) {
+                        this.startGame(pack, gamePath);
+                    }
+                    return;
+                }
+                try {
+                    // Re-sync modpack preserving user data
+                    let configClientUpd = await this.db.readData('configClient');
+                    let enabledFeatures = configClientUpd.instances_features?.[pack.name] || [];
+                    const selectedFeatures = await this.showFeaturesModal(pack.modpack_url);
+                    if (selectedFeatures === undefined) return;
+                    if (selectedFeatures.length > 0) {
+                        enabledFeatures = selectedFeatures;
+                        if (!configClientUpd.instances_features) configClientUpd.instances_features = {};
+                        configClientUpd.instances_features[pack.name] = enabledFeatures;
+                        await this.db.updateData('configClient', configClientUpd);
+                    }
+
+                    const packBaseUrl = pack.modpack_url.replace(/\/modpack\.json$/, '');
+                    const modpackSyncUpd = new ModpackSync(pack.modpack_url, localPackDir, {
+                        enabledFeatures,
+                        serverBaseUrl: packBaseUrl || this._serverUrl || ''
+                    });
+
+                    new logger(pkg.name, '#7289da').info(`Actualizando ${pack.title || pack.name}...`);
+                    const currentVersion = configClientUpd.instances_versions?.[pack.name] || null;
+                    const result = await modpackSyncUpd.sync((progress, size, message) => {
+                        new logger(pkg.name, '#7289da').info(`[${progress}/${size}] ${message}`);
+                    }, null);
+
+                    if (result && result.version) {
+                        if (!configClientUpd.instances_versions) configClientUpd.instances_versions = {};
+                        configClientUpd.instances_versions[pack.name] = result.version;
+                        await this.db.updateData('configClient', configClientUpd);
+                        alert('Modpack actualizado correctamente.');
+                        await this.initInstances();
+                        await this.selectInstance(pack);
+                    } else {
+                        alert('El modpack ya está actualizado o no hubo cambios.');
+                    }
+                } catch (err) {
+                    alert(`Error al actualizar: ${err.message}`);
+                }
+            };
+        }
 
         // Dropdown Option: Force Close Game (Forzar Cierre)
         document.getElementById('opt-btn-kill').onclick = () => {
@@ -1293,10 +1485,6 @@ class Home {
         let configClient = await this.db.readData('configClient');
         let authenticator = await this.db.readData('accounts', configClient.account_selected);
 
-        let playBtn = document.getElementById('detail-play-btn');
-        let btnContent = document.getElementById('detail-play-btn-content');
-        let btnSpinner = document.getElementById('detail-play-btn-spinner');
-
         let progressContainer = document.getElementById('detail-progress');
         let progressText = document.getElementById('detail-progress-text');
         let progressPct = document.getElementById('detail-progress-pct');
@@ -1310,8 +1498,8 @@ class Home {
         let loaderVersion = options.loader?.loader_version || options.loader?.build || '';
         const mcVersion = options.loader?.minecraft_version || options.gameVersion || '1.20.1';
 
-        // For Forge, the build must include the MC version prefix (e.g. "1.20.1-47.4.10")
-        if (loaderType === 'forge' && loaderVersion && !loaderVersion.startsWith(mcVersion + '-')) {
+        // For Forge & NeoForge, the build must include the MC version prefix (e.g. "1.20.1-47.4.10")
+        if ((loaderType === 'forge' || loaderType === 'neoforge') && loaderVersion && !loaderVersion.startsWith(mcVersion + '-')) {
             loaderVersion = mcVersion + '-' + loaderVersion;
         }
 
@@ -1399,9 +1587,12 @@ class Home {
         }
 
         // Transition Play Button to Loading Spinner, show floating progress card
-        if (btnContent) btnContent.style.display = 'none';
-        if (btnSpinner) btnSpinner.style.display = 'flex';
-        playBtn.disabled = true;
+        const playBtnLoading = document.getElementById('detail-play-btn');
+        const btnContentLoading = document.getElementById('detail-play-btn-content');
+        const btnSpinnerLoading = document.getElementById('detail-play-btn-spinner');
+        if (btnContentLoading) btnContentLoading.style.display = 'none';
+        if (btnSpinnerLoading) btnSpinnerLoading.style.display = 'flex';
+        if (playBtnLoading) playBtnLoading.disabled = true;
 
         if (progressContainer) progressContainer.style.display = 'flex';
         if (wavyBar) wavyBar.style.width = '0%';
@@ -1416,9 +1607,12 @@ class Home {
                 const selectedFeatures = await this.showFeaturesModal(options.modpack_url);
                 if (selectedFeatures === undefined) {
                     // User cancelled the features dialog
-                    if (btnContent) btnContent.style.display = 'flex';
-                    if (btnSpinner) btnSpinner.style.display = 'none';
-                    playBtn.disabled = false;
+                    const playBtnCancel = document.getElementById('detail-play-btn');
+                    const btnContentCancel = document.getElementById('detail-play-btn-content');
+                    const btnSpinnerCancel = document.getElementById('detail-play-btn-spinner');
+                    if (btnContentCancel) btnContentCancel.style.display = 'flex';
+                    if (btnSpinnerCancel) btnSpinnerCancel.style.display = 'none';
+                    if (playBtnCancel) playBtnCancel.disabled = false;
                     if (progressContainer) progressContainer.style.display = 'none';
                     this._launching = false;
                     return;
@@ -1437,8 +1631,10 @@ class Home {
 
                 const instancePath = path.join(gamePath, 'instances', options.name);
 
+                const packBaseUrl = options.modpack_url.replace(/\/modpack\.json$/, '');
                 const modpackSync = new ModpackSync(options.modpack_url, instancePath, {
-                    enabledFeatures
+                    enabledFeatures,
+                    serverBaseUrl: packBaseUrl || this._serverUrl || ''
                 });
 
                 this.showDownload(options.name, options.title || options.name);
@@ -1464,19 +1660,10 @@ class Home {
                     await this.initInstances();
                     await this.selectInstance(options);
 
-                    // Re-acquire DOM references after selectInstance replaced the play button via cloneNode
-                    playBtn = document.getElementById('detail-play-btn');
-                    btnContent = document.getElementById('detail-play-btn-content');
-                    btnSpinner = document.getElementById('detail-play-btn-spinner');
                     progressContainer = document.getElementById('detail-progress');
                     progressText = document.getElementById('detail-progress-text');
                     progressPct = document.getElementById('detail-progress-pct');
                     if (progressContainer) progressContainer.style.display = 'flex';
-
-                    // Re-apply loading state for remaining phases (NeoForge install, game launch)
-                    if (btnContent) btnContent.style.display = 'none';
-                    if (btnSpinner) btnSpinner.style.display = 'flex';
-                    if (playBtn) playBtn.disabled = true;
                 } else {
                     // Modpack sync skipped or failed (e.g. 404) — continue to NeoForge without mods
                     // DOM references from lines 1183-1185 are still valid (selectInstance was NOT called)
@@ -1491,10 +1678,12 @@ class Home {
                     options: true
                 });
 
-                // Restore button state
-                if (btnContent) btnContent.style.display = 'flex';
-                if (btnSpinner) btnSpinner.style.display = 'none';
-                playBtn.disabled = false;
+                const playBtnRestore = document.getElementById('detail-play-btn');
+                const btnContentRestore = document.getElementById('detail-play-btn-content');
+                const btnSpinnerRestore = document.getElementById('detail-play-btn-spinner');
+                if (btnContentRestore) btnContentRestore.style.display = 'flex';
+                if (btnSpinnerRestore) btnSpinnerRestore.style.display = 'none';
+                if (playBtnRestore) playBtnRestore.disabled = false;
                 if (progressContainer) progressContainer.style.display = 'none';
                 this._launching = false;
                 this._launchingInstance = null;
@@ -1519,7 +1708,37 @@ class Home {
                             playtime_seconds: elapsed,
                             startTime: sessionStartTime,
                             endTime: Date.now()
-                        });
+        });
+
+        // Cache posters locally when server is online
+        const posterCacheDir = path.join(this.gamePath, 'poster-cache');
+        if (serverOnline) {
+            try {
+                if (!fs.existsSync(posterCacheDir)) fs.mkdirSync(posterCacheDir, { recursive: true });
+                for (const pack of instancesList) {
+                    if (!pack.poster) continue;
+                    const ext = path.extname(pack.poster.split('?')[0].split('#')[0]) || '.jpg';
+                    const cachedPath = path.join(posterCacheDir, pack.name + ext);
+                    try {
+                        const res = await fetch(pack.poster);
+                        if (res.ok) {
+                            const buffer = await res.buffer();
+                            fs.writeFileSync(cachedPath, buffer);
+                        }
+                    } catch (_) {}
+                }
+            } catch (_) {}
+        } else if (fs.existsSync(posterCacheDir)) {
+            // Rewrite poster URLs to cached versions when server is offline
+            for (const pack of instancesList) {
+                if (!pack.poster) continue;
+                const ext = path.extname(pack.poster.split('?')[0].split('#')[0]) || '.jpg';
+                const cachedPath = path.join(posterCacheDir, pack.name + ext);
+                if (fs.existsSync(cachedPath)) {
+                    pack.poster = `file:///${cachedPath.replace(/\\/g, '/')}`;
+                }
+            }
+        }
                     } else {
                         existing.playtime_seconds += elapsed;
                         existing.endTime = Date.now();
@@ -1534,6 +1753,14 @@ class Home {
         launch.Launch(opt);
 
         this.minecraftProcess = launch;
+
+        // Persist running instance to survive renderer crashes
+        const persistLaunch = async (instanceName) => {
+            let cc = await this.db.readData('configClient');
+            cc.running_instance = instanceName;
+            await this.db.updateData('configClient', cc);
+        };
+        persistLaunch(options.name);
 
         launch.on('progress', (progress, size) => {
             const pct = ((progress / size) * 100).toFixed(0);
@@ -1557,14 +1784,23 @@ class Home {
 
         launch.on('close', async code => {
             await endSession();
+            // Clear persisted running instance
+            let ccClose = await this.db.readData('configClient');
+            delete ccClose.running_instance;
+            await this.db.updateData('configClient', ccClose);
+            // Refresh instance status to remove running tag
+            this.refreshInstanceStatus(options.name);
             if (configClient.launcher_config.closeLauncher == 'close-launcher') {
                 ipcRenderer.send('main-window-show');
             }
             ipcRenderer.send('main-window-progress-reset');
 
-            if (btnContent) btnContent.style.display = 'flex';
-            if (btnSpinner) btnSpinner.style.display = 'none';
-            playBtn.disabled = false;
+            const playBtnRestore2 = document.getElementById('detail-play-btn');
+            const btnContentRestore2 = document.getElementById('detail-play-btn-content');
+            const btnSpinnerRestore2 = document.getElementById('detail-play-btn-spinner');
+            if (btnContentRestore2) btnContentRestore2.style.display = 'flex';
+            if (btnSpinnerRestore2) btnSpinnerRestore2.style.display = 'none';
+            if (playBtnRestore2) playBtnRestore2.disabled = false;
             if (progressContainer) progressContainer.style.display = 'none';
             this._launching = false;
 
@@ -1574,6 +1810,11 @@ class Home {
 
         launch.on('error', async err => {
             await endSession();
+            // Clear persisted running instance
+            let ccErr = await this.db.readData('configClient');
+            delete ccErr.running_instance;
+            await this.db.updateData('configClient', ccErr);
+            this.refreshInstanceStatus(options.name);
 
             let errorMsg = err.error || err.message || err;
             if (typeof errorMsg === 'string' && errorMsg.includes('Could not create the Java Virtual Machine')) {
@@ -1592,9 +1833,12 @@ class Home {
             }
             ipcRenderer.send('main-window-progress-reset');
 
-            if (btnContent) btnContent.style.display = 'flex';
-            if (btnSpinner) btnSpinner.style.display = 'none';
-            playBtn.disabled = false;
+            const playBtnRestore3 = document.getElementById('detail-play-btn');
+            const btnContentRestore3 = document.getElementById('detail-play-btn-content');
+            const btnSpinnerRestore3 = document.getElementById('detail-play-btn-spinner');
+            if (btnContentRestore3) btnContentRestore3.style.display = 'flex';
+            if (btnSpinnerRestore3) btnSpinnerRestore3.style.display = 'none';
+            if (playBtnRestore3) playBtnRestore3.disabled = false;
             if (progressContainer) progressContainer.style.display = 'none';
             this._launching = false;
 
@@ -1701,7 +1945,7 @@ class Home {
     async settingsJavaPath() {
         let javaPathText = document.querySelector(".java-path-txt");
         if (javaPathText) {
-            javaPathText.textContent = `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}/runtime`;
+            javaPathText.textContent = `${await appdata()}/.yusup/runtime`;
         }
 
         let configClient = await this.db.readData('configClient');

@@ -282,7 +282,7 @@
             width: 480px;
             padding: 25px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 15px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         }
@@ -385,6 +385,42 @@
         progress::-webkit-progress-value {
             background-color: var(--accent-color);
         }
+
+        /* Server status indicator */
+        .server-status {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            margin: 10px 0;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .server-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .server-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .server-dot.offline { background: #ef4444; }
+        .server-dot.online { background: #10b981; box-shadow: 0 0 6px #10b981; }
+
+        .server-info {
+            font-size: 0.75em;
+            color: #64748b;
+            word-break: break-all;
+        }
     </style>
 </head>
 
@@ -416,7 +452,6 @@
         <div class="menu-item" id="menu-edit">Editar</div>
         <div class="menu-item" id="menu-test">Probar</div>
         <div class="menu-item" id="menu-build">Compilar</div>
-        <div class="menu-item" id="menu-github">GitHub Pages</div>
     </div>
 
     <!-- Toolbar -->
@@ -435,14 +470,18 @@
         <button class="tool-btn" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4);"
             id="btn-build">📦 Compilar Modpack</button>
         <div class="divider"></div>
-        <button class="tool-btn" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4);"
-            id="btn-github">🚀 Subir a GitHub Pages</button>
-        <div class="divider"></div>
         <div class="divider"></div>
         <button class="tool-btn" style="background: rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.5);"
             id="btn-install-launcher">⬇️ Instalar Seleccionados</button>
         <button class="tool-btn" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4);"
             id="btn-install-all">⬇️⬇️ Instalar Todos</button>
+        <div class="divider"></div>
+        <button class="tool-btn" style="background: rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.5);"
+            id="btn-check-updates">🔄 Verificar Actualizaciones</button>
+        <button class="tool-btn" id="btn-start-server">🌐 Iniciar Servidor</button>
+        <div class="divider"></div>
+        <button class="tool-btn" style="background: rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.5);"
+            id="btn-launch-client">▶️ Probar en Launcher</button>
     </div>
 
     <!-- Main Workspace -->
@@ -472,6 +511,15 @@
             <h3 class="panel-title">📟 Consola del Sistema</h3>
             <div class="console-logs" id="console-logs">
                 <div class="log-entry log-info">[Listo] Creador de Modpacks inicializado.</div>
+            </div>
+
+            <!-- Server Status -->
+            <div class="server-status" id="server-status" style="display:none;">
+                <div class="server-indicator">
+                    <span class="server-dot" id="server-dot"></span>
+                    <span id="server-label">Servidor detenido</span>
+                </div>
+                <div class="server-info" id="server-info"></div>
             </div>
 
             <!-- Progress -->
@@ -568,35 +616,6 @@
             <div class="modal-buttons">
                 <button class="modal-btn cancel" id="btn-cancel-new">Cancelar</button>
                 <button class="modal-btn confirm" id="btn-save-new">Guardar Modpack</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: GitHub Pages Config -->
-    <div class="modal" id="modal-github">
-        <div class="modal-content">
-            <h3 class="modal-title">🚀 Subir a GitHub Pages</h3>
-            <p style="font-size: 0.85em; color: #94a3b8; margin: 0;">Esta función te permite empujar automáticamente el
-                archivo modpack.json y los archivos de mods compilados directamente a tu repositorio de GitHub Pages
-                para distribución instantánea.</p>
-
-            <div class="input-group">
-                <label>Ruta Local de tu Repositorio de Git / GitHub Pages</label>
-                <button class="btn-select-dir"
-                    style="background: #020618; border: 1px solid var(--border-color); text-align: left;"
-                    id="btn-select-git-dir">Seleccionar carpeta de repositorio...</button>
-                <span id="git-dir-path" style="font-size:0.75em; color:#94a3b8; word-break:break-all;">No
-                    seleccionada</span>
-            </div>
-
-            <div class="input-group">
-                <label>Mensaje del Commit</label>
-                <input type="text" id="git-commit-msg" value="Actualización automática de modpack">
-            </div>
-
-            <div class="modal-buttons">
-                <button class="modal-btn cancel" id="btn-cancel-github">Cancelar</button>
-                <button class="modal-btn confirm" id="btn-push-github">Subir y Publicar</button>
             </div>
         </div>
     </div>

@@ -29,6 +29,7 @@
         "extract-zip": "^2.0.1",
         "minecraft-java-core": "^4.2.5",
         "node-fetch": "^2.7.0",
+        "sharp": "^0.34.5",
         "xml-js": "^1.6.11"
     },
     "devDependencies": {
