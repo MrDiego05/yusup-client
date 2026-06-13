@@ -89,42 +89,6 @@ class Launcher {
 
     initFrame() {
         console.log('Initializing Frame...')
-        let platform = os.platform() === 'darwin' ? "darwin" : "other";
-        let frameEl = document.querySelector(`.${platform} .frame`);
-        
-        if (!frameEl) {
-            platform = "other";
-            frameEl = document.querySelector(`.${platform} .frame`);
-        }
-
-        if (frameEl) {
-            frameEl.style.display = 'flex';
-        }
-
-        const minimizeBtn = document.querySelector(`.${platform} .frame #minimize`);
-        if (minimizeBtn) {
-            minimizeBtn.addEventListener('click', () => {
-                ipcRenderer.send('main-window-minimize');
-            });
-        }
-
-        let maximized = false;
-        let maximize = document.querySelector(`.${platform} .frame #maximize`);
-        if (maximize) {
-            maximize.addEventListener('click', () => {
-                ipcRenderer.send('main-window-maximize');
-                maximized = !maximized
-                maximize.classList.toggle('icon-maximize')
-                maximize.classList.toggle('icon-restore-down')
-            });
-        }
-
-        const closeBtn = document.querySelector(`.${platform} .frame #close`);
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                ipcRenderer.send('main-window-close');
-            });
-        }
     }
 
     async initConfigClient() {

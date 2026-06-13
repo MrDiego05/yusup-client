@@ -5,6 +5,7 @@ const { shell, ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
 const fetch = require('node-fetch');
 
 class Home {
@@ -23,6 +24,9 @@ class Home {
 
         // Initialize user skin / head avatar
         await this.initUserAvatar();
+
+        // Header frame controls (minimize/close)
+        this.setupHeaderControls();
 
         // Account dropdown toggle
         this.setupAccountDropdown();
@@ -49,12 +53,11 @@ class Home {
         // 3. Render and initialize modpacks
         await this.initInstances();
 
-        // Check if there's a persisted running instance (survived a crash)
+        // Clear stale running_instance — app restarted, process is gone
         const ccCheck = await this.db.readData('configClient');
         if (ccCheck && ccCheck.running_instance) {
-            this._launching = true;
-            this._launchingInstance = ccCheck.running_instance;
-            this.refreshInstanceStatus(ccCheck.running_instance, 'running');
+            delete ccCheck.running_instance;
+            await this.db.updateData('configClient', ccCheck);
         }
 
         // Refresh button
@@ -65,6 +68,15 @@ class Home {
         // 4. Initialize Settings
         await this.initSettings();
 
+        // 5. Initialize Calendar
+        this.initCalendar();
+
+        // 6. Initialize Search Overlay
+        this.setupSearchOverlay();
+
+        // Show calendar sidebar if creator server is active
+        this.refreshCalendarVisibility();
+
         // Auto-refresh instances every 30s
         this._refreshTimer = setInterval(() => {
             this.initInstances();
@@ -73,48 +85,23 @@ class Home {
 
     async initUserAvatar() {
         let configClient = await this.db.readData('configClient');
-        let auth = await this.db.readData('accounts', configClient.account_selected);
-        if (!auth) return;
+        let auth = configClient?.account_selected ? await this.db.readData('accounts', configClient.account_selected) : null;
+        const defaultAvatarStyle = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
         const setAvatar = async (el) => {
             if (!el) return;
-            const defaultFace = 'url("assets/images/default/setve.png")';
-            let skinUrl = null;
-            if (auth.profile?.skins?.[0]?.base64) {
-                try {
-                    let headTex = await new skin2D().creatHeadTexture(auth.profile.skins[0].base64);
-                    skinUrl = headTex;
-                } catch (e) {}
+            if (auth) {
+                let skinUrl = await this._getSkinUrl(auth);
+                if (skinUrl) {
+                    el.style.backgroundImage = `url(${skinUrl})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center';
+                    el.innerHTML = '';
+                    return;
+                }
             }
-            if (!skinUrl && auth.profile?.skins?.[0]?.url) {
-                skinUrl = auth.profile.skins[0].url;
-            }
-            if (!skinUrl && auth.uuid) {
-                try {
-                    const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${auth.uuid.replace(/-/g, '')}`);
-                    if (res.ok) {
-                        const profile = await res.json();
-                        const texProp = profile.properties?.find(p => p.name === 'textures');
-                        if (texProp?.value) {
-                            const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
-                            if (tex.textures?.SKIN?.url) {
-                                const skinFetch = await fetch(tex.textures.SKIN.url);
-                                if (skinFetch.ok) {
-                                    const blob = await skinFetch.blob();
-                                    skinUrl = URL.createObjectURL(blob);
-                                }
-                            }
-                        }
-                    }
-                } catch (e) {}
-            }
-            if (skinUrl) {
-                el.style.backgroundImage = `url(${skinUrl})`;
-            } else {
-                el.style.backgroundImage = defaultFace;
-            }
-            el.style.backgroundSize = 'cover';
-            el.style.backgroundPosition = 'center';
-            el.innerHTML = '';
+            el.style.background = defaultAvatarStyle;
+            el.style.backgroundImage = 'none';
+            el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (auth?.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
         };
         setAvatar(document.querySelector('#top-profile-avatar'));
         setAvatar(document.querySelector('#dropdown-avatar-large'));
@@ -145,11 +132,7 @@ class Home {
                     blockNews.classList.add('news-block');
                     blockNews.innerHTML = `
                         <div class="news-image-placeholder">
-                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
+                            <img src="assets/images/png/home.png" width="32" height="32" alt="news">
                         </div>
                         <div class="news-header">
                             <div class="title">${News.title}</div>
@@ -175,49 +158,189 @@ class Home {
         }
     }
 
+    setupHeaderControls() {
+        const minimizeBtn = document.getElementById('header-btn-minimize');
+        if (minimizeBtn) {
+            minimizeBtn.addEventListener('click', () => {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('main-window-minimize');
+            });
+        }
+        const closeBtn = document.getElementById('header-btn-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('main-window-close');
+            });
+        }
+    }
+
+    setupSearchOverlay() {
+        const container = document.getElementById('search-container');
+        const searchBtn = document.getElementById('header-search-btn');
+        const input = document.getElementById('search-input-field');
+        const dropdown = document.getElementById('search-results-dropdown');
+        if (!container || !searchBtn || !input || !dropdown) return;
+
+        let allInstances = [];
+        let allEvents = [];
+
+        const searchColors = ['#192E03','#3B5E0B','#5C8F14','#7DBF1C','#9EEF24','#D8F999','#A8B87C','#6B8E23','#556B2F','#4A7C59'];
+
+        const refreshData = async () => {
+            let instancesList = await config.getInstanceList();
+            if (!instancesList || instancesList.length === 0) {
+                const cc = await this.db.readData('configClient');
+                if (cc?.creator_server_cache) instancesList = cc.creator_server_cache;
+            }
+            allInstances = instancesList || [];
+            allEvents = this._calEvents || [];
+        };
+
+        const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?');
+
+        const getColor = (name) => {
+            if (!name) return searchColors[0];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return searchColors[Math.abs(hash) % searchColors.length];
+        };
+
+        const renderResults = (query) => {
+            const q = query.trim().toLowerCase();
+            dropdown.innerHTML = '';
+
+            // Modpacks
+            const filteredPacks = q
+                ? allInstances.filter(p => (p.title || p.name).toLowerCase().includes(q))
+                : allInstances;
+
+            // Events
+            const filteredEvents = q
+                ? allEvents.filter(e => e.title.toLowerCase().includes(q))
+                : allEvents;
+
+            const hasPacks = filteredPacks.length > 0;
+            const hasEvents = filteredEvents.length > 0;
+
+            if (!hasPacks && !hasEvents) {
+                dropdown.innerHTML = '<p class="search-result-hint">No se encontraron resultados.</p>';
+                return;
+            }
+
+            if (hasPacks) {
+                const title = document.createElement('div');
+                title.className = 'search-result-section-title';
+                title.textContent = 'Modpacks';
+                dropdown.appendChild(title);
+
+                filteredPacks.forEach(pack => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    const name = pack.title || pack.name;
+                    const initial = getInitial(name);
+                    const color = getColor(name);
+                    const searchThumb = pack.banner || pack.poster || '';
+                    let iconHtml;
+                    if (searchThumb) {
+                        iconHtml = `<div class="search-result-icon"><img src="${searchThumb}" alt=""></div>`;
+                    } else {
+                        iconHtml = `<div class="search-result-icon" style="background:${color}">${initial}</div>`;
+                    }
+                    const loaderLabel = (pack.loader?.type || '').toUpperCase();
+                    item.innerHTML = `
+                        ${iconHtml}
+                        <div class="search-result-info">
+                            <span class="search-result-name">${name}</span>
+                            <span class="search-result-meta">${pack.gameVersion || pack.loader?.minecraft_version || ''} ${loaderLabel ? '· ' + loaderLabel : ''}</span>
+                        </div>
+                        ${loaderLabel ? `<span class="search-result-tag">${loaderLabel}</span>` : ''}
+                    `;
+                    item.addEventListener('click', () => {
+                        container.classList.remove('open');
+                        this.selectInstance(pack);
+                    });
+                    dropdown.appendChild(item);
+                });
+            }
+
+            if (hasEvents) {
+                const title = document.createElement('div');
+                title.className = 'search-result-section-title';
+                title.textContent = 'Eventos';
+                dropdown.appendChild(title);
+
+                filteredEvents.forEach(ev => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    const dateStr = ev.date || '';
+                    const timeStr = ev.time || 'Todo el día';
+                    item.innerHTML = `
+                        <span class="search-result-dot"></span>
+                        <div class="search-result-info">
+                            <span class="search-result-name">${ev.title}</span>
+                            <span class="search-result-meta">${dateStr} · ${timeStr}</span>
+                        </div>
+                    `;
+                    item.addEventListener('click', () => {
+                        container.classList.remove('open');
+                        // Switch to calendar view and select this date
+                        document.getElementById('nav-btn-calendar')?.click();
+                        if (ev.date) {
+                            this._calSelectedDate = ev.date;
+                            this.renderEventsForDay(ev.date);
+                        }
+                    });
+                    dropdown.appendChild(item);
+                });
+            }
+        };
+
+        searchBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await refreshData();
+            input.focus();
+        });
+
+        input.addEventListener('focus', async () => {
+            await refreshData();
+            container.classList.add('open');
+            if (input.value.trim()) renderResults(input.value);
+        });
+
+        input.addEventListener('input', () => {
+            if (input.value.trim()) {
+                container.classList.add('open');
+                renderResults(input.value);
+            } else {
+                container.classList.remove('open');
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (!input.value.trim()) container.classList.remove('open');
+            }, 200);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#search-container') && !e.target.closest('#header-search-btn')) {
+                container.classList.remove('open');
+            }
+        });
+    }
+
     setupNavigation() {
         const navButtons = document.querySelectorAll('.sidebar-item.nav-btn');
         const views = document.querySelectorAll('.dashboard-view');
 
-        const ensureStaticChevron = (breadcrumb) => {
-            const existing = breadcrumb.querySelector('.top-chevron');
-            if (!existing) {
-                const ch = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                ch.setAttribute('viewBox', '0 0 24 24');
-                ch.setAttribute('width', '30');
-                ch.setAttribute('height', '30');
-                ch.setAttribute('fill', 'none');
-                ch.setAttribute('stroke', 'currentColor');
-                ch.setAttribute('stroke-width', '2.5');
-                ch.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
-                ch.classList.add('top-chevron');
-                const logo = breadcrumb.querySelector('#top-logo-btn');
-                if (logo && logo.nextSibling) {
-                    breadcrumb.insertBefore(ch, logo.nextSibling);
-                } else {
-                    breadcrumb.appendChild(ch);
-                }
-            }
-        };
-
-        const setViewTitle = (text) => {
-            const titleEl = document.getElementById('top-page-title');
-            const breadcrumb = document.getElementById('top-breadcrumb');
-            if (!titleEl || !breadcrumb) return;
-            breadcrumb.querySelectorAll('.top-chevron:not(.initial)').forEach(el => el.remove());
-            breadcrumb.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
-            ensureStaticChevron(breadcrumb);
-            titleEl.style.display = '';
-            titleEl.textContent = text;
-        };
-
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 let targetViewId = '';
-                let titleText = '';
-                if (btn.id === 'nav-btn-home') { targetViewId = 'view-home'; titleText = 'Inicio'; }
-                else if (btn.id === 'nav-btn-instances') { targetViewId = 'view-instances'; titleText = 'Librería'; }
-                else if (btn.id === 'nav-btn-settings') { targetViewId = 'view-settings'; titleText = 'Ajustes'; }
+                if (btn.id === 'nav-btn-home') { targetViewId = 'view-home'; }
+                else if (btn.id === 'nav-btn-instances') { targetViewId = 'view-instances'; }
+                else if (btn.id === 'nav-btn-settings') { targetViewId = 'view-settings'; }
+                else if (btn.id === 'nav-btn-calendar') { targetViewId = 'view-calendar'; }
 
                 if (!targetViewId) return;
 
@@ -226,8 +349,6 @@ class Home {
 
                 views.forEach(v => v.classList.remove('active'));
                 document.getElementById(targetViewId)?.classList.add('active');
-
-                setViewTitle(titleText);
 
                 // Close account dropdown
                 const accDropdown = document.querySelector('.account-dropdown-overlay');
@@ -243,20 +364,8 @@ class Home {
                 document.getElementById('nav-btn-home')?.classList.add('active');
                 views.forEach(v => v.classList.remove('active'));
                 document.getElementById('view-home')?.classList.add('active');
-                const titleEl = document.getElementById('top-page-title');
-                if (titleEl) {
-                    titleEl.style.display = '';
-                    titleEl.textContent = 'Inicio';
-                }
-                const breadcrumb = document.getElementById('top-breadcrumb');
-                if (breadcrumb) {
-                    breadcrumb.querySelectorAll('.top-chevron:not(.initial)').forEach(el => el.remove());
-                    breadcrumb.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
-                    ensureStaticChevron(breadcrumb);
-                }
             });
         }
-
     }
 
     setupAccountDropdown() {
@@ -313,16 +422,18 @@ class Home {
                 configClient.account_selected = null;
                 await this.db.updateData('configClient', configClient);
 
-                // Reset avatars to default
+                // Reset avatars to default gradient
                 const avatarEl = document.querySelector('#top-profile-avatar');
                 if (avatarEl) {
-                    avatarEl.style.backgroundImage = `url('assets/images/default/setve.png')`;
-                    avatarEl.innerHTML = '';
+                    avatarEl.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                    avatarEl.style.backgroundImage = 'none';
+                    avatarEl.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">?</span>';
                 }
                 const largeAvatar = document.querySelector('#dropdown-avatar-large');
                 if (largeAvatar) {
-                    largeAvatar.style.backgroundImage = `url('assets/images/default/setve.png')`;
-                    largeAvatar.innerHTML = '';
+                    largeAvatar.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                    largeAvatar.style.backgroundImage = 'none';
+                    largeAvatar.innerHTML = '<span style="color:#fff;font-size:24px;font-weight:700;">?</span>';
                 }
 
                 // Auto-switch to another account or go to login
@@ -341,8 +452,9 @@ class Home {
             });
         }
 
-        // Listen for account changes and refresh the dropdown
+        // Listen for account changes and refresh the dropdown and avatar
         document.addEventListener('accounts-changed', () => {
+            this.initUserAvatar();
             if (this._accountOverlay && this._accountOverlay.classList.contains('open')) {
                 this.populateAccountDropdown();
             }
@@ -384,46 +496,121 @@ class Home {
     // Helper: load avatar into any element
     _loadAvatarToEl(elId, account) {
         const el = document.getElementById(elId);
-        if (!el || !account) {
-            if (el) el.style.backgroundImage = `url('assets/images/default/setve.png')`;
-            return;
-        }
-        el.style.backgroundImage = `url('assets/images/default/setve.png')`;
+        if (!el || !account) return;
+        // Set initial gradient
+        el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+        el.style.backgroundImage = 'none';
+        el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (account.name ? account.name.charAt(0).toUpperCase() : '?') + '</span>';
         // Load avatar in background
         this._getSkinUrl(account).then(url => {
-            if (url) el.style.backgroundImage = `url(${url})`;
+            if (url) {
+                el.style.backgroundImage = `url(${url})`;
+                el.style.backgroundSize = 'cover';
+                el.style.backgroundPosition = 'center';
+                el.innerHTML = '';
+            }
         }).catch(() => {});
     }
+
 
     // Cache skin URLs to avoid repeated fetches
     _skinCache = new Map();
     async _getSkinUrl(acc) {
         if (this._skinCache.has(acc.ID)) return this._skinCache.get(acc.ID);
         try {
-            let url = null;
+            let headUrl = null;
+            // 1. Try base64 skin -> render head
             if (acc?.profile?.skins?.[0]?.base64) {
-                const headTex = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
-                if (headTex) url = headTex;
+                try {
+                    headUrl = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
+                } catch (e) {}
             }
-            if (!url && acc?.profile?.skins?.[0]?.url) {
-                url = acc.profile.skins[0].url;
-            }
-            if (!url && acc.uuid) {
-                const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${acc.uuid.replace(/-/g, '')}`);
-                if (res.ok) {
-                    const profile = await res.json();
-                    const texProp = profile.properties?.find(p => p.name === 'textures');
-                    if (texProp?.value) {
-                        const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
-                        if (tex.textures?.SKIN?.url) url = tex.textures.SKIN.url;
+            // 2. Try skin URL -> fetch image -> render head
+            if (!headUrl && acc?.profile?.skins?.[0]?.url) {
+                try {
+                    const res = await fetch(acc.profile.skins[0].url);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const reader = new FileReader();
+                        headUrl = await new Promise((resolve) => {
+                            reader.onload = async () => {
+                                const b64 = reader.result.split(',')[1];
+                                try {
+                                    const head = await new skin2D().creatHeadTexture(b64);
+                                    resolve(head);
+                                } catch { resolve(null); }
+                            };
+                            reader.readAsDataURL(blob);
+                        });
                     }
-                }
+                } catch (e) {}
             }
-            this._skinCache.set(acc.ID, url);
-            return url;
+            // 3. Try Mojang sessionserver for premium accounts
+            if (!headUrl && acc.uuid && (acc.meta?.type === 'Xbox' || acc.meta?.type === 'Mojang')) {
+                try {
+                    const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${acc.uuid.replace(/-/g, '')}`);
+                    if (res.ok) {
+                        const profile = await res.json();
+                        const texProp = profile.properties?.find(p => p.name === 'textures');
+                        if (texProp?.value) {
+                            const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
+                            if (tex.textures?.SKIN?.url) {
+                                const skinRes = await fetch(tex.textures.SKIN.url);
+                                if (skinRes.ok) {
+                                    const blob = await skinRes.blob();
+                                    const reader = new FileReader();
+                                    headUrl = await new Promise((resolve) => {
+                                        reader.onload = async () => {
+                                            const b64 = reader.result.split(',')[1];
+                                            try {
+                                                const head = await new skin2D().creatHeadTexture(b64);
+                                                resolve(head);
+                                            } catch { resolve(null); }
+                                        };
+                                        reader.readAsDataURL(blob);
+                                    });
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+            // 4. Fallback for offline accounts: try mc-heads (more reliable)
+            if (!headUrl) {
+                try {
+                    const res = await fetch(`https://mc-heads.net/avatar/${acc.name || 'Steve'}/64`);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const reader = new FileReader();
+                        headUrl = await new Promise((resolve) => {
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    }
+                } catch (e) {}
+            }
+            // 5. Ultimate fallback: use local setve.png image
+            if (!headUrl) {
+                try {
+                    const defaultPath = path.join(__dirname, '../../images/default/setve.png');
+                    if (fs.existsSync(defaultPath)) {
+                        const buf = fs.readFileSync(defaultPath);
+                        headUrl = `data:image/png;base64,${buf.toString('base64')}`;
+                    }
+                } catch (e) {}
+            }
+            if (headUrl) {
+                this._skinCache.set(acc.ID, headUrl);
+            }
+            return headUrl;
         } catch (e) {
             return null;
         }
+    }
+
+    _getOfflineUuid(username) {
+        const md5 = crypto.createHash('md5').update('OfflinePlayer:' + username).digest('hex');
+        return md5.substring(0, 8) + '-' + md5.substring(8, 12) + '-' + md5.substring(12, 16) + '-' + md5.substring(16, 20) + '-' + md5.substring(20, 32);
     }
 
     async _renderAccountList(listEl, accounts, selectedId, overlay) {
@@ -433,7 +620,7 @@ class Home {
             const isActive = acc.ID === selectedId;
             item.className = 'dropdown-account-item' + (isActive ? ' active-account' : '');
             item.innerHTML = `
-                <div class="dropdown-account-avatar" style="background-image: url('assets/images/default/setve.png'); background-size: cover; background-position: center;"></div>
+                <div class="dropdown-account-avatar" style="background:linear-gradient(135deg,var(--green-dark),var(--green-mid));display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:14px;font-weight:700;">${acc.name ? acc.name.charAt(0).toUpperCase() : '?'}</span></div>
                 <div class="dropdown-account-name">${acc.name}</div>
             `;
 
@@ -441,7 +628,10 @@ class Home {
             this._getSkinUrl(acc).then(url => {
                 if (url) {
                     const av = item.querySelector('.dropdown-account-avatar');
-                    if (av) av.style.backgroundImage = `url(${url})`;
+                    if (av) {
+                        av.style.background = `url(${url}) center/cover`;
+                        av.innerHTML = '';
+                    }
                 }
             }).catch(() => {});
 
@@ -621,14 +811,9 @@ class Home {
 
         let accounts = await this.db.readAllData('accounts');
         for (let acc of accounts) {
-            let skin = false;
-            if (acc?.profile?.skins[0]?.base64) {
-                try {
-                    skin = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
-                } catch (e) {
-                    // Fallback
-                }
-            }
+            const accSkin = await this._getSkinUrl(acc).catch(() => null);
+            const fallbackSkin = accSkin ? null : 'background:linear-gradient(135deg,var(--green-dark),var(--green-mid));display:flex;align-items:center;justify-content:center;';
+            const fallbackContent = accSkin ? '' : `<span style="color:#fff;font-size:24px;font-weight:700;">${acc.name ? acc.name.charAt(0).toUpperCase() : '?'}</span>`;
 
             const card = document.createElement('div');
             card.classList.add('account');
@@ -637,16 +822,13 @@ class Home {
             }
             card.id = `switch-${acc.ID}`;
             card.innerHTML = `
-                <div class="profile-image" ${skin ? `style="background-image: url(${skin});"` : ''}></div>
+                <div class="profile-image" style="${accSkin ? `background-image: url(${accSkin}); background-size: cover; background-position: center;` : fallbackSkin}">${fallbackContent}</div>
                 <div class="profile-infos">
                     <div class="profile-pseudo">${acc.name}</div>
                     <div class="profile-uuid">${acc.uuid}</div>
                 </div>
                 <div class="delete-profile" id="delete-${acc.ID}">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
+                    <img src="assets/images/png/more-vertical.png" width="14" height="14" alt="del">
                 </div>
             `;
 
@@ -757,10 +939,7 @@ class Home {
                     <span>${f.status === 'online' ? 'Conectado' : 'Desconectado'}</span>
                 </div>
                 <div class="friend-delete-btn" title="Eliminar amigo">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                    <img src="assets/images/png/more-vertical.png" width="14" height="14" alt="x">
                 </div>
             `;
 
@@ -790,6 +969,11 @@ class Home {
         let instancesList = await config.getInstanceList();
         let currentSelect = configClient.instance_select;
 
+        // Clear stale instance statuses on init
+        this._instanceStatus.clear();
+        this._launching = false;
+        this._launchingInstance = null;
+
         // Detect creator server URL
         this._serverUrl = '';
         try {
@@ -810,6 +994,9 @@ class Home {
             instancesList = configClient.creator_server_cache;
         }
         this._serverOnline = serverOnline;
+
+        // Show/hide calendar sidebar based on creator server
+        this.refreshCalendarVisibility();
 
         // Normalize loader: support both string (legacy) and object formats
         instancesList = instancesList.map(pack => {
@@ -967,6 +1154,8 @@ class Home {
             return;
         }
 
+        const now = Date.now();
+
         packs.forEach(pack => {
             const card = document.createElement('div');
             card.classList.add('modpack-grid-card');
@@ -978,11 +1167,17 @@ class Home {
             const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
             const status = this._instanceStatus.get(pack.name);
-            const statusClassMap = { downloading: 'descargando', installing: 'instalando', running: 'ejecutando' };
             let statusTag = '';
             if (status === 'downloading') statusTag = '<span class="modpack-grid-tag descargando">Descargando</span>';
             else if (status === 'installing') statusTag = '<span class="modpack-grid-tag instalando">Instalando</span>';
-            else if (status === 'running') statusTag = '<span class="modpack-grid-tag ejecutando">Ejecutando</span>';
+            else if (status === 'running' || status === 'playing') statusTag = '<span class="modpack-grid-tag jugando">Jugando</span>';
+
+            // "Nuevo" tag: show if pack was created/added in the last 7 days
+            let newTag = '';
+            const firstSeen = pack._firstSeen || this._getFirstSeen(pack.name);
+            if (firstSeen && (now - firstSeen) < 7 * 24 * 60 * 60 * 1000) {
+                newTag = '<span class="modpack-grid-tag nuevo">Nuevo</span>';
+            }
 
             const tags = pack.tags || [];
             let tagsHtml = '';
@@ -990,15 +1185,13 @@ class Home {
                 tagsHtml = `<div class="modpack-grid-tags">${tags.slice(0, 3).map(t => `<span class="modpack-grid-tag-item">${t}</span>`).join('')}${tags.length > 3 ? `<span class="modpack-grid-tag-overflow">+${tags.length - 3}</span>` : ''}</div>`;
             }
 
-            const thumbStyle = pack.poster ? `style="background-image: url('${pack.poster}'); background-size: cover; background-position: center;"` : '';
+            const thumbSrc = pack.banner || pack.poster || '';
+            const thumbStyle = thumbSrc ? `style="background-image: url('${thumbSrc}'); background-size: cover; background-position: center;"` : '';
             card.innerHTML = `
                 <div class="modpack-grid-thumb" ${thumbStyle}>
-                    ${!pack.poster ? `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>` : ''}
+                    ${!thumbSrc ? `<img src="assets/images/png/logo.png" width="28" height="28" alt="pack">` : ''}
                     ${statusTag}
+                    ${newTag}
                 </div>
                 <div class="modpack-grid-info">
                     <div class="modpack-grid-info-top">
@@ -1017,11 +1210,20 @@ class Home {
         });
     }
 
+    _getFirstSeen(instanceName) {
+        try {
+            const firstSeenPath = path.join(this.gamePath, 'instances', instanceName, '.first-seen');
+            if (fs.existsSync(firstSeenPath)) {
+                return parseInt(fs.readFileSync(firstSeenPath, 'utf8').trim(), 10);
+            }
+        } catch (e) {}
+        return null;
+    }
+
     refreshInstanceStatus(name, status) {
         if (status) this._instanceStatus.set(name, status);
         else this._instanceStatus.delete(name);
-        const statusClassMap = { running: 'ejecutando', downloading: 'descargando', installing: 'instalando', closing: 'cerrando', playing: 'jugando' };
-        const label = status === 'running' ? 'Ejecutando' : status === 'downloading' ? 'Descargando' : status === 'installing' ? 'Instalando' : status === 'closing' ? 'Cerrando' : status === 'playing' ? 'Jugando' : '';
+        const label = status === 'running' ? 'Jugando' : status === 'playing' ? 'Jugando' : status === 'downloading' ? 'Descargando' : status === 'installing' ? 'Instalando' : '';
         document.querySelectorAll(`.modpack-grid-card[data-instance-name="${name}"]`).forEach(card => {
             const thumb = card.querySelector('.modpack-grid-thumb');
             if (!thumb) return;
@@ -1029,7 +1231,15 @@ class Home {
             if (existing) existing.remove();
             if (!label) return;
             const tag = document.createElement('span');
-            tag.className = `modpack-grid-tag ${statusClassMap[status] || status}`;
+            if (status === 'running' || status === 'playing') {
+                tag.className = 'modpack-grid-tag jugando';
+            } else if (status === 'downloading') {
+                tag.className = 'modpack-grid-tag descargando';
+            } else if (status === 'installing') {
+                tag.className = 'modpack-grid-tag instalando';
+            } else {
+                tag.className = 'modpack-grid-tag';
+            }
             tag.textContent = label;
             thumb.appendChild(tag);
         });
@@ -1064,24 +1274,23 @@ class Home {
                 document.getElementById('nav-btn-instances')?.classList.add('active');
                 document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
                 document.getElementById('view-instances')?.classList.add('active');
-                const titleEl2 = document.getElementById('top-page-title');
-                if (titleEl2) { titleEl2.style.display = ''; titleEl2.textContent = 'Librería'; }
-                const bc = document.getElementById('top-breadcrumb');
-                if (bc) {
-                    bc.querySelectorAll('.top-chevron').forEach(el => el.remove());
-                    bc.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
-                }
             });
         }
 
         // Fill detail viewport floating card content
         document.getElementById('detail-title').textContent = pack.title || pack.name;
 
-        // Set poster image
+        // Set poster image (card only — no duplicate full-viewport bg)
         const posterImg = document.getElementById('detail-poster-img');
+        const posterSrc = pack.banner || pack.poster || pack.image || '';
         if (posterImg) {
-            posterImg.src = pack.poster || pack.image || 'assets/images/default/setve.png';
-            posterImg.alt = (pack.title || pack.name) + ' poster';
+            if (posterSrc) {
+                posterImg.src = posterSrc;
+                posterImg.style.display = '';
+                posterImg.alt = (pack.title || pack.name) + ' poster';
+            } else {
+                posterImg.style.display = 'none';
+            }
         }
 
         // Dynamic tags
@@ -1106,7 +1315,7 @@ class Home {
 
         const playBtnLabel = document.querySelector('#detail-play-btn-content span');
         if (playBtnLabel) {
-            playBtnLabel.textContent = hasDownloaded ? 'Jugar' : 'Descargar';
+            playBtnLabel.textContent = hasDownloaded ? '' : 'Descargar';
         }
 
         // Setup launcher control listeners
@@ -1117,66 +1326,7 @@ class Home {
     }
 
     updateBreadcrumb(subPage) {
-        const titleEl = document.getElementById('top-page-title');
-        const breadcrumb = document.getElementById('top-breadcrumb');
-        if (!titleEl || !breadcrumb) return;
-
-        // Remove ALL dynamic breadcrumb elements
-        breadcrumb.querySelectorAll('.top-chevron').forEach(el => el.remove());
-        breadcrumb.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
-
-        if (subPage) {
-            // Hide the static titleEl, use breadcrumb segments instead
-            titleEl.style.display = 'none';
-
-            const ch = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            ch.setAttribute('viewBox', '0 0 24 24');
-            ch.setAttribute('width', '30');
-            ch.setAttribute('height', '30');
-            ch.setAttribute('fill', 'none');
-            ch.setAttribute('stroke', 'currentColor');
-            ch.setAttribute('stroke-width', '2.5');
-            ch.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
-            ch.classList.add('top-chevron');
-
-            const seg = document.createElement('span');
-            seg.classList.add('top-page-title', 'breadcrumb-segment');
-            seg.style.cursor = 'pointer';
-            seg.textContent = 'Librería';
-            seg.addEventListener('click', () => {
-                document.querySelectorAll('.sidebar-item.nav-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('nav-btn-instances')?.classList.add('active');
-                document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
-                document.getElementById('view-instances')?.classList.add('active');
-                const t = document.getElementById('top-page-title');
-                if (t) { t.style.display = ''; t.textContent = 'Librería'; }
-                const br = document.getElementById('top-breadcrumb');
-                if (br) {
-                    br.querySelectorAll('.top-chevron').forEach(el => el.remove());
-                    br.querySelectorAll('.breadcrumb-segment').forEach(el => el.remove());
-                }
-            });
-
-            const seg2 = document.createElement('span');
-            seg2.classList.add('top-page-title', 'breadcrumb-segment');
-            seg2.textContent = subPage;
-
-            breadcrumb.appendChild(ch);
-            breadcrumb.appendChild(seg);
-            const ch2 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            ch2.setAttribute('viewBox', '0 0 24 24');
-            ch2.setAttribute('width', '30');
-            ch2.setAttribute('height', '30');
-            ch2.setAttribute('fill', 'none');
-            ch2.setAttribute('stroke', 'currentColor');
-            ch2.setAttribute('stroke-width', '2.5');
-            ch2.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
-            ch2.classList.add('top-chevron');
-            breadcrumb.appendChild(ch2);
-            breadcrumb.appendChild(seg2);
-        } else {
-            titleEl.style.display = '';
-        }
+        // Breadcrumb removed - logo only
     }
 
     setupLauncherControls(pack, gamePath) {
@@ -1190,7 +1340,6 @@ class Home {
         playBtn.replaceWith(playBtn.cloneNode(true));
         const newPlayBtn = document.getElementById('detail-play-btn');
         newPlayBtn.addEventListener('click', () => {
-            if (this._launching) return;
             this.startGame(pack, gamePath);
         });
 
@@ -1330,12 +1479,12 @@ class Home {
         // Dropdown Option: Force Close Game (Forzar Cierre)
         document.getElementById('opt-btn-kill').onclick = () => {
             if (dropdown) dropdown.classList.remove('open');
+            const instName = this._launchingInstance;
             const proc = this.minecraftProcess?._process;
             if (proc) {
                 proc.kill();
                 this.minecraftProcess = null;
                 new logger('Minecraft', '#ef4444').info('Minecraft finalizado por el usuario.');
-                alert('Minecraft ha sido cerrado de forma forzada.');
             } else {
                 const { exec } = require('child_process');
                 if (process.platform === 'win32') {
@@ -1343,8 +1492,11 @@ class Home {
                 } else {
                     exec('killall -9 java');
                 }
-                alert('Procesos de Java cerrados de forma forzada.');
             }
+            this._launching = false;
+            this._launchingInstance = null;
+            if (instName) this.refreshInstanceStatus(instName);
+            alert('Procesos cerrados. El estado se ha reiniciado.');
         };
     }
 
@@ -1407,7 +1559,6 @@ class Home {
                     padding:8px 12px; margin:4px 0;
                     border-radius:8px; cursor:pointer;
                     background:rgba(255,255,255,0.03);
-                    transition:background 0.2s;
                 `;
 
                 const cb = document.createElement('input');
@@ -1498,8 +1649,9 @@ class Home {
         let loaderVersion = options.loader?.loader_version || options.loader?.build || '';
         const mcVersion = options.loader?.minecraft_version || options.gameVersion || '1.20.1';
 
-        // For Forge & NeoForge, the build must include the MC version prefix (e.g. "1.20.1-47.4.10")
-        if ((loaderType === 'forge' || loaderType === 'neoforge') && loaderVersion && !loaderVersion.startsWith(mcVersion + '-')) {
+        // For Forge, the build must include the MC version prefix (e.g. "1.20.1-47.4.10")
+        // NeoForge uses its own versioning (e.g. "21.1.1"), do NOT prepend MC version
+        if (loaderType === 'forge' && loaderVersion && !loaderVersion.startsWith(mcVersion + '-')) {
             loaderVersion = mcVersion + '-' + loaderVersion;
         }
 
@@ -1517,6 +1669,8 @@ class Home {
         if (maxGB > 4) maxGB = 4;
         if (minGB > maxGB) minGB = 1;
 
+        const isOffline = authenticator?.meta?.type === 'Offline';
+
         let opt = {
             url: options.url || undefined,
             authenticator: authenticator,
@@ -1527,6 +1681,7 @@ class Home {
             detached: configClient.launcher_config?.closeLauncher == "close-all" ? false : true,
             downloadFileMultiple: configClient.launcher_config?.download_multi || 5,
             intelEnabledMac: configClient.launcher_config?.intelEnabledMac ?? true,
+            bypassOffline: isOffline,
 
             loader: {
                 type: loaderType === 'vanilla' ? 'none' : loaderType,
@@ -1557,13 +1712,20 @@ class Home {
 
         // Prevent launching while already launching
         if (this._launching) {
-            new popup().openPopup({
-                title: 'Ya hay una instancia iniciando',
-                content: 'Esperá a que la instancia actual termine de iniciarse.',
-                color: 'orange',
-                options: true
-            });
-            return;
+            const reset = confirm('Ya hay una instancia en ejecución. Si el juego se cerró inesperadamente, presioná OK para reiniciar el estado.');
+            if (reset) {
+                this._launching = false;
+                this._launchingInstance = null;
+                this.minecraftProcess = null;
+                // clean running_instance from config
+                let ccReset = await this.db.readData('configClient');
+                if (ccReset && ccReset.running_instance) {
+                    delete ccReset.running_instance;
+                    await this.db.updateData('configClient', ccReset);
+                }
+            } else {
+                return;
+            }
         }
         this._launching = true;
         this._launchingInstance = options.name;
@@ -1655,6 +1817,14 @@ class Home {
                     if (!configClient.instances_versions) configClient.instances_versions = {};
                     configClient.instances_versions[options.name] = result.version;
                     await this.db.updateData('configClient', configClient);
+
+                    // Write .first-seen for "Nuevo" badge
+                    try {
+                        const firstSeenPath = path.join(instancePath, '.first-seen');
+                        if (!fs.existsSync(firstSeenPath)) {
+                            fs.writeFileSync(firstSeenPath, String(Date.now()));
+                        }
+                    } catch (e) {}
 
                     // Refresh instances grid so installed pack moves from "Todas" to "Instaladas"
                     await this.initInstances();
@@ -1761,6 +1931,7 @@ class Home {
             await this.db.updateData('configClient', cc);
         };
         persistLaunch(options.name);
+        this.refreshInstanceStatus(options.name, 'running');
 
         launch.on('progress', (progress, size) => {
             const pct = ((progress / size) * 100).toFixed(0);
@@ -1848,6 +2019,162 @@ class Home {
     }
 
     /* ==========================================================================
+       CALENDAR
+       ========================================================================== */
+
+    _calCurrentDate = new Date();
+    _calSelectedDate = null;
+    _calEvents = [];
+
+    refreshCalendarVisibility() {
+        const calBtn = document.getElementById('nav-btn-calendar');
+        if (!calBtn) return;
+        const isCreatorActive = document.querySelector('#instances-admin-section')?.style.display !== 'none'
+            || this._serverUrl
+            || document.querySelectorAll('#instances-grid-creator .modpack-grid-card').length > 0;
+        calBtn.style.display = isCreatorActive ? '' : 'none';
+    }
+
+    initCalendar() {
+        this.loadCalendarEvents();
+        this.renderCalendar();
+        this.setupCalendarNav();
+    }
+
+    loadCalendarEvents() {
+        this._calEvents = [];
+        try {
+            const userDataPath = require('electron').ipcRenderer ? true : false;
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.invoke('path-user-data').then(userDataPath => {
+                const calPath = require('path').join(userDataPath, 'calendar-events.json');
+                if (require('fs').existsSync(calPath)) {
+                    this._calEvents = JSON.parse(require('fs').readFileSync(calPath, 'utf8'));
+                    if (this._isCalendarViewActive()) this.renderEventsForDay(this._calSelectedDate);
+                }
+            }).catch(() => {});
+        } catch (e) {}
+    }
+
+    _isCalendarViewActive() {
+        return document.getElementById('view-calendar')?.classList.contains('active');
+    }
+
+    renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        const monthYear = document.getElementById('cal-month-year');
+        if (!grid || !monthYear) return;
+
+        const date = this._calCurrentDate;
+        const year = date.getFullYear();
+        const month = date.getMonth();
+
+        const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        monthYear.textContent = `${months[month]} ${year}`;
+
+        grid.innerHTML = '';
+
+        const dayHeaders = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        dayHeaders.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'cal-day-header';
+            el.textContent = d;
+            grid.appendChild(el);
+        });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+        const today = new Date();
+
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const el = document.createElement('div');
+            el.className = 'cal-day other-month';
+            el.textContent = daysInPrevMonth - i;
+            grid.appendChild(el);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const el = document.createElement('div');
+            el.className = 'cal-day';
+            el.textContent = d;
+
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+            if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                el.classList.add('today');
+            }
+
+            if (this._calSelectedDate === dateStr) {
+                el.classList.add('selected');
+            }
+
+            if (this._calEvents.some(e => e.date === dateStr)) {
+                el.classList.add('has-event');
+            }
+
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
+                el.classList.add('selected');
+                this._calSelectedDate = dateStr;
+                this.renderEventsForDay(dateStr);
+            });
+
+            grid.appendChild(el);
+        }
+
+        const totalCells = firstDay + daysInMonth;
+        const remaining = (7 - (totalCells % 7)) % 7;
+        for (let i = 1; i <= remaining; i++) {
+            const el = document.createElement('div');
+            el.className = 'cal-day other-month';
+            el.textContent = i;
+            grid.appendChild(el);
+        }
+    }
+
+    setupCalendarNav() {
+        const prev = document.getElementById('cal-prev');
+        const next = document.getElementById('cal-next');
+        if (prev) {
+            prev.addEventListener('click', () => {
+                this._calCurrentDate = new Date(this._calCurrentDate.getFullYear(), this._calCurrentDate.getMonth() - 1, 1);
+                this.renderCalendar();
+            });
+        }
+        if (next) {
+            next.addEventListener('click', () => {
+                this._calCurrentDate = new Date(this._calCurrentDate.getFullYear(), this._calCurrentDate.getMonth() + 1, 1);
+                this.renderCalendar();
+            });
+        }
+    }
+
+    renderEventsForDay(dateStr) {
+        const list = document.getElementById('cal-events-list');
+        if (!list) return;
+
+        const dayEvents = this._calEvents.filter(e => e.date === dateStr);
+
+        if (dayEvents.length === 0) {
+            list.innerHTML = '<p style="font-size:12px; color:var(--text-secondary);">No hay eventos para este día.</p>';
+            return;
+        }
+
+        list.innerHTML = '';
+        dayEvents.forEach(ev => {
+            const item = document.createElement('div');
+            item.className = 'cal-event-item';
+            item.innerHTML = `
+                <span class="event-dot"></span>
+                <span class="event-time">${ev.time || 'Todo el día'}</span>
+                <span class="event-title">${ev.title}</span>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    /* ==========================================================================
        MERGED GENERAL SETTINGS CONTROLLER LOGIC
        ========================================================================== */
     async initSettings() {
@@ -1855,6 +2182,7 @@ class Home {
         await this.settingsJavaPath();
         await this.settingsResolution();
         await this.settingsLauncher();
+        await this.settingsAccount();
     }
 
     async settingsRam() {
@@ -2020,6 +2348,34 @@ class Home {
             newHeight.value = '480';
             await this.db.updateData('configClient', currentConfig);
         });
+    }
+
+    async settingsAccount() {
+        let configClient = await this.db.readData('configClient');
+        let auth = configClient.account_selected
+            ? await this.db.readData('accounts', configClient.account_selected)
+            : null;
+
+        const nameEl = document.getElementById('acc-active-name');
+        const typeEl = document.getElementById('acc-active-type');
+        const avatarEl = document.getElementById('acc-active-avatar');
+
+        if (nameEl) nameEl.textContent = auth?.name || 'Sin cuenta';
+        if (typeEl) typeEl.textContent = auth?.meta?.type || 'Offline';
+
+        if (avatarEl && auth) {
+            const skinUrl = await this._getSkinUrl(auth);
+            if (skinUrl) {
+                avatarEl.style.backgroundImage = `url(${skinUrl})`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.style.backgroundPosition = 'center';
+                avatarEl.innerHTML = '';
+            } else {
+                avatarEl.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                avatarEl.style.backgroundImage = 'none';
+                avatarEl.innerHTML = '<span style="color:#fff;font-size:24px;font-weight:700;">' + (auth.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
+            }
+        }
     }
 
     async settingsLauncher() {

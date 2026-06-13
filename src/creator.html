@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +7,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #020618;
-            --card-color: #0f172b;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-color: #f8fafc;
+            --bg-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --accent-color: #333333;
+            --accent-hover: #555555;
+            --text-color: #1A1A1A;
             --border-radius: 12px;
-            --border-color: rgba(255, 255, 255, 0.05);
-            --danger-color: #ef4444;
+            --border-color: #CCCCCC;
+            --danger-color: #666666;
         }
 
         body {
@@ -30,11 +29,9 @@
             height: 100vh;
         }
 
-        /* Frame */
         .frame {
             height: 40px;
-            background-color: rgba(2, 6, 24, 0.8);
-            backdrop-filter: blur(10px);
+            background-color: #FFFFFF;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -47,7 +44,7 @@
         .frame-title {
             font-weight: 700;
             font-size: 0.95em;
-            color: #3b82f6;
+            color: #333333;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -62,51 +59,48 @@
         .frame-btn {
             background: none;
             border: none;
-            color: #64748b;
+            color: #999999;
             cursor: pointer;
             font-size: 1.1em;
             padding: 5px;
-            transition: color 0.2s;
         }
 
         .frame-btn:hover {
-            color: var(--text-color);
+            color: #333333;
         }
 
-        /* Menu Bar */
         .menu-bar {
-            background-color: #0b0f19;
+            background-color: #FFFFFF;
             padding: 5px 15px;
             display: flex;
             gap: 15px;
             font-size: 0.85em;
             border-bottom: 1px solid var(--border-color);
-            color: #94a3b8;
+            color: #666666;
         }
 
         .menu-item {
             cursor: pointer;
-            transition: color 0.2s;
         }
 
         .menu-item:hover {
-            color: var(--text-color);
+            color: #333333;
         }
 
-        /* Toolbar */
         .toolbar {
-            background-color: #0f172a;
+            background-color: #FFFFFF;
             padding: 10px 15px;
             display: flex;
             gap: 12px;
             border-bottom: 1px solid var(--border-color);
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .tool-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: #ccc;
+            background: #F0F0F0;
+            border: 1px solid #CCCCCC;
+            color: #333333;
             padding: 8px 12px;
             border-radius: 8px;
             cursor: pointer;
@@ -115,38 +109,31 @@
             gap: 6px;
             font-size: 0.85em;
             font-family: inherit;
-            transition: all 0.2s;
         }
 
         .tool-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--accent-color);
-            color: #fff;
-            transform: translateY(-1px);
-        }
-
-        .tool-btn:active {
-            transform: translateY(0);
+            background: #E0E0E0;
+            border-color: #999999;
+            color: #1A1A1A;
         }
 
         .tool-btn.primary {
-            background: var(--accent-color);
+            background: #333333;
             border: none;
-            color: #fff;
+            color: #FFFFFF;
             font-weight: 600;
         }
 
         .tool-btn.primary:hover {
-            background: var(--accent-hover);
+            background: #555555;
         }
 
         .divider {
             width: 1px;
             height: 24px;
-            background-color: var(--border-color);
+            background-color: #CCCCCC;
         }
 
-        /* Main Workspace */
         .workspace {
             display: flex;
             flex: 1;
@@ -154,7 +141,6 @@
             position: relative;
         }
 
-        /* Modpack Table List */
         .list-panel {
             flex: 1.5;
             padding: 20px;
@@ -178,36 +164,33 @@
             text-align: left;
         }
 
-        th,
-        td {
+        th, td {
             padding: 12px 15px;
             border-bottom: 1px solid var(--border-color);
         }
 
         th {
-            background: rgba(255, 255, 255, 0.02);
-            color: #94a3b8;
+            background: #F5F5F5;
+            color: #666666;
             font-weight: 600;
         }
 
         tr {
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         tr:hover {
-            background: rgba(255, 255, 255, 0.02);
+            background: #F5F5F5;
         }
 
         tr.selected {
-            background: rgba(59, 130, 246, 0.15) !important;
-            border-left: 3px solid var(--accent-color);
+            background: #E0E0E0 !important;
+            border-left: 3px solid #333333;
         }
 
-        /* Side Console Panel */
         .side-panel {
             flex: 1;
-            background-color: #030712;
+            background-color: #FFFFFF;
             border-left: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -219,7 +202,7 @@
         .panel-title {
             font-size: 1.1em;
             font-weight: 700;
-            color: var(--accent-color);
+            color: #333333;
             margin: 0;
             display: flex;
             align-items: center;
@@ -228,18 +211,18 @@
 
         .console-logs {
             flex: 1;
-            background-color: #010409;
+            background-color: #F5F5F5;
             border-radius: 8px;
             padding: 12px;
             font-family: monospace;
             font-size: 0.8em;
-            color: #10b981;
+            color: #555555;
             overflow-y: auto;
             white-space: pre-wrap;
             display: flex;
             flex-direction: column;
             gap: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.02);
+            border: 1px solid #E0E0E0;
         }
 
         .log-entry {
@@ -247,19 +230,18 @@
         }
 
         .log-info {
-            color: #a855f7;
+            color: #555555;
         }
 
         .log-success {
-            color: #10b981;
+            color: #333333;
             font-weight: bold;
         }
 
         .log-error {
-            color: #ef4444;
+            color: #666666;
         }
 
-        /* Modal dialogs */
         .modal {
             display: none;
             position: fixed;
@@ -267,8 +249,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(2, 6, 24, 0.85);
-            backdrop-filter: blur(5px);
+            background-color: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -276,7 +257,7 @@
 
         .modal-content {
             overflow: auto;
-            background-color: var(--card-color);
+            background-color: #FFFFFF;
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             width: 480px;
@@ -284,13 +265,13 @@
             display: flex;
             flex-direction: row;
             gap: 15px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
         }
 
         .modal-title {
             font-size: 1.2em;
             font-weight: 700;
-            color: #fff;
+            color: #1A1A1A;
             margin: 0;
         }
 
@@ -302,26 +283,25 @@
 
         label {
             font-size: 0.85em;
-            color: #94a3b8;
+            color: #666666;
             font-weight: 600;
         }
 
         input[type="text"],
         select {
-            background-color: rgba(2, 6, 24, 0.6);
+            background-color: #F5F5F5;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: #fff;
+            color: #1A1A1A;
             padding: 10px 12px;
             font-family: inherit;
             font-size: 0.9em;
             outline: none;
-            transition: border-color 0.2s;
         }
 
         input[type="text"]:focus,
         select:focus {
-            border-color: var(--accent-color);
+            border-color: #999999;
         }
 
         .modal-buttons {
@@ -339,30 +319,28 @@
             cursor: pointer;
             font-weight: 600;
             border: none;
-            transition: all 0.2s;
         }
 
         .modal-btn.cancel {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ccc;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #F0F0F0;
+            color: #666666;
+            border: 1px solid #CCCCCC;
         }
 
         .modal-btn.cancel:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: #E0E0E0;
+            color: #333333;
         }
 
         .modal-btn.confirm {
-            background: var(--accent-color);
-            color: #fff;
+            background: #333333;
+            color: #FFFFFF;
         }
 
         .modal-btn.confirm:hover {
-            background: var(--accent-hover);
+            background: #555555;
         }
 
-        /* Progress Bar */
         .progress-container {
             display: none;
             flex-direction: column;
@@ -373,29 +351,28 @@
             width: 100%;
             height: 8px;
             border-radius: 4px;
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: #E0E0E0;
             border: none;
             overflow: hidden;
         }
 
         progress::-webkit-progress-bar {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: #E0E0E0;
         }
 
         progress::-webkit-progress-value {
-            background-color: var(--accent-color);
+            background-color: #333333;
         }
 
-        /* Server status indicator */
         .server-status {
             display: none;
             flex-direction: column;
             gap: 6px;
             margin: 10px 0;
             padding: 10px 12px;
-            background: rgba(0,0,0,0.3);
+            background: #F5F5F5;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid #E0E0E0;
         }
 
         .server-indicator {
@@ -403,7 +380,7 @@
             align-items: center;
             gap: 8px;
             font-size: 0.85em;
-            color: #94a3b8;
+            color: #666666;
         }
 
         .server-dot {
@@ -413,40 +390,30 @@
             display: inline-block;
         }
 
-        .server-dot.offline { background: #ef4444; }
-        .server-dot.online { background: #10b981; box-shadow: 0 0 6px #10b981; }
+        .server-dot.offline { background: #999999; }
+        .server-dot.online { background: #333333; }
 
         .server-info {
             font-size: 0.75em;
-            color: #64748b;
+            color: #999999;
             word-break: break-all;
         }
     </style>
 </head>
 
 <body>
-    <!-- Custom Window Frame -->
     <div class="frame">
-        <div class="frame-title">📁 Yusup Modpack Creator (SKCraft Style)</div>
+        <div class="frame-title">Yusup Modpack Creator (SKCraft Style)</div>
         <div class="frame-buttons">
             <button class="frame-btn" id="minimize">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="currentColor">
-                    <path
-                        d="M280-120q-17 0-28.5-11.5T240-160q0-17 11.5-28.5T280-200h400q17 0 28.5 11.5T720-160q0 17-11.5 28.5T680-120H280Z" />
-                </svg>
+                <img src="assets/images/png/more-vertical.png" height="24" width="24" alt="-">
             </button>
             <button class="frame-btn" id="close">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="currentColor">
-                    <path
-                        d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
-                </svg>
+                <img src="assets/images/png/charge.png" height="24" width="24" alt="x">
             </button>
         </div>
     </div>
 
-    <!-- Menu Bar -->
     <div class="menu-bar">
         <div class="menu-item" id="menu-file">Archivo</div>
         <div class="menu-item" id="menu-edit">Editar</div>
@@ -454,39 +421,30 @@
         <div class="menu-item" id="menu-build">Compilar</div>
     </div>
 
-    <!-- Toolbar -->
     <div class="toolbar">
-        <button class="tool-btn primary" id="btn-new-pack">🆕 Nuevo Modpack</button>
-        <button class="tool-btn" id="btn-add-existing">📂 Añadir Existente</button>
+        <button class="tool-btn primary" id="btn-new-pack">Nuevo Modpack</button>
+        <button class="tool-btn" id="btn-add-existing">Anadir Existente</button>
         <div class="divider"></div>
-        <button class="tool-btn" id="btn-modify">📝 Modificar</button>
-        <button class="tool-btn" id="btn-open-folder">📂 Abrir Carpeta</button>
-        <button class="tool-btn" id="btn-whitelist" style="background: rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.4);">👥 Roles</button>
-        <button class="tool-btn" id="btn-delete-pack" style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4);">🗑️ Eliminar</button>
-        <button class="tool-btn" id="btn-check">✔️ Verificar</button>
+        <button class="tool-btn" id="btn-modify">Modificar</button>
+        <button class="tool-btn" id="btn-open-folder">Abrir Carpeta</button>
+        <button class="tool-btn" id="btn-whitelist">Roles</button>
+        <button class="tool-btn" id="btn-delete-pack">Eliminar</button>
+        <button class="tool-btn" id="btn-check">Verificar</button>
         <div class="divider"></div>
-        <button class="tool-btn" style="background: rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.4);"
-            id="btn-test">🧪 Probar Modpack</button>
-        <button class="tool-btn" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4);"
-            id="btn-build">📦 Compilar Modpack</button>
+        <button class="tool-btn" id="btn-test">Probar Modpack</button>
+        <button class="tool-btn" id="btn-build">Compilar Modpack</button>
         <div class="divider"></div>
+        <button class="tool-btn" id="btn-install-launcher">Instalar Seleccionados</button>
+        <button class="tool-btn" id="btn-install-all">Instalar Todos</button>
         <div class="divider"></div>
-        <button class="tool-btn" style="background: rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.5);"
-            id="btn-install-launcher">⬇️ Instalar Seleccionados</button>
-        <button class="tool-btn" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4);"
-            id="btn-install-all">⬇️⬇️ Instalar Todos</button>
+        <button class="tool-btn" id="btn-check-updates">Verificar Actualizaciones</button>
+        <button class="tool-btn" id="btn-start-server">Iniciar Servidor</button>
         <div class="divider"></div>
-        <button class="tool-btn" style="background: rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.5);"
-            id="btn-check-updates">🔄 Verificar Actualizaciones</button>
-        <button class="tool-btn" id="btn-start-server">🌐 Iniciar Servidor</button>
-        <div class="divider"></div>
-        <button class="tool-btn" style="background: rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.5);"
-            id="btn-launch-client">▶️ Probar en Launcher</button>
+        <button class="tool-btn" id="btn-calendar">Calendario</button>
+        <button class="tool-btn" id="btn-launch-client">Probar en Launcher</button>
     </div>
 
-    <!-- Main Workspace -->
     <div class="workspace">
-        <!-- List Panel -->
         <div class="list-panel">
             <div class="table-container">
                 <table id="modpack-table">
@@ -494,26 +452,23 @@
                         <tr>
                             <th style="width:32px;"><input type="checkbox" id="check-all" title="Seleccionar todos"></th>
                             <th>Nombre</th>
-                            <th>Título</th>
-                            <th>Versión del Juego</th>
-                            <th>Ubicación</th>
+                            <th>Titulo</th>
+                            <th>Version del Juego</th>
+                            <th>Ubicacion</th>
                         </tr>
                     </thead>
                     <tbody id="modpack-list">
-                        <!-- Modpacks dynamically loaded -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Side Output Panel -->
         <div class="side-panel">
-            <h3 class="panel-title">📟 Consola del Sistema</h3>
+            <h3 class="panel-title">Consola del Sistema</h3>
             <div class="console-logs" id="console-logs">
                 <div class="log-entry log-info">[Listo] Creador de Modpacks inicializado.</div>
             </div>
 
-            <!-- Server Status -->
             <div class="server-status" id="server-status" style="display:none;">
                 <div class="server-indicator">
                     <span class="server-dot" id="server-dot"></span>
@@ -522,18 +477,16 @@
                 <div class="server-info" id="server-info"></div>
             </div>
 
-            <!-- Progress -->
             <div class="progress-container" id="progress-container">
-                <label style="font-size: 0.8em; color: #94a3b8;" id="progress-status">Procesando...</label>
+                <label style="font-size: 0.8em; color: #999999;" id="progress-status">Procesando...</label>
                 <progress id="compile-progress" value="0" max="100"></progress>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: Nuevo Modpack -->
     <div class="modal" id="modal-new-pack">
         <div class="modal-content">
-            <h3 class="modal-title">🆕 Crear Nuevo Modpack</h3>
+            <h3 class="modal-title">Crear Nuevo Modpack</h3>
 
             <div class="input-group">
                 <label>Nombre Identificador (ID sin espacios)</label>
@@ -541,12 +494,12 @@
             </div>
 
             <div class="input-group">
-                <label>Título Visible</label>
+                <label>Titulo Visible</label>
                 <input type="text" id="new-title" placeholder="ej. Selvania Server 1.20">
             </div>
 
             <div class="input-group">
-                <label>Versión de Minecraft</label>
+                <label>Version de Minecraft</label>
                 <input type="text" id="new-game-version" value="1.20.1">
             </div>
 
@@ -561,16 +514,16 @@
             </div>
 
             <div class="input-group">
-                <label>Versión del Loader</label>
+                <label>Version del Loader</label>
                 <select id="new-loader-version">
-                    <option value="">Seleccioná una versión de MC primero</option>
+                    <option value="">Seleccion una version de MC primero</option>
                 </select>
             </div>
 
             <div class="input-group">
-                <label>Descripción</label>
-                <textarea id="new-description" rows="3" placeholder="Descripción del modpack..."
-                    style="background: rgba(2,6,24,0.6); border:1px solid var(--border-color); border-radius:8px; color:#fff; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none; resize:vertical;"></textarea>
+                <label>Descripcion</label>
+                <textarea id="new-description" rows="3" placeholder="Descripcion del modpack..."
+                    style="background: #F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none; resize:vertical;"></textarea>
             </div>
 
             <div class="input-group">
@@ -579,38 +532,37 @@
             </div>
 
             <div class="input-group">
-                <label>Banner para tarjeta (recomendado: 262×162 px)</label>
+                <label>Banner para tarjeta (recomendado: 262x162 px)</label>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <button class="btn-select-dir" id="btn-select-banner"
-                        style="background:#020618; border:1px solid var(--border-color);">Seleccionar imagen...</button>
+                        style="background:#F5F5F5; border:1px solid #CCCCCC; padding:8px 12px; border-radius:8px; cursor:pointer; font-family:inherit;">Seleccionar imagen...</button>
                     <button class="btn-select-dir" id="btn-clear-banner"
-                        style="background:transparent; border:1px solid #ef4444; color:#ef4444; display:none;">✕</button>
+                        style="background:transparent; border:1px solid #666666; color:#666666; display:none; padding:8px 12px; border-radius:8px; cursor:pointer;">X</button>
                 </div>
                 <input type="file" id="new-banner-input" accept="image/png,image/jpeg,image/webp" style="display:none;">
-                <span id="new-banner-path" style="font-size:0.75em; color:#94a3b8; word-break:break-all;">No seleccionada</span>
-                <div id="new-banner-preview" style="display:none; margin-top:8px; width:262px; height:162px; border-radius:12px; background-size:cover; background-position:center; border:1px solid var(--border-color);"></div>
+                <span id="new-banner-path" style="font-size:0.75em; color:#999999; word-break:break-all;">No seleccionada</span>
+                <div id="new-banner-preview" style="display:none; margin-top:8px; width:262px; height:162px; border-radius:12px; background-size:cover; background-position:center; border:1px solid #CCCCCC;"></div>
             </div>
 
             <div class="input-group">
                 <label>Poster para fondo del modpack</label>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <button class="btn-select-dir" id="btn-select-poster"
-                        style="background:#020618; border:1px solid var(--border-color);">Seleccionar imagen...</button>
+                        style="background:#F5F5F5; border:1px solid #CCCCCC; padding:8px 12px; border-radius:8px; cursor:pointer; font-family:inherit;">Seleccionar imagen...</button>
                     <button class="btn-select-dir" id="btn-clear-poster"
-                        style="background:transparent; border:1px solid #ef4444; color:#ef4444; display:none;">✕</button>
+                        style="background:transparent; border:1px solid #666666; color:#666666; display:none; padding:8px 12px; border-radius:8px; cursor:pointer;">X</button>
                 </div>
                 <input type="file" id="new-poster-input" accept="image/png,image/jpeg,image/webp" style="display:none;">
-                <span id="new-poster-path" style="font-size:0.75em; color:#94a3b8; word-break:break-all;">No seleccionada</span>
-                <div id="new-poster-preview" style="display:none; margin-top:8px; max-width:100%; height:120px; border-radius:8px; background-size:cover; background-position:center; border:1px solid var(--border-color);"></div>
+                <span id="new-poster-path" style="font-size:0.75em; color:#999999; word-break:break-all;">No seleccionada</span>
+                <div id="new-poster-preview" style="display:none; margin-top:8px; max-width:100%; height:120px; border-radius:8px; background-size:cover; background-position:center; border:1px solid #CCCCCC;"></div>
             </div>
 
             <div class="input-group">
                 <label>Carpeta Local del Modpack</label>
                 <button class="btn-select-dir"
-                    style="background: #020618; border: 1px solid var(--border-color); text-align: left;"
+                    style="background: #F5F5F5; border: 1px solid #CCCCCC; text-align: left; padding:8px 12px; border-radius:8px; cursor:pointer; font-family:inherit;"
                     id="btn-select-new-location">Seleccionar carpeta local...</button>
-                <span id="new-location-path" style="font-size:0.75em; color:#94a3b8; word-break:break-all;">No
-                    seleccionada</span>
+                <span id="new-location-path" style="font-size:0.75em; color:#999999; word-break:break-all;">No seleccionada</span>
             </div>
 
             <div class="modal-buttons">
@@ -620,27 +572,26 @@
         </div>
     </div>
 
-    <!-- MODAL: Whitelist / Roles -->
     <div class="modal" id="modal-whitelist">
         <div class="modal-content" style="width:560px;">
-            <h3 class="modal-title">👥 Jugadores y Roles</h3>
-            <p style="font-size:0.85em; color:#94a3b8; margin:0;">
-            Definí qué cuentas pueden ver y jugar este modpack.
+            <h3 class="modal-title">Jugadores y Roles</h3>
+            <p style="font-size:0.85em; color:#666666; margin:0;">
+            Defini que cuentas pueden ver y jugar este modpack.
             <b>Admin</b> ve todas las instancias. <b>Player</b> solo ve las que tiene asignadas.
             </p>
 
             <div style="display:flex; gap:10px; align-items:center;">
                 <input type="text" id="wl-player-name" placeholder="Nombre del jugador"
-                    style="flex:1; background:rgba(2,6,24,0.6); border:1px solid var(--border-color); border-radius:8px; color:#fff; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
+                    style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
                 <select id="wl-player-role"
-                    style="background:rgba(2,6,24,0.6); border:1px solid var(--border-color); border-radius:8px; color:#fff; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
+                    style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
                     <option value="player">Player</option>
                     <option value="admin">Admin</option>
                 </select>
-                <button class="tool-btn" id="btn-wl-add" style="white-space:nowrap;">➕ Agregar</button>
+                <button class="tool-btn" id="btn-wl-add" style="white-space:nowrap;">+ Agregar</button>
             </div>
 
-            <div style="flex:1; overflow-y:auto; max-height:180px; border:1px solid var(--border-color); border-radius:8px; background:rgba(2,6,24,0.4);">
+            <div style="flex:1; overflow-y:auto; max-height:180px; border:1px solid #CCCCCC; border-radius:8px; background:#F5F5F5;">
                 <table style="width:100%; font-size:0.85em;">
                     <thead>
                         <tr><th style="padding:8px 12px;">Jugador</th><th style="padding:8px 12px;">Rol</th><th style="padding:8px 12px; width:40px;"></th></tr>
@@ -649,7 +600,7 @@
                 </table>
             </div>
 
-            <label style="display:flex; align-items:center; gap:8px; font-size:0.85em; color:#94a3b8;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.85em; color:#666666;">
                 <input type="checkbox" id="wl-active"> Activar lista de permisos (solo Player pueden ver este modpack)
             </label>
 
@@ -660,7 +611,40 @@
         </div>
     </div>
 
+    <div class="modal" id="modal-calendar">
+        <div class="modal-content" style="width:560px; flex-direction:column;">
+            <h3 class="modal-title">Calendario de Eventos</h3>
+            <p style="font-size:0.85em; color:#666666; margin:0 0 12px 0;">
+            Administrá los eventos del calendario. Los eventos se muestran en el launcher de los jugadores.
+            </p>
+
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                <input type="date" id="cal-event-date"
+                    style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+                <input type="time" id="cal-event-time"
+                    style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                <input type="text" id="cal-event-title" placeholder="Título del evento"
+                    style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+                <button class="tool-btn" id="btn-cal-add" style="white-space:nowrap;">+ Agregar</button>
+            </div>
+
+            <div style="flex:1; overflow-y:auto; max-height:200px; border:1px solid #CCCCCC; border-radius:8px; background:#F5F5F5;">
+                <table style="width:100%; font-size:0.85em;">
+                    <thead>
+                        <tr><th style="padding:8px 12px;">Fecha</th><th style="padding:8px 12px;">Hora</th><th style="padding:8px 12px;">Evento</th><th style="padding:8px 12px; width:40px;"></th></tr>
+                    </thead>
+                    <tbody id="cal-events-table"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="btn-close-cal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="assets/js/creator.js"></script>
 </body>
-
 </html>

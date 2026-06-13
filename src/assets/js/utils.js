@@ -39,14 +39,30 @@ async function appdata() {
     return await ipcRenderer.invoke('appData').then(path => path)
 }
 
+function _generateAvatarSVG(seed) {
+    if (!seed) seed = Math.random().toString();
+    let hash = 0;
+    for (let i = 0; i < String(seed).length; i++) {
+        hash = String(seed).charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    const sat = 50 + (Math.abs(hash * 7) % 30);
+    const lit = 40 + (Math.abs(hash * 13) % 30);
+    return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="hsl(${hue},${sat}%,${lit}%)" rx="8"/><rect x="16" y="8" width="8" height="8" fill="rgba(0,0,0,0.15)" rx="2"/><rect x="40" y="8" width="8" height="8" fill="rgba(0,0,0,0.15)" rx="2"/><rect x="24" y="28" width="16" height="16" fill="rgba(0,0,0,0.1)" rx="4"/><rect x="16" y="44" width="32" height="8" fill="rgba(0,0,0,0.1)" rx="2"/></svg>`)}`;
+}
+
 async function addAccount(data) {
-    let skin = false
-    if (data?.profile?.skins[0]?.base64) skin = await new skin2D().creatHeadTexture(data.profile.skins[0].base64);
+    let skin = null;
+    if (data?.profile?.skins[0]?.base64) {
+        try { skin = await new skin2D().creatHeadTexture(data.profile.skins[0].base64); } catch (e) {}
+    }
+    const initial = data?.name ? data.name.charAt(0).toUpperCase() : '?';
+    const hasSkin = !!skin;
     let div = document.createElement("div");
     div.classList.add("account");
     div.id = data.ID;
     div.innerHTML = `
-        <div class="profile-image" ${skin ? 'style="background-image: url(' + skin + ');"' : ''}></div>
+        <div class="profile-image" style="${hasSkin ? `background-image: url(${skin}); background-size: cover; background-position: center;` : 'background:linear-gradient(135deg,#192E03,#D8F999);display:flex;align-items:center;justify-content:center;'}">${hasSkin ? '' : `<span style="color:#fff;font-size:24px;font-weight:700;">${initial}</span>`}</div>
         <div class="profile-infos">
             <div class="profile-pseudo">${data.name}</div>
             <div class="profile-uuid">${data.uuid}</div>
@@ -88,7 +104,15 @@ async function accountSelect(data) {
     if (accountData?.profile?.skins && accountData.profile.skins[0] && accountData.profile.skins[0].base64) {
         targets.forEach(el => headplayer(accountData.profile.skins[0].base64, el));
     } else {
-        targets.forEach(el => el.style.backgroundImage = `url('assets/images/default/setve.png')`);
+        const initial = accountData?.name ? accountData.name.charAt(0).toUpperCase() : '?';
+        targets.forEach(el => {
+            el.style.background = 'linear-gradient(135deg,#192E03,#D8F999)';
+            el.style.backgroundImage = 'none';
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.innerHTML = `<span style="color:#fff;font-size:18px;font-weight:700;">${initial}</span>`;
+        });
     }
 }
 

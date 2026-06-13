@@ -444,6 +444,10 @@ function walkSrcDir(srcPath) {
                 if (entry.endsWith('.info.json')) continue;
                 if (entry.endsWith('.url.txt')) continue;
 
+                // Skip player-specific config files (controls, graphics)
+                const excludedConfigFiles = ['options.txt', 'optionsof.txt', 'servers.dat', 'servers.dat_old'];
+                if (excludedConfigFiles.includes(entry)) continue;
+
                 const relFilePath = relativePath ? `${relativePath}/${entry}` : entry;
                 let associatedFeature = null;
 
@@ -662,23 +666,20 @@ function copyImageToModpack(src, destDir, filename) {
     }
 }
 
-document.getElementById('btn-select-banner').addEventListener('click', () => {
-    document.getElementById('new-banner-input').click();
-});
-
-document.getElementById('new-banner-input').addEventListener('change', (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    selectedBannerPath = file.path || file.name;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
+document.getElementById('btn-select-banner').addEventListener('click', async () => {
+    const filePath = await ipcRenderer.invoke('select-image');
+    if (!filePath) return;
+    selectedBannerPath = filePath;
+    try {
+        const buf = fs.readFileSync(filePath);
+        const ext = path.extname(filePath).toLowerCase();
+        const mime = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : ext === '.gif' ? 'image/gif' : 'image/png';
         const preview = document.getElementById('new-banner-preview');
-        preview.style.backgroundImage = `url(${ev.target.result})`;
+        preview.style.backgroundImage = `url('data:${mime};base64,${buf.toString('base64')}')`;
         preview.style.display = 'block';
-        document.getElementById('new-banner-path').textContent = selectedBannerPath;
-        document.getElementById('btn-clear-banner').style.display = 'inline';
-    };
-    reader.readAsDataURL(file);
+    } catch (_) {}
+    document.getElementById('new-banner-path').textContent = filePath;
+    document.getElementById('btn-clear-banner').style.display = 'inline';
 });
 
 document.getElementById('btn-clear-banner').addEventListener('click', () => {
@@ -689,23 +690,20 @@ document.getElementById('btn-clear-banner').addEventListener('click', () => {
     document.getElementById('btn-clear-banner').style.display = 'none';
 });
 
-document.getElementById('btn-select-poster').addEventListener('click', () => {
-    document.getElementById('new-poster-input').click();
-});
-
-document.getElementById('new-poster-input').addEventListener('change', (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    selectedPosterPath = file.path || file.name;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
+document.getElementById('btn-select-poster').addEventListener('click', async () => {
+    const filePath = await ipcRenderer.invoke('select-image');
+    if (!filePath) return;
+    selectedPosterPath = filePath;
+    try {
+        const buf = fs.readFileSync(filePath);
+        const ext = path.extname(filePath).toLowerCase();
+        const mime = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : ext === '.gif' ? 'image/gif' : 'image/png';
         const preview = document.getElementById('new-poster-preview');
-        preview.style.backgroundImage = `url(${ev.target.result})`;
+        preview.style.backgroundImage = `url('data:${mime};base64,${buf.toString('base64')}')`;
         preview.style.display = 'block';
-        document.getElementById('new-poster-path').textContent = selectedPosterPath;
-        document.getElementById('btn-clear-poster').style.display = 'inline';
-    };
-    reader.readAsDataURL(file);
+    } catch (_) {}
+    document.getElementById('new-poster-path').textContent = filePath;
+    document.getElementById('btn-clear-poster').style.display = 'inline';
 });
 
 document.getElementById('btn-clear-poster').addEventListener('click', () => {
@@ -752,8 +750,14 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
 
     // Copy banner/poster images to the modpack folder
-    const bannerFile = copyImageToModpack(selectedBannerPath, selectedNewLocation, 'banner.png');
-    const posterFile = copyImageToModpack(selectedPosterPath, selectedNewLocation, 'poster.png');
+    // Only overwrite if user explicitly selected new ones
+    let bannerFile, posterFile;
+    if (selectedBannerPath) {
+        bannerFile = copyImageToModpack(selectedBannerPath, selectedNewLocation, 'banner.png');
+    }
+    if (selectedPosterPath) {
+        posterFile = copyImageToModpack(selectedPosterPath, selectedNewLocation, 'poster.png');
+    }
 
     const newPack = {
         id,
@@ -764,8 +768,8 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
         loader,
         loaderVersion: loaderVer,
         location: selectedNewLocation,
-        banner: bannerFile,
-        poster: posterFile
+        banner: bannerFile ?? (editingPackId ? modpacks.find(m => m.id === editingPackId)?.banner : null),
+        poster: posterFile ?? (editingPackId ? modpacks.find(m => m.id === editingPackId)?.poster : null)
     };
 
     if (editingPackId) {
@@ -792,6 +796,18 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
 
     saveDb();
     renderModpacks();
+
+    // Reset image state after save
+    selectedBannerPath = null;
+    selectedPosterPath = null;
+    document.getElementById('new-banner-input').value = '';
+    document.getElementById('new-banner-path').textContent = 'No seleccionada';
+    document.getElementById('new-banner-preview').style.display = 'none';
+    document.getElementById('btn-clear-banner').style.display = 'none';
+    document.getElementById('new-poster-input').value = '';
+    document.getElementById('new-poster-path').textContent = 'No seleccionada';
+    document.getElementById('new-poster-preview').style.display = 'none';
+    document.getElementById('btn-clear-poster').style.display = 'none';
     
     modalNewPack.style.display = 'none';
 });
@@ -841,8 +857,16 @@ document.getElementById('btn-modify').addEventListener('click', () => {
     document.getElementById('new-poster-input').value = '';
 
     // Pre-fill banner
-    const bannerPath = pack.banner ? path.join(pack.location, pack.banner) : null;
-    selectedBannerPath = bannerPath;
+    const baseLoc = pack.location || '';
+    let bannerPath = null;
+    if (pack.banner) {
+        bannerPath = path.resolve(baseLoc, pack.banner);
+        // Also try direct path if banner already includes dir
+        if (!fs.existsSync(bannerPath)) {
+            bannerPath = path.resolve(pack.banner);
+        }
+    }
+    selectedBannerPath = (bannerPath && fs.existsSync(bannerPath)) ? bannerPath : null;
     if (bannerPath && fs.existsSync(bannerPath)) {
         const preview = document.getElementById('new-banner-preview');
         try {
@@ -863,8 +887,14 @@ document.getElementById('btn-modify').addEventListener('click', () => {
     }
 
     // Pre-fill poster
-    const posterPath = pack.poster ? path.join(pack.location, pack.poster) : null;
-    selectedPosterPath = posterPath;
+    let posterPath = null;
+    if (pack.poster) {
+        posterPath = path.resolve(baseLoc, pack.poster);
+        if (!fs.existsSync(posterPath)) {
+            posterPath = path.resolve(pack.poster);
+        }
+    }
+    selectedPosterPath = (posterPath && fs.existsSync(posterPath)) ? posterPath : null;
     if (posterPath && fs.existsSync(posterPath)) {
         const preview = document.getElementById('new-poster-preview');
         try {
@@ -1334,6 +1364,14 @@ async function installPackInLauncher(pack) {
     else creatorModpacks.push(entry);
     fs.writeFileSync(_dbPath, JSON.stringify(creatorModpacks, null, 4));
 
+    // Sync in-memory modpacks with what was written to disk so HTTP server returns fresh data
+    const modIdx = modpacks.findIndex(m => m.id === pack.id);
+    if (modIdx >= 0) {
+        modpacks[modIdx].banner = entry.banner;
+        modpacks[modIdx].poster = entry.poster;
+        modpacks[modIdx].location = entry.location;
+    }
+
     log(`✅ "${pack.title}" instalado en el launcher (${instanceDir})`, 'success');
 }
 
@@ -1439,6 +1477,92 @@ function copyRecursive(src, dest) {
         }
     }
 }
+
+/* ==========================================================================
+   CALENDAR EVENT MANAGEMENT
+   ========================================================================== */
+
+let _calendarEvents = [];
+let _calendarEventsPath = null;
+
+async function loadCalendarEvents() {
+    await ensurePaths();
+    const dbDir = path.dirname(_dbPath);
+    _calendarEventsPath = path.join(dbDir, 'calendar-events.json');
+    if (fs.existsSync(_calendarEventsPath)) {
+        try {
+            _calendarEvents = JSON.parse(fs.readFileSync(_calendarEventsPath, 'utf8'));
+        } catch (e) {
+            _calendarEvents = [];
+        }
+    } else {
+        _calendarEvents = [];
+    }
+}
+
+function saveCalendarEvents() {
+    if (_calendarEventsPath) {
+        fs.writeFileSync(_calendarEventsPath, JSON.stringify(_calendarEvents, null, 4));
+    }
+}
+
+function renderCalendarEventsTable() {
+    const tbody = document.getElementById('cal-events-table');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    const sorted = [..._calendarEvents].sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''));
+    sorted.forEach((ev, idx) => {
+        const tr = document.createElement('tr');
+        const dateObj = new Date(ev.date + 'T' + (ev.time || '00:00'));
+        const dateStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+        tr.innerHTML = `
+            <td style="padding:8px 12px;">${dateStr}</td>
+            <td style="padding:8px 12px;">${ev.time || 'Todo el día'}</td>
+            <td style="padding:8px 12px;">${ev.title}</td>
+            <td style="padding:8px 12px;"><button class="cal-event-del" data-idx="${idx}" style="background:none; border:none; color:#666; cursor:pointer; font-size:16px;">×</button></td>
+        `;
+        tr.querySelector('.cal-event-del').addEventListener('click', () => {
+            _calendarEvents.splice(idx, 1);
+            saveCalendarEvents();
+            renderCalendarEventsTable();
+            log(`🗑️ Evento eliminado del calendario.`, 'info');
+        });
+        tbody.appendChild(tr);
+    });
+}
+
+// Calendar button in toolbar
+document.getElementById('btn-calendar')?.addEventListener('click', async () => {
+    await loadCalendarEvents();
+    renderCalendarEventsTable();
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('cal-event-date').value = today;
+    document.getElementById('cal-event-time').value = '';
+    document.getElementById('cal-event-title').value = '';
+    document.getElementById('modal-calendar').style.display = 'flex';
+});
+
+// Add event
+document.getElementById('btn-cal-add')?.addEventListener('click', () => {
+    const date = document.getElementById('cal-event-date').value;
+    const time = document.getElementById('cal-event-time').value;
+    const title = document.getElementById('cal-event-title').value.trim();
+    if (!date || !title) {
+        log('❌ Completá la fecha y el título del evento.', 'error');
+        return;
+    }
+    _calendarEvents.push({ date, time, title });
+    saveCalendarEvents();
+    renderCalendarEventsTable();
+    document.getElementById('cal-event-title').value = '';
+    log(`📅 Evento "${title}" agregado al calendario.`, 'success');
+});
+
+// Close calendar modal
+document.getElementById('btn-close-cal')?.addEventListener('click', () => {
+    document.getElementById('modal-calendar').style.display = 'none';
+});
 
 // Start up
 (async () => {

@@ -389,8 +389,9 @@ class Settings {
                 const hours = Math.floor(accPlaytime / 3600);
                 const minutes = Math.floor((accPlaytime % 3600) / 60);
                 const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                const randAv = this._generateRandomAvatar(acc);
                 card.innerHTML = `
-                    <div class="settings-account-avatar" style="background-image: url('assets/images/default/setve.png'); background-size: cover; background-position: center;"></div>
+                    <div class="settings-account-avatar" style="background-image: url('${randAv}'); background-size: cover; background-position: center;"></div>
                     <div class="settings-account-info">
                         <div class="settings-account-name">${acc.name}</div>
                         <div class="settings-account-detail">UUID: ${acc.uuid ? acc.uuid.substring(0, 8) + '...' : 'N/A'}</div>
@@ -399,7 +400,7 @@ class Settings {
                         <div class="settings-account-status">${isActive ? '✓ Cuenta activa' : 'Hacé clic para usar esta cuenta'}</div>
                     </div>
                     <button class="settings-account-delete" title="Eliminar cuenta">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <img src="assets/images/png/more-vertical.png" width="16" height="16" alt="del">
                     </button>
                 `;
 
@@ -446,27 +447,46 @@ class Settings {
         try {
             let url = null;
             if (acc?.profile?.skins?.[0]?.base64) {
-                const headTex = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
-                if (headTex) url = headTex;
+                try {
+                    const headTex = await new skin2D().creatHeadTexture(acc.profile.skins[0].base64);
+                    if (headTex) url = headTex;
+                } catch (e) {}
             }
             if (!url && acc?.profile?.skins?.[0]?.url) {
                 url = acc.profile.skins[0].url;
             }
             if (!url && acc.uuid) {
-                const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${acc.uuid.replace(/-/g, '')}`);
-                if (res.ok) {
-                    const profile = await res.json();
-                    const texProp = profile.properties?.find(p => p.name === 'textures');
-                    if (texProp?.value) {
-                        const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
-                        if (tex.textures?.SKIN?.url) url = tex.textures.SKIN.url;
+                try {
+                    const res = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${acc.uuid.replace(/-/g, '')}`);
+                    if (res.ok) {
+                        const profile = await res.json();
+                        const texProp = profile.properties?.find(p => p.name === 'textures');
+                        if (texProp?.value) {
+                            const tex = JSON.parse(Buffer.from(texProp.value, 'base64').toString());
+                            if (tex.textures?.SKIN?.url) url = tex.textures.SKIN.url;
+                        }
                     }
-                }
+                } catch (e) {}
+            }
+            if (!url) {
+                url = this._generateRandomAvatar(acc);
             }
             return url;
         } catch (e) {
-            return null;
+            return this._generateRandomAvatar(acc);
         }
+    }
+
+    _generateRandomAvatar(acc) {
+        const seed = acc?.name || acc?.ID || Math.random().toString();
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+            hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash) % 360;
+        const sat = 50 + (Math.abs(hash * 7) % 30);
+        const lit = 40 + (Math.abs(hash * 13) % 30);
+        return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="hsl(${hue},${sat}%,${lit}%)" rx="8"/><rect x="16" y="8" width="8" height="8" fill="rgba(0,0,0,0.15)" rx="2"/><rect x="40" y="8" width="8" height="8" fill="rgba(0,0,0,0.15)" rx="2"/><rect x="24" y="28" width="16" height="16" fill="rgba(0,0,0,0.1)" rx="4"/><rect x="16" y="44" width="32" height="8" fill="rgba(0,0,0,0.1)" rx="2"/></svg>`)}`;
     }
 }
 export default Settings;

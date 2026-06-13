@@ -77,6 +77,14 @@ ipcMain.handle('select-directory', async () => {
     return result.filePaths[0];
 })
 
+ipcMain.handle('select-image', async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{ name: 'Imágenes', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'] }]
+    });
+    return result.filePaths[0] || null;
+})
+
 ipcMain.on('main-window-maximize', () => {
     const w = MainWindow.getWindow();
     if (!w) return;

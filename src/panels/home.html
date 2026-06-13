@@ -1,16 +1,16 @@
-<!-- ===== TOP HEADER (full width) ===== -->
 <header class="top-header">
-    <nav class="top-breadcrumb" id="top-breadcrumb">
-        <a class="top-logo-btn" id="top-logo-btn" title="Inicio">
-            <img src="assets/images/logo-large.png" alt="Yusup Logo" class="top-logo-img">
-        </a>
-        <svg class="top-chevron" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-        <span class="top-page-title" id="top-page-title">Inicio</span>
-    </nav>
-
+    <a class="top-logo-btn" id="top-logo-btn" title="Inicio">
+        <img src="assets/images/png/logo.png" alt="Yusup Logo" class="top-logo-img">
+    </a>
     <div class="header-profile-section">
+        <div class="search-container" id="search-container">
+            <input class="search-input-field" id="search-input-field" type="text" placeholder="Buscar modpacks o eventos...">
+            <button class="header-search-btn" id="header-search-btn" title="Buscar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+            <div class="search-results-dropdown" id="search-results-dropdown">
+            </div>
+        </div>
         <button class="top-profile-btn" id="top-profile-btn" title="Perfil">
             <div class="top-profile-avatar" id="top-profile-avatar"></div>
         </button>
@@ -25,9 +25,7 @@
                 <div class="dropdown-accounts-section" id="dropdown-accounts-section">
                     <button class="dropdown-section-toggle" id="dropdown-section-toggle">
                         <span>Cambiar de cuenta</span>
-                        <svg class="dropdown-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
+                        <img class="dropdown-toggle-icon" src="assets/images/png/chevron.png" width="16" height="16" alt="v">
                     </button>
                     <div class="dropdown-accounts-body" id="dropdown-accounts-body">
                         <div class="dropdown-accounts-list" id="dropdown-accounts-list"></div>
@@ -35,66 +33,59 @@
                 </div>
                 <div class="dropdown-actions">
                     <button class="dropdown-account-action add-btn" id="dropdown-btn-add">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-                        </svg>
+                        <img src="assets/images/png/more-vertical.png" width="16" height="16" alt="+">
                         Añadir cuenta
                     </button>
                     <button class="dropdown-account-action" id="dropdown-btn-logout">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-                        </svg>
+                        <img src="assets/images/png/charge.png" width="16" height="16" alt=">">
                         Cerrar sesión
                     </button>
                 </div>
             </div>
         </div>
+        <div class="header-frame-controls">
+            <button class="header-frame-btn" id="header-btn-minimize" title="Minimizar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="header-frame-btn" id="header-btn-close" title="Cerrar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+            </button>
+        </div>
     </div>
 </header>
 
 <div class="launcher-dashboard">
-
-    <!-- ===== SIDEBAR (260px) ===== -->
     <aside class="sidebar-left">
-
-        <!-- Main navigation -->
         <nav class="sidebar-nav">
-            <button class="sidebar-item nav-btn active" id="nav-btn-home" title="Inicio">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M5.00004 15.8333H7.50004V10.8333H12.5V15.8333H15V8.33333L10 4.58333L5.00004 8.33333V15.8333ZM3.33337 17.5V7.5L10 2.5L16.6667 7.5V17.5H10.8334V12.5H9.16671V17.5H3.33337Z" fill="currentColor"/>
-                </svg>
+            <a class="sidebar-item nav-btn active" id="nav-btn-home" title="Inicio">
+                <div class="sidebar-icon-wrap"><img src="assets/images/png/home.png" width="24" height="24" alt="Inicio" class="sidebar-icon"></div>
                 <span class="sidebar-item-label">Inicio</span>
-            </button>
-            <button class="sidebar-item nav-btn" id="nav-btn-instances" title="Librería">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M4.5875 19.4125C4.19583 19.0208 4 18.55 4 18C4 17.45 4.19583 16.9792 4.5875 16.5875C4.97917 16.1958 5.45 16 6 16C6.55 16 7.02083 16.1958 7.4125 16.5875C7.80417 16.9792 8 17.45 8 18C8 18.55 7.80417 19.0208 7.4125 19.4125C7.02083 19.8042 6.55 20 6 20C5.45 20 4.97917 19.8042 4.5875 19.4125ZM10.5875 19.4125C10.1958 19.0208 10 18.55 10 18C10 17.45 10.1958 16.9792 10.5875 16.5875C10.9792 16.1958 11.45 16 12 16C12.55 16 13.0208 16.1958 13.4125 16.5875C13.8042 16.9792 14 17.45 14 18C14 18.55 13.8042 19.0208 13.4125 19.4125C13.0208 19.8042 12.55 20 12 20C11.45 20 10.9792 19.8042 10.5875 19.4125ZM16.5875 19.4125C16.1958 19.0208 16 18.55 16 18C16 17.45 16.1958 16.9792 16.5875 16.5875C16.9792 16.1958 17.45 16 18 16C18.55 16 19.0208 16.1958 19.4125 16.5875C19.8042 16.9792 20 17.45 20 18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20C17.45 20 16.9792 19.8042 16.5875 19.4125ZM4.5875 13.4125C4.19583 13.0208 4 12.55 4 12C4 11.45 4.19583 10.9792 4.5875 10.5875C4.97917 10.1958 5.45 10 6 10C6.55 10 7.02083 10.1958 7.4125 10.5875C7.80417 10.9792 8 11.45 8 12C8 12.55 7.80417 13.0208 7.4125 13.4125C7.02083 13.8042 6.55 14 6 14C5.45 14 4.97917 13.8042 4.5875 13.4125Z" fill="currentColor"/>
-                </svg>
+            </a>
+            <a class="sidebar-item nav-btn" id="nav-btn-instances" title="Librería">
+                <div class="sidebar-icon-wrap"><img src="assets/images/png/library.png" width="24" height="24" alt="Librería" class="sidebar-icon"></div>
                 <span class="sidebar-item-label">Librería</span>
-            </button>
-            <button class="sidebar-item nav-btn" id="nav-btn-settings" title="Ajustes">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M7.70833 18.3333L7.375 15.6667C7.19444 15.5972 7.02431 15.5139 6.86458 15.4167C6.70486 15.3194 6.54861 15.2153 6.39583 15.1042L3.91667 16.1458L1.625 12.1875L3.77083 10.5625C3.75694 10.4653 3.75 10.3715 3.75 10.2813V9.71875C3.75 9.62848 3.75694 9.53473 3.77083 9.4375L1.625 7.8125L3.91667 3.85417L6.39583 4.89584C6.54861 4.78473 6.70833 4.68056 6.875 4.58334C7.04167 4.48612 7.20833 4.40278 7.375 4.33334L7.70833 1.66667H12.2917L12.625 4.33334C12.8056 4.40278 12.9757 4.48612 13.1354 4.58334C13.2951 4.68056 13.4514 4.78473 13.6042 4.89584L16.0833 3.85417L18.375 7.8125L16.2292 9.4375C16.2431 9.53473 16.25 9.63194 16.25 9.71875V10.2813C16.25 10.3715 16.2361 10.4653 16.2083 10.5625L18.3542 12.1875L16.0625 16.1458L13.6042 15.1042C13.4514 15.2153 13.2917 15.3194 13.125 15.4167C12.9583 15.5139 12.7917 15.5972 12.625 15.6667L12.2917 18.3333H7.70833Z" fill="currentColor"/>
-                </svg>
+            </a>
+            <a class="sidebar-item nav-btn" id="nav-btn-settings" title="Ajustes">
+                <div class="sidebar-icon-wrap"><img src="assets/images/png/settings.png" width="24" height="24" alt="Ajustes" class="sidebar-icon"></div>
                 <span class="sidebar-item-label">Ajustes</span>
-            </button>
+            </a>
+            <a class="sidebar-item nav-btn" id="nav-btn-calendar" title="Calendario" style="display:none;">
+                <div class="sidebar-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                <span class="sidebar-item-label">Calendario</span>
+            </a>
         </nav>
 
-        <!-- Quick Play -->
         <button class="sidebar-quick-play" id="sidebar-quick-play" style="display:none" title="Juego rápido">
             <span class="quick-play-circle" id="quick-play-circle"></span>
             <span class="quick-play-name" id="quick-play-name"></span>
-            <svg class="quick-play-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
+            <img class="quick-play-icon" src="assets/images/png/play.png" width="14" height="14" alt="play">
         </button>
 
         <aside class="downloads-floating-panel" id="downloads-floating-panel" style="display:none;">
             <header class="downloads-panel-header">
                 <span>Descargas activas</span>
                 <button class="downloads-panel-close" id="downloads-panel-close">
-                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                        <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
+                    <img src="assets/images/png/charge.png" width="12" height="12" alt="x">
                 </button>
             </header>
             <div class="downloads-panel-body" id="downloads-panel-body">
@@ -103,65 +94,42 @@
         </aside>
     </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
     <main class="dashboard-content">
-
         <section class="main-card-viewport">
 
-            <!-- VIEW: HOME -->
             <article class="dashboard-view active" id="view-home">
-
                 <div class="news-list content-scroll"></div>
             </article>
 
-            <!-- VIEW: INSTANCES / LIBRARY -->
             <article class="dashboard-view" id="view-instances">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <input class="modpack-search" id="modpack-search" type="text" placeholder="Buscar modpacks..." style="flex:1;" />
-                    <button id="btn-refresh-instances" class="sidebar-circle-btn" style="width:40px; height:40px; border-radius:50%; background:var(--background-secondary); color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; border:none; flex-shrink:0;" title="Refrescar instancias">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                        </svg>
-                    </button>
-                </div>
                 <div class="instances-viewport-scroll content-scroll">
-
                     <section class="instances-section" id="instances-admin-section" style="display: none;">
                         <h2 class="instances-section-title">Creados en Creator Tools</h2>
                         <div class="instances-grid" id="instances-grid-creator"></div>
                     </section>
-
                     <section class="instances-section">
                         <div class="instances-grid" id="instances-grid-installed"></div>
                     </section>
-
                     <section class="instances-section">
                         <h2 class="instances-section-title">Todas las instancias</h2>
                         <div class="instances-grid" id="instances-grid-all"></div>
                     </section>
-
                 </div>
             </article>
 
-            <!-- VIEW: MODPACK DETAIL -->
             <article class="dashboard-view" id="view-detail">
                 <div class="detail-poster-bg" id="detail-poster-bg"></div>
                 <div class="detail-poster-scrim" id="detail-poster-scrim"></div>
 
-                <!-- Section 1: Back button + poster image -->
                 <section class="detail-pack-screen" id="detail-pack-screen">
                     <button class="detail-back-btn" id="detail-back-btn">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
+                        <img src="assets/images/png/chevron.png" width="20" height="20" alt="<">
                     </button>
                     <div class="detail-poster-wrap" id="detail-poster-wrap">
-                        <img src="assets/images/default/setve.png" alt="" id="detail-poster-img">
+                        <img src="" alt="" id="detail-poster-img">
                     </div>
                 </section>
 
-                <!-- Section 2: Name + tags + action buttons -->
                 <section class="detail-pack-info" id="detail-pack-info">
                     <div class="detail-pack-info-inner">
                         <h1 class="detail-pack-name" id="detail-title">Cargando...</h1>
@@ -175,9 +143,7 @@
                             <button class="detail-play-btn" id="detail-play-btn">
                                 <div class="detail-play-btn-inner">
                                     <span class="detail-play-btn-content" id="detail-play-btn-content">
-                                        <svg class="detail-play-btn-icon" id="detail-play-btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none">
-                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                        </svg>
+                                        <img class="detail-play-btn-icon" src="assets/images/png/play.png" width="16" height="16" alt="play">
                                         <span class="detail-play-btn-label" id="detail-play-btn-label">Descarga</span>
                                     </span>
                                     <div class="detail-btn-status" id="detail-btn-status" style="display: none;">Preparando...</div>
@@ -185,64 +151,40 @@
                                         <img src="assets/images/loading-icon.png" alt="Cargando" class="spinner-img">
                                     </div>
                                     <div class="detail-btn-progress-track" id="detail-btn-progress-track" style="display: none;">
-                                        <svg class="detail-btn-progress-svg" id="detail-btn-progress-svg" preserveAspectRatio="none" viewBox="0 0 220 10">
-                                            <line id="dt-track-bg" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="5" stroke-linecap="round" x1="0" y1="5" x2="220" y2="5" />
-                                            <path id="dt-wave-path" fill="none" stroke="#18ff6f" stroke-width="5" stroke-linecap="round" />
-                                            <circle id="dt-track-dot" fill="#18ff6f" r="3" />
-                                        </svg>
+                                        <div class="progress-track">
+                                            <div class="progress-fill-wavy" id="dt-progress-fill"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </button>
 
                             <div class="detail-options-wrapper">
                                 <button class="detail-options-trigger-btn" id="detail-options-btn" title="Accesos Rápidos">
-                                    <svg class="opt-icon-dots" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <circle cx="12" cy="5" r="1.5"></circle>
-                                        <circle cx="12" cy="12" r="1.5"></circle>
-                                        <circle cx="12" cy="19" r="1.5"></circle>
-                                    </svg>
-                                    <svg class="opt-icon-close" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none;">
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        <line x1="6" y1="18" x2="18" y2="6"></line>
-                                    </svg>
+                                    <img class="opt-icon-dots" src="assets/images/png/more-vertical.png" width="20" height="20" alt="...">
                                 </button>
-
                                 <nav class="detail-fab-menu" id="detail-fab-menu">
                                     <button class="detail-fab-item" id="opt-btn-worlds">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                                        </svg>
+                                        <img src="assets/images/png/library.png" width="16" height="16" alt="folder">
                                         <span>Mundos</span>
                                     </button>
                                     <button class="detail-fab-item" id="opt-btn-resourcepacks">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
-                                        </svg>
+                                        <img src="assets/images/png/settings.png" width="16" height="16" alt="globe">
                                         <span>Resourcepacks</span>
                                     </button>
                                     <button class="detail-fab-item" id="opt-btn-screenshots">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                                            <circle cx="12" cy="13" r="4"/>
-                                        </svg>
+                                        <img src="assets/images/png/home.png" width="16" height="16" alt="camera">
                                         <span>Capturas</span>
                                     </button>
                                     <button class="detail-fab-item" id="opt-btn-update">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                                        </svg>
+                                        <img src="assets/images/png/charge.png" width="16" height="16" alt="update">
                                         <span>Actualizar</span>
                                     </button>
                                     <button class="detail-fab-item danger-item" id="opt-btn-reinstall">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
-                                        </svg>
+                                        <img src="assets/images/png/more-vertical.png" width="16" height="16" alt="trash">
                                         <span>Eliminar</span>
                                     </button>
                                     <button class="detail-fab-item warning-item" id="opt-btn-kill">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                                        </svg>
+                                        <img src="assets/images/png/charge.png" width="16" height="16" alt="kill">
                                         <span>Cerrar Juego</span>
                                     </button>
                                 </nav>
@@ -262,28 +204,39 @@
                 </div>
             </article>
 
-            <!-- VIEW: SETTINGS (embedded) -->
+            <article class="dashboard-view" id="view-calendar">
+                <div class="calendar-container content-scroll">
+                    <div class="glass-section-card">
+                        <h3 class="section-card-title">Calendario de Eventos</h3>
+                        <div class="calendar-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                            <button class="calendar-nav-btn" id="cal-prev">&lt;</button>
+                            <span class="calendar-month-year" id="cal-month-year" style="font-size:16px; font-weight:600;"></span>
+                            <button class="calendar-nav-btn" id="cal-next">&gt;</button>
+                        </div>
+                        <div class="calendar-grid" id="calendar-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px;"></div>
+                    </div>
+                    <div class="glass-section-card" style="margin-top:12px;">
+                        <h3 class="section-card-title">Eventos del día</h3>
+                        <div id="cal-events-list" style="min-height:60px;">
+                            <p style="font-size:12px; color:var(--text-secondary);">Seleccioná un día para ver los eventos.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
             <article class="dashboard-view" id="view-settings">
                 <div class="settings-content-wrapper content-scroll">
-
-                    <!-- Account section -->
                     <div class="glass-section-card settings-glass-section settings-account-card">
-                        <h3 class="section-card-title">Cuenta</h3>
+                        <h3 class="section-card-title">Cuenta Activa</h3>
                         <div class="settings-account-row">
                             <div class="player-big-head" id="acc-active-avatar"></div>
                             <div class="settings-account-info">
                                 <div class="active-profile-name" id="acc-active-name">Cargando...</div>
                                 <span class="active-profile-type-badge" id="acc-active-type">Offline</span>
                             </div>
-                            <div class="settings-account-actions">
-                                <button class="premium-action-btn" id="acc-btn-switch-account">Cambiar</button>
-                                <button class="premium-action-btn neutral-btn" id="acc-btn-add-account">+ Añadir</button>
-                            </div>
                         </div>
-                        <div class="settings-account-switcher" id="account-selection-container" style="display:none;"></div>
                     </div>
 
-                    <!-- RAM -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">RAM</h3>
                         <div class="ram-controls-row">
@@ -306,7 +259,6 @@
                         </div>
                     </div>
 
-                    <!-- Java -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">Java</h3>
                         <code class="java-path-txt">Cargando...</code>
@@ -318,7 +270,6 @@
                         </div>
                     </div>
 
-                    <!-- Resolution -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">Resolución</h3>
                         <div class="resolution-inputs-row">
@@ -331,7 +282,6 @@
                         </div>
                     </div>
 
-                    <!-- Toggles -->
                     <div class="glass-section-card settings-glass-section">
                         <div class="settings-toggle-row">
                             <span class="settings-toggle-label">Consola de Minecraft</span>
@@ -366,7 +316,6 @@
                         </div>
                     </div>
 
-                    <!-- Downloads + behavior -->
                     <div class="glass-section-card settings-glass-section">
                         <h3 class="section-card-title">Descargas</h3>
                         <div class="downloads-row">
@@ -381,7 +330,6 @@
                             <button class="behavior-btn close-all">Cerrar juego si el launcher cierra</button>
                         </div>
                     </div>
-
                 </div>
             </article>
 

@@ -1,14 +1,8 @@
-/**
- * @author Luuxis
- * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
- */
-
 const { ipcRenderer, shell } = require('electron');
 const pkg = require('../package.json');
 const os = require('os');
 import { config, database } from './utils.js';
 const nodeFetch = require("node-fetch");
-
 
 class Splash {
     constructor() {
@@ -24,29 +18,17 @@ class Splash {
             let isDarkTheme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
             document.body.className = isDarkTheme ? 'dark global' : 'light global';
             if (process.platform == 'win32') ipcRenderer.send('update-window-progress-load')
-            this.startAnimation()
+            this.start();
         });
     }
 
-    async startAnimation() {
-        let splashes = [
-            { "message": "Je... vie...", "author": "Luuxis" },
-            { "message": "Salut je suis du code.", "author": "Luuxis" },
-            { "message": "Linux n'est pas un os, mais un kernel.", "author": "Luuxis" }
-        ];
-        let splash = splashes[Math.floor(Math.random() * splashes.length)];
-        this.splashMessage.textContent = splash.message;
-        this.splashAuthor.children[0].textContent = "@" + splash.author;
-        await sleep(100);
+    async start() {
         document.querySelector("#splash").style.display = "block";
-        await sleep(500);
         this.splash.classList.add("opacity");
-        await sleep(500);
         this.splash.classList.add("translate");
         this.splashMessage.classList.add("opacity");
         this.splashAuthor.classList.add("opacity");
         this.message.classList.add("opacity");
-        await sleep(1000);
         this.checkUpdate();
     }
 
@@ -108,14 +90,12 @@ class Splash {
         if (os.platform() == 'darwin') latest = this.getLatestReleaseForOS('mac', '.dmg', latestRelease);
         else if (os == 'linux') latest = this.getLatestReleaseForOS('linux', '.appimage', latestRelease);
 
-
         this.setStatus(`Mise à jour disponible !<br><div class="download-update">Télécharger</div>`);
         document.querySelector(".download-update").addEventListener("click", () => {
             shell.openExternal(latest.browser_download_url);
             return this.shutdown("Téléchargement en cours...");
         });
     }
-
 
     async maintenanceCheck() {
         config.GetConfig().then(res => {
@@ -154,10 +134,6 @@ class Splash {
         this.progress.value = value;
         this.progress.max = max;
     }
-}
-
-function sleep(ms) {
-    return new Promise(r => setTimeout(r, ms));
 }
 
 document.addEventListener("keydown", (e) => {

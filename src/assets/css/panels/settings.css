@@ -1,11 +1,12 @@
-/* ==========================================================================
-   Yusup Launcher Redesigned Settings Panel (Premium Glassmorphic Layout)
-   ========================================================================== */
-
 .settings {
     height: 100%;
     font-family: 'Google Sans Flex', sans-serif;
 }
+
+h1 { font-size: 28px; }
+h2 { font-size: 24px; }
+h3 { font-size: 16px; }
+p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .settings .container {
     display: flex;
@@ -13,39 +14,27 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-    background-color: var(--background);
+    background-color: #F5F5F5;
     box-sizing: border-box;
 }
 
 .settings-glass-card {
     display: flex;
-    background: var(--background-element);
-    border: var(--card-border);
+    background: var(--green-light);
+    border: 1px solid var(--green-pale);
     border-radius: 40px;
     width: 780px;
     height: 520px;
-    box-shadow: 0 30px 60px var(--shadow);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.06);
     overflow: hidden;
-    animation: settings-pop-up var(--m3-duration-spatial) var(--m3-spring-spatial);
     box-sizing: border-box;
-}
-
-@keyframes settings-pop-up {
-    from {
-        opacity: 0;
-        transform: translateY(40px) scale(0.92);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
 }
 
 .nav-settings {
     width: 28%;
     height: 100%;
-    background: var(--background-secondary);
-    border-right: var(--card-border);
+    background: var(--green-pale);
+    border-right: 1px solid var(--green-mid);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -55,7 +44,7 @@
 }
 
 .settings-title {
-    color: var(--color);
+    color: var(--green-dark);
     font-size: 22px;
     font-weight: 600;
     margin: 10px 0 32px 0;
@@ -82,37 +71,37 @@
     cursor: pointer;
     border: none;
     background: transparent;
-    color: var(--color);
+    color: #1A1A1A;
     opacity: 0.6;
-    transition: var(--transition);
     box-sizing: border-box;
     user-select: none;
 }
 
 .nav-settings-btn:hover {
-    background: var(--background-tertiary);
-    color: var(--color);
+    background: #FFFFFF;
+    color: #1A1A1A;
     opacity: 1;
 }
 
 .active-settings-BTN {
-    background: var(--element-color) !important;
-    color: #020618 !important;
+    background: var(--green-dark) !important;
+    color: var(--green-light) !important;
+    opacity: 1 !important;
 }
 
 .close-main-btn {
-    background: rgba(226, 74, 59, 0.15) !important;
-    color: #e24a3b !important;
-    border: 1px solid rgba(226, 74, 59, 0.25) !important;
+    background: #E0E0E0 !important;
+    color: #666666 !important;
+    border: 1px solid #CCCCCC !important;
     margin-top: auto !important;
+    opacity: 1 !important;
 }
 
 .close-main-btn:hover {
-    background: rgba(226, 74, 59, 0.22) !important;
-    color: #ef4444 !important;
+    background: #CCCCCC !important;
+    color: #333333 !important;
 }
 
-/* Right Viewport Settings Area */
 .settings-viewport {
     width: 72%;
     height: 100%;
@@ -132,7 +121,6 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    transition: opacity var(--m3-duration-fade) var(--m3-easing-emphasized-decelerate);
 }
 
 .active-container-settings {
@@ -144,17 +132,17 @@
 .titre-tab {
     font-size: 16px;
     font-weight: 600;
-    color: var(--color);
+    color: var(--green-dark);
     margin: 12px 0 2px 0;
-    border-left: 3.5px solid var(--element-color);
+    border-left: 3.5px solid var(--green-mid);
     padding-left: 10px;
     width: fit-content;
     box-sizing: border-box;
 }
 
 .settings-elements-box {
-    background: var(--background-element);
-    border: var(--card-border);
+    background: var(--green-light);
+    border: 1px solid var(--green-pale);
     border-radius: 20px;
     padding: 20px;
     width: 100%;
@@ -167,7 +155,7 @@
 .setting-text {
     font-size: 12px;
     line-height: 1.5;
-    color: var(--color);
+    color: #1A1A1A;
     opacity: 0.7;
 }
 
@@ -188,20 +176,17 @@
     gap: 16px;
 }
 
-/* ==========================================================================
-   RAM & JAVA TAB
-   ========================================================================== */
 .ram-info-block {
     font-size: 12px;
-    color: var(--color);
+    color: #1A1A1A;
     opacity: 0.7;
     line-height: 1.5;
 }
 
 .java-path-input-text {
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
-    color: var(--color);
+    background: #F0F0F0;
+    border: 1px solid #CCCCCC;
+    color: #1A1A1A;
     padding: 10px 16px;
     border-radius: 100px;
     width: 55%;
@@ -223,33 +208,29 @@
 
 .java-path-btn {
     padding: 10px 16px;
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
+    background: #E0E0E0;
+    border: 1px solid #CCCCCC;
     border-radius: 100px;
-    color: var(--color);
+    color: #1A1A1A;
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
-    transition: var(--transition);
 }
 
 .java-path-btn:hover {
-    background: var(--background-tertiary);
+    background: #CCCCCC;
 }
 
 .java-path-reset {
-    background: rgba(226, 74, 59, 0.1) !important;
-    color: #e24a3b !important;
-    border-color: rgba(226, 74, 59, 0.15) !important;
+    background: #E0E0E0 !important;
+    color: #666666 !important;
+    border-color: #CCCCCC !important;
 }
 
 .java-path-reset:hover {
-    background: rgba(226, 74, 59, 0.15) !important;
+    background: #CCCCCC !important;
 }
 
-/* ==========================================================================
-   RESOLUTION TAB
-   ========================================================================== */
 .input-size-element {
     display: flex;
     align-items: center;
@@ -257,9 +238,9 @@
 }
 
 .input-resolution {
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
-    color: var(--color);
+    background: #F0F0F0;
+    border: 1px solid #CCCCCC;
+    color: #1A1A1A;
     padding: 10px;
     border-radius: 100px;
     text-align: center;
@@ -268,16 +249,15 @@
     font-weight: 500;
     font-family: 'Google Sans Flex', sans-serif;
     font-size: 12px;
-    transition: var(--transition);
 }
 
 .input-resolution:focus {
-    border-color: var(--element-color);
-    background: var(--background-tertiary);
+    border-color: #999999;
+    background: #FFFFFF;
 }
 
 .size-cross {
-    color: var(--color);
+    color: #1A1A1A;
     opacity: 0.4;
     font-weight: 500;
     font-size: 16px;
@@ -285,27 +265,23 @@
 
 .size-btn {
     padding: 10px 16px;
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
+    background: #E0E0E0;
+    border: 1px solid #CCCCCC;
     border-radius: 100px;
-    color: var(--color);
+    color: #1A1A1A;
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
-    transition: var(--transition);
 }
 
 .size-btn:hover {
-    background: var(--background-tertiary);
+    background: #CCCCCC;
 }
 
-/* ==========================================================================
-   LAUNCHER CONFIGS TAB
-   ========================================================================== */
 .input-max-files {
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
-    color: var(--color);
+    background: #F0F0F0;
+    border: 1px solid #CCCCCC;
+    color: #1A1A1A;
     padding: 10px;
     border-radius: 100px;
     text-align: center;
@@ -317,11 +293,11 @@
 }
 
 .input-max-files:focus {
-    border-color: var(--element-color);
+    border-color: #999999;
 }
 
 .files-label {
-    color: var(--color);
+    color: #1A1A1A;
     opacity: 0.7;
     font-weight: 500;
     font-size: 12px;
@@ -329,48 +305,44 @@
 
 .max-files-btn {
     padding: 10px 16px;
-    background: var(--background-secondary);
-    border: 1px solid var(--background-tertiary);
+    background: #E0E0E0;
+    border: 1px solid #CCCCCC;
     border-radius: 100px;
-    color: var(--color);
+    color: #1A1A1A;
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
-    transition: var(--transition);
 }
 
 .max-files-btn:hover {
-    background: var(--background-tertiary);
+    background: #CCCCCC;
 }
 
-/* Launcher Startup actions buttons */
 .close-btn {
     font-size: 12px !important;
     width: 30% !important;
     text-align: center;
-    border: 1px solid var(--background-tertiary) !important;
-    background: var(--background-secondary) !important;
-    color: var(--color) !important;
+    border: 1px solid #CCCCCC !important;
+    background: #E0E0E0 !important;
+    color: #1A1A1A !important;
     border-radius: 100px !important;
     padding: 12px 8px !important;
     cursor: pointer;
-    transition: var(--transition) !important;
     box-sizing: border-box;
 }
 
 .close-btn:hover {
-    background: var(--background-tertiary) !important;
-    color: var(--color) !important;
+    background: #CCCCCC !important;
+    color: #1A1A1A !important;
 }
 
 .active-close {
-    border-color: var(--element-color) !important;
-    background: rgba(24, 255, 111, 0.08) !important;
-    color: var(--element-color) !important;
-    box-shadow: 0 4px 12px rgba(24, 255, 111, 0.15);
+    border-color: #555555 !important;
+    background: #D9D9D9 !important;
+    color: #333333 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Custom Scrollbar for Right settings Viewports */
 .content-scroll::-webkit-scrollbar {
     width: 6px;
 }
@@ -380,15 +352,14 @@
 }
 
 .content-scroll::-webkit-scrollbar-thumb {
-    background: var(--background-tertiary);
+    background: #CCCCCC;
     border-radius: 10px;
 }
 
 .content-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: #999999;
 }
 
-/* RAM stepper inputs (replaced memory-slider) */
 .ram-stepper-row {
     display: flex;
     align-items: center;
@@ -404,7 +375,7 @@
 .ram-input-label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: #666666;
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
@@ -413,41 +384,40 @@
     display: flex;
     align-items: center;
     gap: 0;
-    border: 1px solid var(--border-color);
+    border: 1px solid #CCCCCC;
     border-radius: 10px;
     overflow: hidden;
-    background: var(--background);
+    background: #F5F5F5;
 }
 
 .ram-step-btn {
     width: 34px;
     height: 34px;
     border: none;
-    background: var(--background-secondary);
-    color: var(--text);
+    background: #E0E0E0;
+    color: #1A1A1A;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background var(--m3-duration-micro) var(--m3-easing-emphasized);
     font-family: inherit;
     line-height: 1;
 }
 
 .ram-step-btn:hover {
-    background: var(--background-tertiary);
+    background: #CCCCCC;
 }
 
 .ram-input {
     width: 70px;
     height: 34px;
     border: none;
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    background: var(--background-primary);
-    color: var(--text);
+    border-left: 1px solid #CCCCCC;
+    border-right: 1px solid #CCCCCC;
+    background: #E8E8E8;
+    color: #1A1A1A;
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
@@ -463,10 +433,9 @@
 }
 
 .ram-input:focus {
-    background: var(--background);
+    background: #F5F5F5;
 }
 
-/* RAM number inputs */
 .ram-input-row {
     display: flex;
     align-items: center;
@@ -482,7 +451,7 @@
 
 .ram-input-group label {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #666666;
     font-weight: 500;
 }
 
@@ -490,9 +459,9 @@
     width: 80px;
     padding: 6px 10px;
     border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--background);
-    color: var(--text);
+    border: 1px solid #CCCCCC;
+    background: #F5F5F5;
+    color: #1A1A1A;
     font-family: inherit;
     font-size: 14px;
     font-weight: 500;
@@ -500,11 +469,10 @@
 }
 
 .ram-input-group input:focus {
-    border-color: var(--element-color);
+    border-color: #999999;
     outline: none;
 }
 
-/* Theme selector */
 .theme-box {
     display: flex;
     gap: 8px;
@@ -514,35 +482,33 @@
     flex: 1;
     padding: 10px 16px;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
-    background: var(--background);
-    color: var(--text);
+    border: 1px solid #CCCCCC;
+    background: #F5F5F5;
+    color: #1A1A1A;
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     text-align: center;
-    transition: all var(--m3-duration-micro) var(--m3-easing-emphasized);
 }
 
 .theme-option:hover {
-    background: var(--background-secondary);
+    background: #E0E0E0;
 }
 
 .theme-option.theme-active {
-    border-color: var(--element-color);
-    background: rgba(24, 255, 111, 0.08);
-    color: var(--element-color);
+    border-color: var(--green-dark);
+    background: var(--green-mid);
+    color: var(--green-dark);
 }
 
-/* JVM args */
 .jvm-args-input {
     width: 100%;
     padding: 10px 12px;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
-    background: var(--background);
-    color: var(--text);
+    border: 1px solid #CCCCCC;
+    background: #F5F5F5;
+    color: #1A1A1A;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 12px;
     resize: vertical;
@@ -550,7 +516,7 @@
 }
 
 .jvm-args-input:focus {
-    border-color: var(--element-color);
+    border-color: #999999;
     outline: none;
 }
 
@@ -558,27 +524,20 @@
     align-self: flex-start;
     padding: 6px 14px;
     border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--background);
-    color: var(--text);
+    border: 1px solid #CCCCCC;
+    background: #F5F5F5;
+    color: #1A1A1A;
     font-family: inherit;
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--m3-duration-micro) var(--m3-easing-emphasized);
     width: auto;
 }
 
 .jvm-args-btn:hover {
-    background: var(--background-secondary);
+    background: #E0E0E0;
 }
 
-@keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Settings Account Cards */
 .settings-accounts-list {
     display: flex;
     flex-direction: column;
@@ -592,20 +551,19 @@
     gap: 14px;
     padding: 14px 16px;
     border-radius: 16px;
-    background: var(--background-secondary);
+    background: #E0E0E0;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all var(--m3-duration-micro) var(--m3-easing-emphasized);
 }
 
 .settings-account-card:hover {
-    background: var(--background);
-    border-color: var(--border-color);
+    background: var(--green-light);
+    border-color: var(--green-mid);
 }
 
 .settings-account-card.active {
-    border-color: #3C6301;
-    background: rgba(60, 99, 1, 0.06);
+    border-color: var(--green-dark);
+    background: var(--green-pale);
 }
 
 .settings-account-avatar {
@@ -615,11 +573,11 @@
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
-    border: 2px solid var(--border-color);
+    border: 2px solid #CCCCCC;
 }
 
 .settings-account-card.active .settings-account-avatar {
-    border-color: #3C6301;
+    border-color: #555555;
 }
 
 .settings-account-info {
@@ -633,7 +591,7 @@
 .settings-account-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text);
+    color: #1A1A1A;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -641,20 +599,21 @@
 
 .settings-account-status {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #666666;
     opacity: 0.7;
 }
 
 .settings-account-detail {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #666666;
     opacity: 0.6;
     line-height: 1.3;
 }
 
 .settings-account-card.active .settings-account-status {
-    color: #3C6301;
+    color: var(--green-dark);
     opacity: 1;
+    font-weight: 600;
 }
 
 .settings-account-delete {
@@ -663,18 +622,17 @@
     border-radius: 50%;
     border: none;
     background: transparent;
-    color: var(--text);
+    color: #1A1A1A;
     opacity: 0.4;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all var(--m3-duration-micro) var(--m3-easing-emphasized);
 }
 
 .settings-account-delete:hover {
     opacity: 1;
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    background: #E0E0E0;
+    color: #666666;
 }
