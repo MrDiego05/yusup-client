@@ -30,7 +30,21 @@ const crypto = require('crypto');
 
 const PORT = 3456;
 const WWW_DIR = path.join(__dirname, 'www');
-const SERVER_CONFIG_PATH = path.join(__dirname, 'creator-server.json');
+
+// Posibles rutas de creator-server.json (debe coincidir con config.js)
+const SERVER_CONFIG_PATHS = (() => {
+    const paths = [
+        path.join(__dirname, 'data', 'creator-server.json'),   // dev: userData = data/
+        path.join(__dirname, 'creator-server.json'),            // legacy: project root
+    ];
+    if (process.env.APPDATA) {
+        paths.push(path.join(process.env.APPDATA, 'yusup-client', 'creator-server.json'));
+    }
+    if (process.env.LOCALAPPDATA) {
+        paths.push(path.join(process.env.LOCALAPPDATA, 'yusup-client', 'creator-server.json'));
+    }
+    return paths;
+})();
 
 // ── detectar IPs ────────────────────────────────────────
 
@@ -320,10 +334,17 @@ function startServer() {
     });
 
     server.listen(PORT, '0.0.0.0', () => {
-        try {
-            fs.writeFileSync(SERVER_CONFIG_PATH, JSON.stringify({ url: serverUrl }, null, 4));
-        } catch (e) {
-            console.error(`❌ No se pudo escribir creator-server.json: ${e.message}`);
+        let wroteCount = 0;
+        for (const cfgPath of SERVER_CONFIG_PATHS) {
+            try {
+                const cfgDir = path.dirname(cfgPath);
+                if (!fs.existsSync(cfgDir)) fs.mkdirSync(cfgDir, { recursive: true });
+                fs.writeFileSync(cfgPath, JSON.stringify({ url: serverUrl }, null, 4));
+                wroteCount++;
+            } catch (e) {}
+        }
+        if (wroteCount === 0) {
+            console.error(`❌ No se pudo escribir creator-server.json en ninguna ruta`);
         }
 
         const packCount = Object.keys(packs).length;
