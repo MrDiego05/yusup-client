@@ -7,6 +7,8 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
+const __filename = new URL(import.meta.url).pathname;
+const __dirname = path.dirname(__filename);
 
 class Home {
     static id = "home";
@@ -52,6 +54,7 @@ class Home {
 
         // 3. Render and initialize modpacks
         await this.initInstances();
+        this._allInstancesCache = [];
 
         // Clear stale running_instance — app restarted, process is gone
         const ccCheck = await this.db.readData('configClient');
@@ -74,9 +77,6 @@ class Home {
         // 6. Initialize Search Overlay
         this.setupSearchOverlay();
 
-        // Show calendar sidebar if creator server is active
-        this.refreshCalendarVisibility();
-
         // Auto-refresh instances every 30s
         this._refreshTimer = setInterval(() => {
             this.initInstances();
@@ -84,27 +84,38 @@ class Home {
     }
 
     async initUserAvatar() {
-        let configClient = await this.db.readData('configClient');
-        let auth = configClient?.account_selected ? await this.db.readData('accounts', configClient.account_selected) : null;
-        const defaultAvatarStyle = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-        const setAvatar = async (el) => {
-            if (!el) return;
-            if (auth) {
-                let skinUrl = await this._getSkinUrl(auth);
-                if (skinUrl) {
-                    el.style.backgroundImage = `url(${skinUrl})`;
-                    el.style.backgroundSize = 'cover';
-                    el.style.backgroundPosition = 'center';
-                    el.innerHTML = '';
-                    return;
-                }
-            }
-            el.style.background = defaultAvatarStyle;
-            el.style.backgroundImage = 'none';
-            el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (auth?.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
-        };
-        setAvatar(document.querySelector('#top-profile-avatar'));
-        setAvatar(document.querySelector('#dropdown-avatar-large'));
+        try {
+            let configClient = await this.db.readData('configClient');
+            let auth = configClient?.account_selected ? await this.db.readData('accounts', configClient.account_selected) : null;
+            const setAvatar = async (el) => {
+                if (!el) return;
+                try {
+                    if (auth) {
+                        let skinUrl = await this._getSkinUrl(auth);
+                        if (skinUrl) {
+                            el.style.background = `url(${skinUrl}) center / cover`;
+                            el.innerHTML = '';
+                            return;
+                        }
+                    }
+                } catch (e) {}
+                // Ultimate fallback: always show something
+                try {
+                    const defaultPath = path.join(__dirname, '../../images/default/setve.png');
+                    if (fs.existsSync(defaultPath)) {
+                        const buf = fs.readFileSync(defaultPath);
+                        const b64 = buf.toString('base64');
+                        el.style.background = `url('data:image/png;base64,${b64}') center / cover`;
+                        el.innerHTML = '';
+                        return;
+                    }
+                } catch (e) {}
+                el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (auth?.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
+            };
+            setAvatar(document.querySelector('#top-profile-avatar'));
+            setAvatar(document.querySelector('#dropdown-avatar-large'));
+        } catch (e) {}
     }
 
     async news() {
@@ -187,13 +198,8 @@ class Home {
 
         const searchColors = ['#192E03','#3B5E0B','#5C8F14','#7DBF1C','#9EEF24','#D8F999','#A8B87C','#6B8E23','#556B2F','#4A7C59'];
 
-        const refreshData = async () => {
-            let instancesList = await config.getInstanceList();
-            if (!instancesList || instancesList.length === 0) {
-                const cc = await this.db.readData('configClient');
-                if (cc?.creator_server_cache) instancesList = cc.creator_server_cache;
-            }
-            allInstances = instancesList || [];
+        const refreshData = () => {
+            allInstances = this._instancesList || [];
             allEvents = this._calEvents || [];
         };
 
@@ -299,21 +305,21 @@ class Home {
         searchBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             await refreshData();
-            input.focus();
-        });
-
-        input.addEventListener('focus', async () => {
-            await refreshData();
-            container.classList.add('open');
-            if (input.value.trim()) renderResults(input.value);
+            const isOpen = container.classList.contains('open');
+            if (isOpen) {
+                container.classList.remove('open');
+            } else {
+                container.classList.add('open');
+                setTimeout(() => input.focus(), 100);
+            }
         });
 
         input.addEventListener('input', () => {
             if (input.value.trim()) {
-                container.classList.add('open');
                 renderResults(input.value);
             } else {
-                container.classList.remove('open');
+                const dropdown = document.getElementById('search-results-dropdown');
+                if (dropdown) dropdown.innerHTML = '';
             }
         });
 
@@ -324,7 +330,7 @@ class Home {
         });
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#search-container') && !e.target.closest('#header-search-btn')) {
+            if (!e.target.closest('#search-container')) {
                 container.classList.remove('open');
             }
         });
@@ -377,6 +383,8 @@ class Home {
             e.stopPropagation();
             const isOpen = this._accountOverlay.classList.contains('open');
             document.querySelectorAll('.account-dropdown-overlay').forEach(d => d.classList.remove('open'));
+            const menu = document.querySelector('.account-dropdown-menu');
+            if (menu) menu.classList.remove('expanded-dropdown');
             if (!isOpen) {
                 this._accountOverlay.classList.add('open');
                 await this.populateAccountDropdown();
@@ -441,10 +449,15 @@ class Home {
                 if (accounts.length > 0) {
                     configClient.account_selected = accounts[0].ID;
                     await this.db.updateData('configClient', configClient);
+                    await accountSelect(accounts[0]);
+                    await this.initUserAvatar();
+                    await this.setupAccountView();
+                    await this.initInstances();
                     await this.populateAccountDropdown();
                     document.querySelectorAll('.cancel-login').forEach(el => {
                         el.style.display = 'inline';
                     });
+                    document.dispatchEvent(new Event('accounts-changed'));
                 } else {
                     await this.db.updateData('configClient', configClient);
                     changePanel('login');
@@ -455,13 +468,24 @@ class Home {
         // Listen for account changes and refresh the dropdown and avatar
         document.addEventListener('accounts-changed', () => {
             this.initUserAvatar();
+            this.populateAccountDropdown(false);
+            // If dropdown is open and expanded, re-render the list immediately
             if (this._accountOverlay && this._accountOverlay.classList.contains('open')) {
-                this.populateAccountDropdown();
+                const section = document.getElementById('dropdown-accounts-section');
+                const listEl = document.getElementById('dropdown-accounts-list');
+                if (section && section.classList.contains('expanded') && listEl) {
+                    this.db.readData('configClient').then(cc => {
+                        this.db.readAllData('accounts').then(accounts => {
+                            this._renderAccountList(listEl, accounts, cc.account_selected, this._accountOverlay);
+                        });
+                    });
+                }
             }
+            this.loadAccountsSwitcherList();
         });
     }
 
-    async populateAccountDropdown() {
+    async populateAccountDropdown(resetState = true) {
         const overlay = this._accountOverlay;
         let configClient = await this.db.readData('configClient');
         let accounts = await this.db.readAllData('accounts');
@@ -479,7 +503,13 @@ class Home {
         const toggle = document.getElementById('dropdown-section-toggle');
         const body = document.getElementById('dropdown-accounts-body');
         const listEl = document.getElementById('dropdown-accounts-list');
+        const menu = document.querySelector('.account-dropdown-menu');
         if (!section || !toggle || !body || !listEl) return;
+
+        if (resetState) {
+            section.classList.remove('expanded');
+            if (menu) menu.classList.remove('expanded-dropdown');
+        }
 
         // Remove old listeners by cloning
         const newToggle = toggle.cloneNode(true);
@@ -487,7 +517,13 @@ class Home {
 
         newToggle.addEventListener('click', () => {
             section.classList.toggle('expanded');
-            if (section.classList.contains('expanded')) {
+            const isExpanded = section.classList.contains('expanded');
+            if (menu) menu.classList.toggle('expanded-dropdown', isExpanded);
+            const span = newToggle.querySelector('span');
+            if (span) {
+                span.textContent = isExpanded ? 'Ocultar más cuentas' : 'Cambiar de cuenta';
+            }
+            if (isExpanded) {
                 this._renderAccountList(listEl, accounts, configClient.account_selected, overlay);
             }
         });
@@ -499,14 +535,11 @@ class Home {
         if (!el || !account) return;
         // Set initial gradient
         el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-        el.style.backgroundImage = 'none';
         el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (account.name ? account.name.charAt(0).toUpperCase() : '?') + '</span>';
         // Load avatar in background
         this._getSkinUrl(account).then(url => {
             if (url) {
-                el.style.backgroundImage = `url(${url})`;
-                el.style.backgroundSize = 'cover';
-                el.style.backgroundPosition = 'center';
+                el.style.background = `url(${url}) center / cover`;
                 el.innerHTML = '';
             }
         }).catch(() => {});
@@ -650,6 +683,7 @@ class Home {
                     await this.setupAccountView();
                     await this.initInstances();
 
+                    document.dispatchEvent(new Event('accounts-changed'));
                     popupSwitch.closePopup();
                     overlay.classList.remove('open');
                 });
@@ -807,6 +841,10 @@ class Home {
     async loadAccountsSwitcherList(selectedId) {
         const container = document.getElementById('account-selection-container');
         if (!container) return;
+        if (!selectedId) {
+            const cc = await this.db.readData('configClient');
+            selectedId = cc?.account_selected;
+        }
         container.innerHTML = '';
 
         let accounts = await this.db.readAllData('accounts');
@@ -828,7 +866,7 @@ class Home {
                     <div class="profile-uuid">${acc.uuid}</div>
                 </div>
                 <div class="delete-profile" id="delete-${acc.ID}">
-                    <img src="assets/images/png/more-vertical.png" width="14" height="14" alt="del">
+                    <img src="assets/images/iconInterface/close.svg" width="14" height="14" alt="del">
                 </div>
             `;
 
@@ -859,6 +897,8 @@ class Home {
                 await this.initUserAvatar();
                 await this.setupAccountView();
                 await this.initInstances();
+                await this.loadAccountsSwitcherList(acc.ID);
+                document.dispatchEvent(new Event('accounts-changed'));
 
                 popupSwitch.closePopup();
             });
@@ -899,7 +939,10 @@ class Home {
                     await this.initInstances();
                 } else {
                     await this.setupAccountView();
+                    await this.initUserAvatar();
                 }
+                await this.loadAccountsSwitcherList(currentConfig.account_selected);
+                document.dispatchEvent(new Event('accounts-changed'));
 
                 popupDel.closePopup();
             });
@@ -939,7 +982,7 @@ class Home {
                     <span>${f.status === 'online' ? 'Conectado' : 'Desconectado'}</span>
                 </div>
                 <div class="friend-delete-btn" title="Eliminar amigo">
-                    <img src="assets/images/png/more-vertical.png" width="14" height="14" alt="x">
+                    <img src="assets/images/iconInterface/close.svg" width="14" height="14" alt="x">
                 </div>
             `;
 
@@ -994,9 +1037,7 @@ class Home {
             instancesList = configClient.creator_server_cache;
         }
         this._serverOnline = serverOnline;
-
-        // Show/hide calendar sidebar based on creator server
-        this.refreshCalendarVisibility();
+        this._instancesList = instancesList;
 
         // Normalize loader: support both string (legacy) and object formats
         instancesList = instancesList.map(pack => {
@@ -1062,8 +1103,7 @@ class Home {
         if (!this._serverOnline) {
         const userDataPath = await ipcRenderer.invoke('path-user-data');
         const creatorPath = path.join(userDataPath, 'creator-modpacks.json');
-        const fallbackCreatorPath = path.join(process.cwd(), 'data', 'creator-modpacks.json');
-        const resolvedCreatorPath = fs.existsSync(creatorPath) ? creatorPath : (fs.existsSync(fallbackCreatorPath) ? fallbackCreatorPath : null);
+        const resolvedCreatorPath = fs.existsSync(creatorPath) ? creatorPath : null;
         if (resolvedCreatorPath) {
             try {
                 const fileData = fs.readFileSync(resolvedCreatorPath, 'utf8');
@@ -1280,14 +1320,28 @@ class Home {
         // Fill detail viewport floating card content
         document.getElementById('detail-title').textContent = pack.title || pack.name;
 
-        // Set poster image (card only — no duplicate full-viewport bg)
+        // Set poster as full background of the detail view + thumbnail inside card
+        const posterSrc = pack.poster || pack.banner || pack.image || '';
+        const detailView = document.getElementById('view-detail');
+        if (detailView) {
+            if (posterSrc) {
+                detailView.style.backgroundImage = `url('${posterSrc}')`;
+                detailView.style.backgroundSize = 'cover';
+                detailView.style.backgroundPosition = 'center';
+            } else {
+                detailView.style.backgroundImage = 'none';
+                detailView.style.backgroundColor = 'var(--background)';
+            }
+        }
         const posterImg = document.getElementById('detail-poster-img');
-        const posterSrc = pack.banner || pack.poster || pack.image || '';
         if (posterImg) {
             if (posterSrc) {
                 posterImg.src = posterSrc;
                 posterImg.style.display = '';
                 posterImg.alt = (pack.title || pack.name) + ' poster';
+                posterImg.onerror = () => {
+                    posterImg.style.display = 'none';
+                };
             } else {
                 posterImg.style.display = 'none';
             }
@@ -1367,9 +1421,7 @@ class Home {
             shell.openPath(fullPath);
         };
 
-        document.getElementById('opt-btn-worlds').onclick = () => openFolder('saves');
-        document.getElementById('opt-btn-resourcepacks').onclick = () => openFolder('resourcepacks');
-        document.getElementById('opt-btn-screenshots').onclick = () => openFolder('screenshots');
+        document.getElementById('opt-btn-folder').onclick = () => openFolder('');
 
         // Dropdown Option: Clean / Reinstall (Eliminar Instancia)
         document.getElementById('opt-btn-reinstall').onclick = async () => {
@@ -1882,10 +1934,10 @@ class Home {
 
         // Cache posters locally when server is online
         const posterCacheDir = path.join(this.gamePath, 'poster-cache');
-        if (serverOnline) {
+        if (this._serverOnline) {
             try {
                 if (!fs.existsSync(posterCacheDir)) fs.mkdirSync(posterCacheDir, { recursive: true });
-                for (const pack of instancesList) {
+                for (const pack of (this._instancesList || [])) {
                     if (!pack.poster) continue;
                     const ext = path.extname(pack.poster.split('?')[0].split('#')[0]) || '.jpg';
                     const cachedPath = path.join(posterCacheDir, pack.name + ext);
@@ -1900,7 +1952,7 @@ class Home {
             } catch (_) {}
         } else if (fs.existsSync(posterCacheDir)) {
             // Rewrite poster URLs to cached versions when server is offline
-            for (const pack of instancesList) {
+            for (const pack of (this._instancesList || [])) {
                 if (!pack.poster) continue;
                 const ext = path.extname(pack.poster.split('?')[0].split('#')[0]) || '.jpg';
                 const cachedPath = path.join(posterCacheDir, pack.name + ext);
@@ -2026,16 +2078,7 @@ class Home {
     _calSelectedDate = null;
     _calEvents = [];
 
-    refreshCalendarVisibility() {
-        const calBtn = document.getElementById('nav-btn-calendar');
-        if (!calBtn) return;
-        const isCreatorActive = document.querySelector('#instances-admin-section')?.style.display !== 'none'
-            || this._serverUrl
-            || document.querySelectorAll('#instances-grid-creator .modpack-grid-card').length > 0;
-        calBtn.style.display = isCreatorActive ? '' : 'none';
-    }
-
-    initCalendar() {
+        initCalendar() {
         this.loadCalendarEvents();
         this.renderCalendar();
         this.setupCalendarNav();

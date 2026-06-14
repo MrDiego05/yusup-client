@@ -10,11 +10,12 @@ export class skin2D {
         return await new Promise((resolve, reject) => {
             image.addEventListener('load', e => {
                 let cvs = document.createElement('canvas');
-                cvs.width = 8;
-                cvs.height = 8;
+                cvs.width = 64;
+                cvs.height = 64;
                 let ctx = cvs.getContext('2d');
-                ctx.drawImage(image, 8, 8, 8, 8, 0, 0, 8, 8);
-                ctx.drawImage(image, 40, 8, 8, 8, 0, 0, 8, 8);
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(image, 8, 8, 8, 8, 0, 0, 64, 64);
+                ctx.drawImage(image, 40, 8, 8, 8, 0, 0, 64, 64);
                 return resolve(cvs.toDataURL());
             });
         })

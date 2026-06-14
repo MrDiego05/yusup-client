@@ -100,6 +100,17 @@ ipcMain.handle('Microsoft-window', async (_, client_id) => {
     return await new Microsoft(id).getAuth();
 })
 
+ipcMain.handle('get-remote-url', () => {
+    try {
+        const pkgPath = path.join(app.getAppPath(), 'package.json');
+        if (fs.existsSync(pkgPath)) {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            if (pkg.url) return pkg.url.replace(/\/+$/, '');
+        }
+    } catch (e) {}
+    return 'https://mrdiego05.github.io/yusup-client';
+})
+
 ipcMain.handle('is-dark-theme', (_, theme) => {
     if (theme === 'dark') return true
     if (theme === 'light') return false

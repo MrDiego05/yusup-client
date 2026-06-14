@@ -6,3 +6,7 @@ dist
 node-v*
 data
 .DS_Store
+
+# Server runtime
+creator-server.json
+www

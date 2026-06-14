@@ -11,7 +11,8 @@
     background: var(--green-light);
     border-radius: 15px;
     text-align: center;
-    min-width: 40%;
+    width: 880px;
+    height: 382px;
     border: 1px solid var(--green-pale);
 }
 

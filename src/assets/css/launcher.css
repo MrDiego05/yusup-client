@@ -8,6 +8,7 @@
     --green-light: #F7FEE7;
     --green-mid: #D8F999;
     --green-pale: #ECFCCA;
+    --green-background: #ECFCCA
 }
 
 body {
@@ -16,10 +17,10 @@ body {
     height: 100%;
     overflow: hidden;
     user-select: none;
-    color: #1A1A1A;
-    background-color: var(--green-light);
+    color: var(--green-dark);
+    background-color: var(--green-background);
     font-family: 'Google Sans Flex', sans-serif;
-    font-weight: 500;
+    font-weight: 400;
     box-sizing: border-box;
 }
 

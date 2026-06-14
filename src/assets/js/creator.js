@@ -439,13 +439,18 @@ function walkSrcDir(srcPath) {
                     walk(fullPath, relativePath, true);
                     continue;
                 }
+
+                // Skip user-specific Minecraft folders
+                const personalDirs = ['screenshots', 'world', 'world_nether', 'world_the_end', 'end_poi', 'logs', 'crash-reports', 'debug', 'downloads', 'DIM1', 'DIM-1', 'advancements', 'stats', 'data'];
+                if (personalDirs.includes(entry)) continue;
+
                 walk(fullPath, relativePath ? `${relativePath}/${entry}` : entry, isOptional);
             } else {
                 if (entry.endsWith('.info.json')) continue;
                 if (entry.endsWith('.url.txt')) continue;
 
                 // Skip player-specific config files (controls, graphics)
-                const excludedConfigFiles = ['options.txt', 'optionsof.txt', 'servers.dat', 'servers.dat_old'];
+                const excludedConfigFiles = ['options.txt', 'optionsof.txt', 'servers.dat', 'servers.dat_old', 'hotbar.nbt', 'controls.json'];
                 if (excludedConfigFiles.includes(entry)) continue;
 
                 const relFilePath = relativePath ? `${relativePath}/${entry}` : entry;
@@ -518,7 +523,7 @@ async function buildSKCraftManifest(pack, progressCallback) {
         const task = {
             type: 'file',
             hash: sha1,
-            location: file.relativePath,
+            location: `objects/${file.relativePath}`,
             to: file.relativePath,
             size: stat.size
         };
@@ -1159,7 +1164,7 @@ document.getElementById('btn-build').addEventListener('click', async () => {
 
             for (const task of manifest.tasks) {
                 const srcFile = path.join(srcDir, task.to);
-                const objPath = path.join(objectsDir, task.location);
+                const objPath = path.join(objectsDir, task.to);
                 const objDir = path.dirname(objPath);
                 if (!fs.existsSync(objDir)) fs.mkdirSync(objDir, { recursive: true });
                 fs.copyFileSync(srcFile, objPath);
@@ -1176,32 +1181,46 @@ document.getElementById('btn-build').addEventListener('click', async () => {
         } else {
             // Legacy build (mods/ only)
             log('Modo legacy: compilando desde mods/...', 'info');
-            const files = fs.readdirSync(modsDir);
-            const jarFiles = files.filter(f => f.toLowerCase().endsWith('.jar'));
 
-            if (jarFiles.length === 0) {
+            const legacyFiles = [];
+            function walkMods(dir, relativePath) {
+                if (!fs.existsSync(dir)) return;
+                const entries = fs.readdirSync(dir);
+                for (const entry of entries) {
+                    if (entry.startsWith('.')) continue;
+                    const fullPath = path.join(dir, entry);
+                    if (fs.statSync(fullPath).isDirectory()) {
+                        walkMods(fullPath, relativePath ? `${relativePath}/${entry}` : entry);
+                    } else {
+                        const rel = relativePath ? `${relativePath}/${entry}` : entry;
+                        legacyFiles.push({ fullPath, relPath: `mods/${rel}` });
+                    }
+                }
+            }
+            walkMods(modsDir, '');
+
+            if (legacyFiles.length === 0) {
                 throw new Error('La carpeta mods/ está vacía.');
             }
 
             const tasks = [];
             let processed = 0;
 
-            for (const file of jarFiles) {
-                const filePath = path.join(modsDir, file);
-                progressStatus.textContent = `Hasheando: ${file}...`;
-                const sha1 = await calculateSHA1(filePath);
-                const stat = fs.statSync(filePath);
+            for (const file of legacyFiles) {
+                progressStatus.textContent = `Hasheando: ${file.relPath}...`;
+                const sha1 = await calculateSHA1(file.fullPath);
+                const stat = fs.statSync(file.fullPath);
 
                 tasks.push({
                     type: 'file',
                     hash: sha1,
-                    location: `mods/${file}`,
-                    to: `mods/${file}`,
+                    location: file.relPath,
+                    to: file.relPath,
                     size: stat.size
                 });
 
                 processed++;
-                compileProgress.value = Math.round((processed / jarFiles.length) * 100);
+                compileProgress.value = Math.round((processed / legacyFiles.length) * 100);
             }
 
             const version = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' +
@@ -1219,7 +1238,7 @@ document.getElementById('btn-build').addEventListener('click', async () => {
             fs.writeFileSync(jsonOutPath, JSON.stringify(manifest, null, 4));
 
             log(`¡Compilación completada!`, 'success');
-            log(`Se procesaron ${jarFiles.length} mods.`, 'success');
+            log(`Se procesaron ${legacyFiles.length} archivos.`, 'success');
         }
 
         progressStatus.textContent = '¡Completado con éxito!';
@@ -1262,22 +1281,36 @@ async function installPackInLauncher(pack) {
         for (const task of manifest.tasks) {
             if (task.url) continue;
             const srcFile = path.join(packFiles.path, task.to);
-            const objPath = path.join(objectsDir, task.location);
+            const objPath = path.join(objectsDir, task.to);
             const objDir = path.dirname(objPath);
             if (!fs.existsSync(objDir)) fs.mkdirSync(objDir, { recursive: true });
             fs.copyFileSync(srcFile, objPath);
         }
     } else {
-        const files = fs.readdirSync(packFiles.path);
-        const jarFiles = files.filter(f => f.toLowerCase().endsWith('.jar'));
-        if (jarFiles.length === 0) throw new Error(`La carpeta mods/ de ${pack.id} está vacía.`);
+        const legacyFiles = [];
+        function walkMods(dir, relativePath) {
+            if (!fs.existsSync(dir)) return;
+            const entries = fs.readdirSync(dir);
+            for (const entry of entries) {
+                if (entry.startsWith('.')) continue;
+                const fullPath = path.join(dir, entry);
+                if (fs.statSync(fullPath).isDirectory()) {
+                    walkMods(fullPath, relativePath ? `${relativePath}/${entry}` : entry);
+                } else {
+                    const rel = relativePath ? `${relativePath}/${entry}` : entry;
+                    legacyFiles.push({ fullPath, relPath: `mods/${rel}` });
+                }
+            }
+        }
+        walkMods(packFiles.path, '');
+
+        if (legacyFiles.length === 0) throw new Error(`La carpeta mods/ de ${pack.id} está vacía.`);
 
         const tasks = [];
-        for (const file of jarFiles) {
-            const filePath = path.join(packFiles.path, file);
-            const sha1 = await calculateSHA1(filePath);
-            const stat = fs.statSync(filePath);
-            tasks.push({ type: 'file', hash: sha1, location: `mods/${file}`, to: `mods/${file}`, size: stat.size });
+        for (const file of legacyFiles) {
+            const sha1 = await calculateSHA1(file.fullPath);
+            const stat = fs.statSync(file.fullPath);
+            tasks.push({ type: 'file', hash: sha1, location: file.relPath, to: file.relPath, size: stat.size });
         }
         const version = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' +
             Math.random().toString(36).slice(2, 8);
@@ -1324,11 +1357,7 @@ async function installPackInLauncher(pack) {
             }
         }
     } else {
-        const destMods = path.join(instanceDir, 'mods');
-        if (!fs.existsSync(destMods)) fs.mkdirSync(destMods, { recursive: true });
-        fs.readdirSync(packFiles.path).forEach(mod => {
-            fs.copyFileSync(path.join(packFiles.path, mod), path.join(destMods, mod));
-        });
+        copyRecursive(packFiles.path, path.join(instanceDir, 'mods'));
     }
 
     // 2.5 Copy poster/banner images to instance directory

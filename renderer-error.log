@@ -24,3 +24,8 @@ TypeError: this.accounts is not a function
     at Launcher.createPanels (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:169:25)
     at Launcher.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:36:14)
 
+[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'onclick')
+TypeError: Cannot set properties of null (setting 'onclick')
+    at Home.setupLauncherControls (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1370:59)
+    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1322:14)
+
