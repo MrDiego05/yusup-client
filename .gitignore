@@ -10,3 +10,4 @@ data
 # Server runtime
 creator-server.json
 www
+/nbproject/private/

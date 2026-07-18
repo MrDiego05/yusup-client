@@ -1,0 +1,20 @@
+[
+    {
+        "name": "mi-modpack",
+        "title": "Mi Modpack ZIP",
+        "description": "Modpack descargado via ZIP desde la nube",
+        "tags": ["zip", "test"],
+        "gameVersion": "1.20.1",
+        "loader": {
+            "type": "neoforge",
+            "build": "20.4.167",
+            "enable": true
+        },
+        "poster": null,
+        "banner": null,
+        "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=zWLuZn7nrp5CBvsM5oSpE1CA%2FtWiqwn46TQ13SJ8iTf30vcbcpO5NrSmU%2Bf32qRnd%2Fui86MYUvOVPiOtJFxjkA%3D%3D&expiry=lWku0Ps%2BN2Zarh2TGYoBycIuowPg6L2kFpNEf6Wow1k%3D&mac=b7f7a2c1e8aa3da4f1ff3d272e026fdb2ad57703cde9e87b11e1f24409b1a1fa",
+        "zipVersion": "v1",
+        "whitelistActive": false,
+        "whitelist": []
+    }
+]

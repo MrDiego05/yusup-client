@@ -281,6 +281,36 @@
             gap: 6px;
         }
 
+        .creator-tags-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .creator-tag-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .creator-tag-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .creator-tag-btn.active {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
         label {
             font-size: 0.85em;
             color: #666666;
@@ -440,7 +470,10 @@
         <button class="tool-btn" id="btn-check-updates">Verificar Actualizaciones</button>
         <button class="tool-btn" id="btn-start-server">Iniciar Servidor</button>
         <div class="divider"></div>
-        <button class="tool-btn" id="btn-calendar">Calendario</button>
+        <button class="tool-btn" id="btn-calendar">Eventos</button>
+        <div class="divider"></div>
+        <button class="tool-btn" id="btn-badges">Badges</button>
+        <button class="tool-btn" id="btn-users">Usuarios</button>
         <button class="tool-btn" id="btn-launch-client">Probar en Launcher</button>
     </div>
 
@@ -527,8 +560,27 @@
             </div>
 
             <div class="input-group">
-                <label>Tags (separadas por coma)</label>
-                <input type="text" id="new-tags" placeholder="ej. PVP, Terror, Amistad, Optimizado">
+                <label>Tags (seleccioná las que correspondan)</label>
+                <div class="creator-tags-grid" id="creator-tags-grid">
+                    <button class="creator-tag-btn" data-tag="Adventure">Adventure</button>
+                    <button class="creator-tag-btn" data-tag="RPG">RPG</button>
+                    <button class="creator-tag-btn" data-tag="Exploration">Exploration</button>
+                    <button class="creator-tag-btn" data-tag="Magic">Magic</button>
+                    <button class="creator-tag-btn" data-tag="Tech">Tech</button>
+                    <button class="creator-tag-btn" data-tag="Fantasy">Fantasy</button>
+                    <button class="creator-tag-btn" data-tag="Medieval">Medieval</button>
+                    <button class="creator-tag-btn" data-tag="Horror">Horror</button>
+                    <button class="creator-tag-btn" data-tag="Combat">Combat</button>
+                    <button class="creator-tag-btn" data-tag="PvP">PvP</button>
+                    <button class="creator-tag-btn" data-tag="Skyblock">Skyblock</button>
+                    <button class="creator-tag-btn" data-tag="Hardcore">Hardcore</button>
+                    <button class="creator-tag-btn" data-tag="Multiplayer">Multiplayer</button>
+                    <button class="creator-tag-btn" data-tag="Vanilla+">Vanilla+</button>
+                    <button class="creator-tag-btn" data-tag="Optimized">Optimized</button>
+                    <button class="creator-tag-btn" data-tag="Building">Building</button>
+                </div>
+                <input type="hidden" id="new-tags" value="">
+                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;" id="new-tags-display"></div>
             </div>
 
             <div class="input-group">
@@ -558,11 +610,31 @@
             </div>
 
             <div class="input-group">
-                <label>Carpeta Local del Modpack</label>
-                <button class="btn-select-dir"
-                    style="background: #F5F5F5; border: 1px solid #CCCCCC; text-align: left; padding:8px 12px; border-radius:8px; cursor:pointer; font-family:inherit;"
-                    id="btn-select-new-location">Seleccionar carpeta local...</button>
-                <span id="new-location-path" style="font-size:0.75em; color:#999999; word-break:break-all;">No seleccionada</span>
+                <label>URL Base del CDN / Storage <span style="font-weight:400; color:#999;">(opcional)</span></label>
+                <input type="text" id="new-cdn-url"
+                    placeholder="ej. https://r2.example.com/packs/mi-modpack"
+                    style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
+                <span style="font-size:0.75em; color:#999999; line-height:1.5; display:block; margin-top:4px;">
+                    Si los archivos pesados (mods, configs) están en un CDN/storage externo, pegá la URL raíz aquí.<br>
+                    El manifest apuntará a este CDN para cada descarga individual. El JSON y las imágenes se sirven por separado.
+                </span>
+            </div>
+
+            <div class="input-group">
+                <label>URL del ZIP <span style="font-weight:400; color:#999;">(opcional)</span></label>
+                <input type="text" id="new-zip-url"
+                    placeholder="ej. https://r2.example.com/packs/mi-modpack.zip"
+                    style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
+                <span style="font-size:0.75em; color:#999999; line-height:1.5; display:block; margin-top:4px;">
+                    Si tenés un ZIP subido a un CDN/storage, pegá la URL directa acá.<br>
+                    El launcher descargará y extraerá el ZIP automáticamente en el primer lanzamiento.
+                </span>
+            </div>
+
+            <div class="input-group">
+                <label>Contraseña de la Instancia (opcional)</label>
+                <input type="text" id="new-instance-password" placeholder="ej. mi-password-secreto"
+                    style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; outline:none;">
             </div>
 
             <div class="modal-buttons">
@@ -611,11 +683,96 @@
         </div>
     </div>
 
+    <div class="modal" id="modal-badges">
+        <div class="modal-content" style="width:560px; flex-direction:column;">
+            <h3 class="modal-title">Administrar Badges</h3>
+            <p style="font-size:0.85em; color:#666666; margin:0 0 12px 0;">
+            Los badges se muestran junto al nombre de los jugadores en el launcher.
+            </p>
+
+            <div id="badge-admin-key-section">
+                <div class="input-group" style="margin-bottom:12px;">
+                    <label>Admin Key (para autenticarte como administrador)</label>
+                    <input type="password" id="badge-admin-key" placeholder="Admin key del servidor social"
+                        style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+                    <button class="tool-btn" id="btn-badge-auth" style="margin-top:4px;">Autenticar</button>
+                    <span id="badge-auth-status" style="font-size:0.8em; margin-left:8px; color:#999999;"></span>
+                </div>
+            </div>
+
+            <div id="badge-social-url-section" style="margin-bottom:12px;">
+                <label>URL del Servidor Social</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input type="text" id="badge-social-url" placeholder="https://tuserver.com:3457"
+                        style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+                    <button class="tool-btn" id="btn-badge-connect">Conectar</button>
+                </div>
+            </div>
+
+            <div id="badge-manager" style="display:none;">
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                    <input type="text" id="badge-name" placeholder="Nombre del badge"
+                        style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+                    <input type="text" id="badge-icon" placeholder="Icono (ej. 👑 ⭐ 🛠️)"
+                        style="width:80px; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; text-align:center;">
+                    <input type="color" id="badge-color" value="#FFD700"
+                        style="width:50px; height:40px; border:1px solid #CCCCCC; border-radius:8px; cursor:pointer; padding:2px;">
+                    <button class="tool-btn" id="btn-badge-create" style="white-space:nowrap;">+ Crear</button>
+                </div>
+
+                <h4 style="font-size:0.9em; color:#333; margin:8px 0;">Badges existentes</h4>
+                <div style="flex:1; overflow-y:auto; max-height:150px; border:1px solid #CCCCCC; border-radius:8px; background:#F5F5F5;">
+                    <table style="width:100%; font-size:0.85em;">
+                        <thead><tr><th style="padding:8px 12px;">Icono</th><th style="padding:8px 12px;">Nombre</th><th style="padding:8px 12px;">Color</th><th style="padding:8px 12px; width:60px;"></th></tr></thead>
+                        <tbody id="badge-table"></tbody>
+                    </table>
+                </div>
+
+                <h4 style="font-size:0.9em; color:#333; margin:12px 0 8px;">Asignar badge a jugador</h4>
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+                    <input type="text" id="badge-assign-user" placeholder="Nombre del jugador"
+                        style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+                    <select id="badge-assign-select"
+                        style="background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em; min-width:120px;">
+                        <option value="">Sin badge</option>
+                    </select>
+                    <button class="tool-btn" id="btn-badge-assign" style="white-space:nowrap;">Asignar</button>
+                </div>
+                <span id="badge-assign-status" style="font-size:0.8em; color:#999999;"></span>
+
+                <h4 style="font-size:0.9em; color:#333; margin:12px 0 8px;">Usuarios online</h4>
+                <div id="badge-online-users" style="font-size:0.85em; color:#666;"></div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="btn-close-badges">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-users">
+        <div class="modal-content" style="width:480px; flex-direction:column;">
+            <h3 class="modal-title">Usuarios Conocidos</h3>
+            <p style="font-size:0.85em; color:#666666; margin:0 0 12px 0;">
+                Jugadores que iniciaron sesión en el launcher. Usá esta lista para asignar whitelist o badges.
+            </p>
+            <div style="flex:1; overflow-y:auto; max-height:300px; border:1px solid #CCCCCC; border-radius:8px; background:#F5F5F5;">
+                <table style="width:100%; font-size:0.85em;">
+                    <thead><tr><th style="padding:8px 12px;">Nombre</th><th style="padding:8px 12px;">Tipo</th><th style="padding:8px 12px;">Último ingreso</th></tr></thead>
+                    <tbody id="users-table"></tbody>
+                </table>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="btn-close-users">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="modal-calendar">
         <div class="modal-content" style="width:560px; flex-direction:column;">
-            <h3 class="modal-title">Calendario de Eventos</h3>
+            <h3 class="modal-title">Eventos</h3>
             <p style="font-size:0.85em; color:#666666; margin:0 0 12px 0;">
-            Administrá los eventos del calendario. Los eventos se muestran en el launcher de los jugadores.
+            Gestioná los eventos que se muestran en el launcher de los jugadores.
             </p>
 
             <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
@@ -629,11 +786,15 @@
                     style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
                 <button class="tool-btn" id="btn-cal-add" style="white-space:nowrap;">+ Agregar</button>
             </div>
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                <input type="text" id="cal-event-desc" placeholder="Descripción (opcional)"
+                    style="flex:1; background:#F5F5F5; border:1px solid #CCCCCC; border-radius:8px; color:#1A1A1A; padding:10px 12px; font-family:inherit; font-size:0.9em;">
+            </div>
 
             <div style="flex:1; overflow-y:auto; max-height:200px; border:1px solid #CCCCCC; border-radius:8px; background:#F5F5F5;">
                 <table style="width:100%; font-size:0.85em;">
                     <thead>
-                        <tr><th style="padding:8px 12px;">Fecha</th><th style="padding:8px 12px;">Hora</th><th style="padding:8px 12px;">Evento</th><th style="padding:8px 12px; width:40px;"></th></tr>
+                        <tr><th style="padding:8px 12px;">Fecha</th><th style="padding:8px 12px;">Hora</th><th style="padding:8px 12px;">Evento</th><th style="padding:8px 12px;">Descripción</th><th style="padding:8px 12px; width:40px;"></th></tr>
                     </thead>
                     <tbody id="cal-events-table"></tbody>
                 </table>

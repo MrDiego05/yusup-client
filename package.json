@@ -2,7 +2,7 @@
     "name": "yusup-client",
     "productName": "Yusup Client",
     "version": "1.0.0",
-    "url": "http://100.92.49.77:3456",
+    "url": "https://mrdiego05.github.io/yusup-client",
     "description": "Yusup Minecraft Client",
     "main": "src/app.js",
     "author": {
@@ -16,7 +16,9 @@
         "build": "node build.js --obf=true --build=platform",
         "icon": "node build.js --icon",
         "server": "node server.js",
+        "social-server": "node social-server.js",
         "generate-instances": "node generate-instances.js",
+        "deploy": "node generate-instances.js --pages",
         "postinstall": "patch-package"
     },
     "license": "CCANC",
@@ -25,6 +27,7 @@
         "ignore": "**/test"
     },
     "dependencies": {
+        "better-sqlite3": "^12.11.1",
         "crypto": "^1.0.1",
         "electron-store": "^8.2.0",
         "electron-updater": "^6.7.3",

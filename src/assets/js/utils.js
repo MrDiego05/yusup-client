@@ -16,6 +16,8 @@ import { skin2D } from './utils/skin.js';
 import slider from './utils/slider.js';
 import ModpackSync from './utils/modpackSync.js';
 import NeoForgeSync from './utils/neoforgeSync.js';
+import SocialClient from './utils/socialClient.js';
+import zipHandler from './utils/zipHandler.js';
 
 async function setBackground(theme) {
     if (typeof theme == 'undefined') {
@@ -34,6 +36,8 @@ async function changePanel(id) {
     if (active) active.classList.remove("active");
     if (panel) panel.classList.add("active");
 }
+
+const socialClient = new SocialClient();
 
 async function appdata() {
     return await ipcRenderer.invoke('appData').then(path => path)
@@ -168,5 +172,7 @@ export {
     slider as Slider,
     pkg as pkg,
     setStatus as setStatus,
-    ModpackSync as ModpackSync
+    ModpackSync as ModpackSync,
+    socialClient as socialClient,
+    zipHandler as zipHandler
 }

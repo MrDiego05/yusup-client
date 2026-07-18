@@ -1,4 +1,9 @@
-import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, ModpackSync, skin2D, accountSelect } from '../utils.js';
+import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, ModpackSync, skin2D, accountSelect, zipHandler } from '../utils.js';
+
+function debounce(fn, ms) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+}
 
 const { Launch } = require('minecraft-java-core');
 const { shell, ipcRenderer } = require('electron');
@@ -7,14 +12,50 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
-const __filename = new URL(import.meta.url).pathname;
+const __filename = require('url').fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Preload Steve skin fallback at module level
+const _steveSkinDataUrl = (() => {
+    try {
+        const p = path.join(__dirname, '../../images/default/setve.png');
+        if (fs.existsSync(p)) {
+            const buf = fs.readFileSync(p);
+            return `data:image/png;base64,${buf.toString('base64')}`;
+        }
+    } catch (e) {}
+    return null;
+})();
+
+const _defaultPosterDataUrl = (() => {
+    try {
+        const p = path.join(__dirname, '../../images/default/icon-modpack.png');
+        if (fs.existsSync(p)) {
+            const buf = fs.readFileSync(p);
+            return `data:image/png;base64,${buf.toString('base64')}`;
+        }
+    } catch (e) {}
+    return null;
+})();
+
+const _defaultBannerDataUrl = (() => {
+    try {
+        const p = path.join(__dirname, '../../images/default/banner-modpack.png');
+        if (fs.existsSync(p)) {
+            const buf = fs.readFileSync(p);
+            return `data:image/png;base64,${buf.toString('base64')}`;
+        }
+    } catch (e) {}
+    return null;
+})();
 
 class Home {
     static id = "home";
     _launching = false;
     _launchingInstance = null;
     _instanceStatus = new Map(); // instanceName → 'downloading' | 'installing' | 'running'
+    _navHistory = [];
+    _navHistoryIndex = -1;
 
     async init(config) {
         this.config = config;
@@ -26,6 +67,12 @@ class Home {
 
         // Initialize user skin / head avatar
         await this.initUserAvatar();
+
+        // Populate account dropdown so the name appears immediately
+        await this.populateAccountDropdown();
+
+        // Track login for creator tools (badges / whitelist)
+        await this._trackLogin();
 
         // Header frame controls (minimize/close)
         this.setupHeaderControls();
@@ -39,21 +86,13 @@ class Home {
         // Download queue floating panel
         this.setupDownloadsPanel();
 
-        // Discord CTA button
-        const discordBtn = document.getElementById('discord-cta-btn');
-        if (discordBtn) {
-            discordBtn.addEventListener('click', () => {
-                const { shell } = require('electron');
-                shell.openExternal('https://discord.gg/yusup');
-            });
-        }
-
-        // 2. Setup Navigation, Account View & Friends
+        // 2. Setup Navigation & Account View
         this.setupNavigation();
         await this.setupAccountView();
 
-        // 3. Render and initialize modpacks
+        // 4. Render and initialize modpacks
         await this.initInstances();
+        await this.populateRecentInstance();
         this._allInstancesCache = [];
 
         // Clear stale running_instance — app restarted, process is gone
@@ -62,11 +101,6 @@ class Home {
             delete ccCheck.running_instance;
             await this.db.updateData('configClient', ccCheck);
         }
-
-        // Refresh button
-        document.getElementById('btn-refresh-instances')?.addEventListener('click', () => {
-            this.initInstances();
-        });
 
         // 4. Initialize Settings
         await this.initSettings();
@@ -83,38 +117,58 @@ class Home {
         }, 30000);
     }
 
+    async initSocial() {
+    }
+
     async initUserAvatar() {
         try {
             let configClient = await this.db.readData('configClient');
             let auth = configClient?.account_selected ? await this.db.readData('accounts', configClient.account_selected) : null;
-            const setAvatar = async (el) => {
+            const setAvatar = async (el, useRealSkin) => {
                 if (!el) return;
-                try {
-                    if (auth) {
-                        let skinUrl = await this._getSkinUrl(auth);
-                        if (skinUrl) {
-                            el.style.background = `url(${skinUrl}) center / cover`;
-                            el.innerHTML = '';
-                            return;
-                        }
-                    }
-                } catch (e) {}
-                // Ultimate fallback: always show something
-                try {
-                    const defaultPath = path.join(__dirname, '../../images/default/setve.png');
-                    if (fs.existsSync(defaultPath)) {
-                        const buf = fs.readFileSync(defaultPath);
-                        const b64 = buf.toString('base64');
-                        el.style.background = `url('data:image/png;base64,${b64}') center / cover`;
+                // Always set local Steve skin first
+                if (_steveSkinDataUrl) {
+                    el.style.background = `url('${_steveSkinDataUrl}') center / cover`;
+                    el.innerHTML = '';
+                } else {
+                    el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                    el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (auth?.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
+                }
+                // Then try real skin in background if requested
+                if (useRealSkin && auth) {
+                    let skinUrl = await this._getSkinUrl(auth);
+                    if (skinUrl && skinUrl !== _steveSkinDataUrl) {
+                        el.style.background = `url(${skinUrl}) center / cover`;
                         el.innerHTML = '';
-                        return;
                     }
-                } catch (e) {}
-                el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-                el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (auth?.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
+                }
             };
-            setAvatar(document.querySelector('#top-profile-avatar'));
-            setAvatar(document.querySelector('#dropdown-avatar-large'));
+            setAvatar(document.querySelector('#top-profile-avatar'), true);
+        } catch (e) {}
+    }
+
+    async _trackLogin() {
+        try {
+            let configClient = await this.db.readData('configClient');
+            let auth = configClient?.account_selected ? await this.db.readData('accounts', configClient.account_selected) : null;
+            if (!auth) return;
+            const knownPath = path.join(this.gamePath, 'known-users.json');
+            let known = [];
+            try { known = JSON.parse(fs.readFileSync(knownPath, 'utf8')); } catch (e) {}
+            const existing = known.find(u => u.id === auth.ID || u.name === auth.name);
+            if (existing) {
+                existing.lastLogin = new Date().toISOString();
+            } else {
+                known.push({
+                    id: auth.ID,
+                    name: auth.name,
+                    uuid: auth.uuid || '',
+                    type: auth.meta?.type || 'Offline',
+                    firstLogin: new Date().toISOString(),
+                    lastLogin: new Date().toISOString()
+                });
+            }
+            fs.writeFileSync(knownPath, JSON.stringify(known, null, 4));
         } catch (e) {}
     }
 
@@ -124,6 +178,31 @@ class Home {
         newsElement.innerHTML = '';
 
         let news = await config.getNews(this.config).then(res => res).catch(() => false);
+        const events = news && news.length ? news.slice(0, 4) : [
+            { title: 'Mision 1 - DesafíoMine II', content: 'Destruye el crater', day: '12' },
+            { title: 'Mision 1 - DesafíoMine II', content: 'Destruye el crater', day: '13' }
+        ];
+
+        events.forEach((event, index) => {
+            let blockNews = document.createElement('div');
+            blockNews.classList.add('news-block');
+            const eventDate = event.date ? new Date(event.date) : null;
+            const day = event.day || (eventDate && !Number.isNaN(eventDate) ? String(eventDate.getDate()).padStart(2, '0') : String(12 + index).padStart(2, '0'));
+            const month = event.month || (eventDate && !Number.isNaN(eventDate) ? eventDate.toLocaleDateString('es-ES', { month: 'long' }) : 'Junio');
+            blockNews.innerHTML = `
+                <div class="event-date-badge">
+                    <span>${month}</span>
+                    <strong>${day}</strong>
+                </div>
+                <div class="news-header">
+                    <div class="title">${event.title || 'Evento'}</div>
+                    <div class="news-content">
+                        <p>${(event.content || event.description || 'Sin descripción').replace(/\n/g, '</br>')}</p>
+                    </div>
+                </div>`;
+            newsElement.appendChild(blockNews);
+        });
+        return;
         if (news) {
             if (!news.length) {
                 let blockNews = document.createElement('div');
@@ -187,358 +266,450 @@ class Home {
     }
 
     setupSearchOverlay() {
-        const container = document.getElementById('search-container');
-        const searchBtn = document.getElementById('header-search-btn');
-        const input = document.getElementById('search-input-field');
-        const dropdown = document.getElementById('search-results-dropdown');
-        if (!container || !searchBtn || !input || !dropdown) return;
+        const overlay = document.getElementById('search-popup-overlay');
+        const input = document.getElementById('search-popup-input');
+        const closeBtn = document.getElementById('search-popup-close');
+        const results = document.getElementById('search-popup-results');
+        const searchBtn = document.getElementById('top-search-btn');
+        if (!overlay || !input || !closeBtn || !results) return;
 
-        let allInstances = [];
-        let allEvents = [];
-
-        const searchColors = ['#192E03','#3B5E0B','#5C8F14','#7DBF1C','#9EEF24','#D8F999','#A8B87C','#6B8E23','#556B2F','#4A7C59'];
-
-        const refreshData = () => {
-            allInstances = this._instancesList || [];
-            allEvents = this._calEvents || [];
+        const open = () => {
+            overlay.classList.add('open');
+            setTimeout(() => input.focus(), 100);
+            this._allInstancesCache = [...(this._instancesList || []), ...(this._fullInstancesList || [])];
         };
 
-        const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?');
-
-        const getColor = (name) => {
-            if (!name) return searchColors[0];
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-            return searchColors[Math.abs(hash) % searchColors.length];
+        const close = () => {
+            overlay.classList.remove('open');
+            input.value = '';
+            results.innerHTML = '';
         };
 
-        const renderResults = (query) => {
-            const q = query.trim().toLowerCase();
-            dropdown.innerHTML = '';
-
-            // Modpacks
-            const filteredPacks = q
-                ? allInstances.filter(p => (p.title || p.name).toLowerCase().includes(q))
-                : allInstances;
-
-            // Events
-            const filteredEvents = q
-                ? allEvents.filter(e => e.title.toLowerCase().includes(q))
-                : allEvents;
-
-            const hasPacks = filteredPacks.length > 0;
-            const hasEvents = filteredEvents.length > 0;
-
-            if (!hasPacks && !hasEvents) {
-                dropdown.innerHTML = '<p class="search-result-hint">No se encontraron resultados.</p>';
-                return;
-            }
-
-            if (hasPacks) {
-                const title = document.createElement('div');
-                title.className = 'search-result-section-title';
-                title.textContent = 'Modpacks';
-                dropdown.appendChild(title);
-
-                filteredPacks.forEach(pack => {
-                    const item = document.createElement('div');
-                    item.className = 'search-result-item';
-                    const name = pack.title || pack.name;
-                    const initial = getInitial(name);
-                    const color = getColor(name);
-                    const searchThumb = pack.banner || pack.poster || '';
-                    let iconHtml;
-                    if (searchThumb) {
-                        iconHtml = `<div class="search-result-icon"><img src="${searchThumb}" alt=""></div>`;
-                    } else {
-                        iconHtml = `<div class="search-result-icon" style="background:${color}">${initial}</div>`;
-                    }
-                    const loaderLabel = (pack.loader?.type || '').toUpperCase();
-                    item.innerHTML = `
-                        ${iconHtml}
-                        <div class="search-result-info">
-                            <span class="search-result-name">${name}</span>
-                            <span class="search-result-meta">${pack.gameVersion || pack.loader?.minecraft_version || ''} ${loaderLabel ? '· ' + loaderLabel : ''}</span>
-                        </div>
-                        ${loaderLabel ? `<span class="search-result-tag">${loaderLabel}</span>` : ''}
-                    `;
-                    item.addEventListener('click', () => {
-                        container.classList.remove('open');
-                        this.selectInstance(pack);
-                    });
-                    dropdown.appendChild(item);
-                });
-            }
-
-            if (hasEvents) {
-                const title = document.createElement('div');
-                title.className = 'search-result-section-title';
-                title.textContent = 'Eventos';
-                dropdown.appendChild(title);
-
-                filteredEvents.forEach(ev => {
-                    const item = document.createElement('div');
-                    item.className = 'search-result-item';
-                    const dateStr = ev.date || '';
-                    const timeStr = ev.time || 'Todo el día';
-                    item.innerHTML = `
-                        <span class="search-result-dot"></span>
-                        <div class="search-result-info">
-                            <span class="search-result-name">${ev.title}</span>
-                            <span class="search-result-meta">${dateStr} · ${timeStr}</span>
-                        </div>
-                    `;
-                    item.addEventListener('click', () => {
-                        container.classList.remove('open');
-                        // Switch to calendar view and select this date
-                        document.getElementById('nav-btn-calendar')?.click();
-                        if (ev.date) {
-                            this._calSelectedDate = ev.date;
-                            this.renderEventsForDay(ev.date);
-                        }
-                    });
-                    dropdown.appendChild(item);
-                });
-            }
-        };
-
-        searchBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            await refreshData();
-            const isOpen = container.classList.contains('open');
-            if (isOpen) {
-                container.classList.remove('open');
-            } else {
-                container.classList.add('open');
-                setTimeout(() => input.focus(), 100);
-            }
-        });
+        if (searchBtn) searchBtn.addEventListener('click', open);
+        closeBtn.addEventListener('click', close);
 
         input.addEventListener('input', () => {
-            if (input.value.trim()) {
-                renderResults(input.value);
-            } else {
-                const dropdown = document.getElementById('search-results-dropdown');
-                if (dropdown) dropdown.innerHTML = '';
+            const q = input.value.trim().toLowerCase();
+            results.innerHTML = '';
+            if (!q) return;
+
+            const filtered = this._allInstancesCache.filter(p =>
+                (p.title || p.name || '').toLowerCase().includes(q)
+            );
+
+            filtered.forEach(pack => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                const name = pack.title || pack.name;
+                const thumb = pack.poster || pack.banner || '';
+                const initial = name ? name.charAt(0).toUpperCase() : '?';
+                let iconHtml;
+                if (thumb) {
+                    iconHtml = `<div class="search-result-icon"><img src="${thumb}" alt=""></div>`;
+                } else {
+                    iconHtml = `<div class="search-result-icon" style="background:var(--green-dark);color:#fff;font-size:18px;font-weight:700;">${initial}</div>`;
+                }
+                item.innerHTML = `
+                    ${iconHtml}
+                    <div class="search-result-info">
+                        <span class="search-result-name">${name}</span>
+                        <span class="search-result-meta">${pack.gameVersion || ''}</span>
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    close();
+                    this.selectInstance(pack);
+                });
+                results.appendChild(item);
+            });
+
+            // Password unlock check
+            const match = this._fullInstancesList?.find(p => p.instancePassword && p.instancePassword === q);
+            if (match && !filtered.some(p => p.name === match.name)) {
+                const area = document.createElement('div');
+                area.className = 'search-password-result';
+                area.innerHTML = `
+                    <div class="search-result-icon" style="background:var(--green-dark);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;">${(match.title || match.name || '?').charAt(0).toUpperCase()}</div>
+                    <div class="search-result-info">
+                        <span class="search-result-name">${match.title || match.name}</span>
+                        <span class="search-result-meta">Instancia protegida · Click para agregar</span>
+                    </div>
+                `;
+                area.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;border-radius:8px;margin-top:8px;';
+                area.addEventListener('click', () => {
+                    close();
+                    this._preloadAndUnlock(match);
+                });
+                results.appendChild(area);
             }
         });
 
-        input.addEventListener('blur', () => {
-            setTimeout(() => {
-                if (!input.value.trim()) container.classList.remove('open');
-            }, 200);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
         });
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#search-container')) {
-                container.classList.remove('open');
-            }
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
         });
+    }
+
+    _navigateTo(viewId, btnId) {
+        const navButtons = document.querySelectorAll('.sidebar-item.nav-btn');
+        const views = document.querySelectorAll('.dashboard-view');
+
+        navButtons.forEach(b => b.classList.remove('active'));
+        if (btnId) document.getElementById(btnId)?.classList.add('active');
+
+        views.forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId)?.classList.add('active');
+
+        const isHome = viewId === 'view-home';
+
+        // Show/hide back button
+        const topBackBtn = document.getElementById('top-back-btn');
+        if (topBackBtn) topBackBtn.style.display = isHome ? 'none' : 'flex';
+
+        this._closeAccountDropdown();
+    }
+
+    _pushNav(viewId, btnId) {
+        // Remove any forward history
+        this._navHistory = this._navHistory.slice(0, this._navHistoryIndex + 1);
+        // Skip if same as last entry
+        const last = this._navHistory[this._navHistory.length - 1];
+        if (last && last.viewId === viewId) return;
+        this._navHistory.push({ viewId, btnId });
+        this._navHistoryIndex = this._navHistory.length - 1;
+        this._updateNavButtons();
+    }
+
+    _updateNavButtons() {
+        const backBtn = document.getElementById('history-back-btn');
+        const forwardBtn = document.getElementById('history-forward-btn');
+        if (backBtn) backBtn.disabled = this._navHistoryIndex <= 0;
+        if (forwardBtn) forwardBtn.disabled = this._navHistoryIndex >= this._navHistory.length - 1;
+    }
+
+    _goBack() {
+        if (this._navHistoryIndex <= 0) return;
+        this._navHistoryIndex--;
+        const entry = this._navHistory[this._navHistoryIndex];
+        if (entry) this._navigateTo(entry.viewId, entry.btnId);
+        this._updateNavButtons();
+    }
+
+    _goForward() {
+        if (this._navHistoryIndex >= this._navHistory.length - 1) return;
+        this._navHistoryIndex++;
+        const entry = this._navHistory[this._navHistoryIndex];
+        if (entry) this._navigateTo(entry.viewId, entry.btnId);
+        this._updateNavButtons();
     }
 
     setupNavigation() {
         const navButtons = document.querySelectorAll('.sidebar-item.nav-btn');
         const views = document.querySelectorAll('.dashboard-view');
 
+        // Push initial state
+        this._pushNav('view-home', 'nav-btn-home');
+
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 let targetViewId = '';
+                let targetBtnId = btn.id;
                 if (btn.id === 'nav-btn-home') { targetViewId = 'view-home'; }
-                else if (btn.id === 'nav-btn-instances') { targetViewId = 'view-instances'; }
-                else if (btn.id === 'nav-btn-settings') { targetViewId = 'view-settings'; }
-                else if (btn.id === 'nav-btn-calendar') { targetViewId = 'view-calendar'; }
-
                 if (!targetViewId) return;
 
-                navButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                views.forEach(v => v.classList.remove('active'));
-                document.getElementById(targetViewId)?.classList.add('active');
-
-                // Close account dropdown
-                const accDropdown = document.querySelector('.account-dropdown-overlay');
-                if (accDropdown) accDropdown.classList.remove('open');
+                this._navigateTo(targetViewId, targetBtnId);
+                this._pushNav(targetViewId, targetBtnId);
             });
         });
 
-        // Logo click -> Home
-        const logoBtn = document.getElementById('top-logo-btn');
-        if (logoBtn) {
-            logoBtn.addEventListener('click', () => {
-                navButtons.forEach(b => b.classList.remove('active'));
-                document.getElementById('nav-btn-home')?.classList.add('active');
-                views.forEach(v => v.classList.remove('active'));
-                document.getElementById('view-home')?.classList.add('active');
+        // Back/Forward buttons
+        const backBtn = document.getElementById('history-back-btn');
+        const forwardBtn = document.getElementById('history-forward-btn');
+        if (backBtn) backBtn.addEventListener('click', () => this._goBack());
+        if (forwardBtn) forwardBtn.addEventListener('click', () => this._goForward());
+    }
+
+    async updateSidebarAccount() {
+        let configClient = await this.db.readData('configClient');
+        let auth = configClient?.account_selected ? await this.db.readData('accounts', configClient.account_selected) : null;
+    }
+
+    async populateRecentInstance() {
+        const section = document.getElementById('sidebar-recents');
+        const list = document.getElementById('sidebar-recents-list');
+        if (!section || !list) return;
+        let sessions = await this.db.readAllData('sessions') || [];
+        sessions = sessions.filter(s => s.endTime);
+        if (sessions.length === 0) { section.style.display = 'none'; return; }
+        // Get unique instances from last 5 sessions
+        const seen = new Set();
+        const recent = [];
+        sessions.sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+        for (const s of sessions) {
+            if (!seen.has(s.instance) && s.instance) {
+                seen.add(s.instance);
+                recent.push(s.instance);
+                if (recent.length >= 5) break;
+            }
+        }
+        if (recent.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        list.innerHTML = '';
+        for (const name of recent) {
+            const pack = (this._instancesList || []).find(i => i.name === name)
+                || (this._fullInstancesList || []).find(i => i.name === name);
+            const btn = document.createElement('button');
+            btn.className = 'sidebar-recent-btn';
+            btn.title = pack?.title || name;
+            const thumb = pack?.poster || pack?.banner || _defaultPosterDataUrl || '';
+            if (thumb) {
+                btn.style.background = `url('${thumb}') center / cover`;
+            } else {
+                btn.textContent = (name.charAt(0) || '?').toUpperCase();
+                btn.style.background = 'var(--green-dark)';
+                btn.style.color = '#fff';
+                btn.style.fontWeight = '700';
+                btn.style.fontSize = '16px';
+            }
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (pack) this.selectInstance(pack);
             });
+            list.appendChild(btn);
         }
     }
 
-    setupAccountDropdown() {
-        this._accountOverlay = document.querySelector('.account-dropdown-overlay');
-        const avatar = document.getElementById('top-profile-btn');
-        if (!avatar || !this._accountOverlay) return;
+    _closeAccountDropdown() {
+        const dropdown = document.getElementById('top-profile-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+        const chevron = document.querySelector('.top-profile-chevron');
+        if (chevron) chevron.classList.remove('open');
+    }
 
-        avatar.addEventListener('click', async (e) => {
+    _openLoginModal() {
+        const loginPanel = document.querySelector('.panel.login');
+        if (!loginPanel) return;
+        loginPanel.classList.add('modal-mode', 'active');
+    }
+
+    _closeLoginModal() {
+        const loginPanel = document.querySelector('.panel.login');
+        if (!loginPanel) return;
+        loginPanel.classList.remove('modal-mode', 'active');
+    }
+
+    setupAccountDropdown() {
+        const profile = document.querySelector('.top-profile');
+        const dropdown = document.getElementById('top-profile-dropdown');
+        if (!profile || !dropdown) return;
+
+        profile.addEventListener('click', async (e) => {
             e.stopPropagation();
-            const isOpen = this._accountOverlay.classList.contains('open');
-            document.querySelectorAll('.account-dropdown-overlay').forEach(d => d.classList.remove('open'));
-            const menu = document.querySelector('.account-dropdown-menu');
-            if (menu) menu.classList.remove('expanded-dropdown');
+            const isOpen = dropdown.classList.contains('open');
+            const chevron = profile.querySelector('.top-profile-chevron');
             if (!isOpen) {
-                this._accountOverlay.classList.add('open');
+                chevron?.classList.add('open');
+                dropdown.classList.add('open');
                 await this.populateAccountDropdown();
+            } else {
+                this._closeAccountDropdown();
             }
         });
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.account-dropdown-overlay') && !e.target.closest('#top-profile-btn')) {
-                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
+            if (!e.target.closest('.top-profile') && !e.target.closest('.top-profile-dropdown')) {
+                this._closeAccountDropdown();
             }
         });
 
-        // Add account button in dropdown
-        const addBtn = document.getElementById('dropdown-btn-add');
-        if (addBtn) {
-            addBtn.addEventListener('click', async () => {
-                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
-                const accounts = await this.db.readAllData('accounts');
-                const show = accounts?.length > 0;
-                document.querySelectorAll('.cancel-login').forEach(el => {
-                    el.style.display = show ? 'inline' : 'none';
-                });
+        document.getElementById('dropdown-btn-add-account')?.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            this._closeAccountDropdown();
+            let allAccounts = await this.db.readAllData('accounts');
+            if (allAccounts && allAccounts.length > 0) {
+                this._openLoginModal();
+            } else {
                 changePanel('login');
-            });
-        }
+            }
+        });
 
-        // Logout button: delete current account and go to login
-        const logoutBtn = document.getElementById('dropdown-btn-logout');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                if (this._accountOverlay) this._accountOverlay.classList.remove('open');
-                let configClient = await this.db.readData('configClient');
-                const selectedId = configClient.account_selected;
+        document.getElementById('dropdown-btn-settings')?.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            this._closeAccountDropdown();
+            this.openSettingsModal();
+        });
 
-                // Remove DOM elements for the deleted account
-                if (selectedId) {
-                    document.getElementById(selectedId)?.remove();
-                    document.getElementById(`delete-${selectedId}`)?.closest('.account')?.remove();
-                    document.getElementById(`switch-${selectedId}`)?.remove();
-                    await this.db.deleteData('accounts', selectedId);
-                }
+        document.getElementById('dropdown-btn-logout')?.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            this._closeAccountDropdown();
+            let configClient = await this.db.readData('configClient');
+            const selectedId = configClient.account_selected;
 
-                configClient.account_selected = null;
-                await this.db.updateData('configClient', configClient);
+            if (selectedId) {
+                await this.db.deleteData('accounts', selectedId);
+            }
 
-                // Reset avatars to default gradient
-                const avatarEl = document.querySelector('#top-profile-avatar');
-                if (avatarEl) {
-                    avatarEl.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-                    avatarEl.style.backgroundImage = 'none';
-                    avatarEl.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">?</span>';
-                }
-                const largeAvatar = document.querySelector('#dropdown-avatar-large');
-                if (largeAvatar) {
-                    largeAvatar.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-                    largeAvatar.style.backgroundImage = 'none';
-                    largeAvatar.innerHTML = '<span style="color:#fff;font-size:24px;font-weight:700;">?</span>';
-                }
+            configClient.account_selected = null;
+            await this.db.updateData('configClient', configClient);
 
-                // Auto-switch to another account or go to login
-                let accounts = await this.db.readAllData('accounts');
-                if (accounts.length > 0) {
-                    configClient.account_selected = accounts[0].ID;
-                    await this.db.updateData('configClient', configClient);
-                    await accountSelect(accounts[0]);
-                    await this.initUserAvatar();
-                    await this.setupAccountView();
-                    await this.initInstances();
-                    await this.populateAccountDropdown();
-                    document.querySelectorAll('.cancel-login').forEach(el => {
-                        el.style.display = 'inline';
-                    });
-                    document.dispatchEvent(new Event('accounts-changed'));
+            const setLogoutAvatar = () => {
+                const el = document.getElementById('top-profile-avatar');
+                if (!el) return;
+                if (_steveSkinDataUrl) {
+                    el.style.background = `url('${_steveSkinDataUrl}') center / cover`;
+                    el.innerHTML = '';
                 } else {
-                    await this.db.updateData('configClient', configClient);
-                    changePanel('login');
+                    el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                    el.innerHTML = '';
                 }
-            });
-        }
+            };
+            setLogoutAvatar();
 
-        // Listen for account changes and refresh the dropdown and avatar
+            let accounts = await this.db.readAllData('accounts');
+            if (accounts.length > 0) {
+                configClient.account_selected = accounts[0].ID;
+                await this.db.updateData('configClient', configClient);
+                await accountSelect(accounts[0]);
+                await this.initUserAvatar();
+                await this.setupAccountView();
+                await this.initInstances();
+                await this.populateAccountDropdown();
+                document.dispatchEvent(new Event('accounts-changed'));
+            } else {
+                await this.db.updateData('configClient', configClient);
+                changePanel('login');
+            }
+        });
+
         document.addEventListener('accounts-changed', () => {
             this.initUserAvatar();
-            this.populateAccountDropdown(false);
-            // If dropdown is open and expanded, re-render the list immediately
-            if (this._accountOverlay && this._accountOverlay.classList.contains('open')) {
-                const section = document.getElementById('dropdown-accounts-section');
-                const listEl = document.getElementById('dropdown-accounts-list');
-                if (section && section.classList.contains('expanded') && listEl) {
-                    this.db.readData('configClient').then(cc => {
-                        this.db.readAllData('accounts').then(accounts => {
-                            this._renderAccountList(listEl, accounts, cc.account_selected, this._accountOverlay);
-                        });
-                    });
-                }
-            }
+            this._trackLogin();
+            this.populateAccountDropdown();
             this.loadAccountsSwitcherList();
         });
     }
 
-    async populateAccountDropdown(resetState = true) {
-        const overlay = this._accountOverlay;
-        let configClient = await this.db.readData('configClient');
-        let accounts = await this.db.readAllData('accounts');
+    async populateAccountDropdown() {
+        let configClient = (await this.db.readData('configClient')) || {};
+        let rawAccounts = await this.db.readAllData('accounts');
+        let accounts = Array.isArray(rawAccounts) ? rawAccounts : [];
+
         const currentAccount = configClient.account_selected
             ? accounts.find(a => a.ID === configClient.account_selected)
             : null;
 
-        // Update current account header
-        const nameEl = document.getElementById('dropdown-current-name');
+        // Update name in top bar trigger
+        const nameEl = document.getElementById('top-profile-name');
         if (nameEl) nameEl.textContent = currentAccount?.name || 'Sin cuenta';
-        this._loadAvatarToEl('dropdown-avatar-large', currentAccount);
 
-        // Setup expandable section
-        const section = document.getElementById('dropdown-accounts-section');
-        const toggle = document.getElementById('dropdown-section-toggle');
-        const body = document.getElementById('dropdown-accounts-body');
-        const listEl = document.getElementById('dropdown-accounts-list');
-        const menu = document.querySelector('.account-dropdown-menu');
-        if (!section || !toggle || !body || !listEl) return;
-
-        if (resetState) {
-            section.classList.remove('expanded');
-            if (menu) menu.classList.remove('expanded-dropdown');
+        try {
+        const listEl = document.getElementById('top-profile-accounts');
+        if (!listEl) { console.error('[populateAccountDropdown] listEl not found'); return; }
+        listEl.innerHTML = accounts.map(a => {
+            const isActive = a.ID === configClient.account_selected;
+            return `<div class="discord-account-item${isActive ? ' discord-current-account' : ''}" data-acc-id="${a.ID}">
+                <div class="discord-account-item-avatar" style="${_steveSkinDataUrl ? `background:url('${_steveSkinDataUrl}') center/cover` : 'background:linear-gradient(135deg,var(--green-dark),var(--green-mid));display:flex;align-items:center;justify-content:center;'}">${_steveSkinDataUrl ? '' : (a.name ? a.name.charAt(0).toUpperCase() : '?')}</div>
+                <div class="discord-account-item-info">
+                    <div class="discord-account-item-name">${a.name || 'Sin nombre'}</div>
+                    <div class="discord-account-item-type">${a.meta?.type === 'Xbox' ? 'Microsoft' : 'Offline'}</div>
+                </div>
+                ${isActive ? '<span class="discord-account-item-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>' : ''}
+                ${!isActive ? '<button class="discord-account-item-delete" title="Eliminar cuenta" data-acc-id="' + a.ID + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="currentColor"/></svg></button>' : ''}
+            </div>`;
+        }).join('');
+        listEl._delHandler = (e) => {
+            const delBtn = e.target.closest('.discord-account-item-delete');
+            if (!delBtn) return;
+            const accId = parseInt(delBtn.dataset.accId);
+            if (!accId) return;
+            this._deleteAccount(accId);
+        };
+        listEl.removeEventListener('click', listEl._delHandler);
+        listEl.addEventListener('click', listEl._delHandler);
+        listEl._switchHandler = (e) => {
+            if (e.target.closest('.discord-account-item-delete')) return;
+            const item = e.target.closest('.discord-account-item');
+            if (!item || item.classList.contains('discord-current-account')) return;
+            const accId = parseInt(item.dataset.accId);
+            if (!accId) return;
+            this._switchAccount(accId);
+        };
+        listEl.removeEventListener('click', listEl._switchHandler);
+        listEl.addEventListener('click', listEl._switchHandler);
+        for (const a of accounts) {
+            this._getSkinUrl(a).then(url => {
+                if (!url) return;
+                const avatarEl = listEl.querySelector(`.discord-account-item[data-acc-id="${a.ID}"] .discord-account-item-avatar`);
+                if (!avatarEl) return;
+                avatarEl.style.background = `url('${url}') center / cover`;
+                avatarEl.textContent = '';
+            }).catch(() => {});
         }
+        } catch (e) {
+            console.error('[populateAccountDropdown] render error: ' + (e.stack || e.message || e));
+        }
+    }
 
-        // Remove old listeners by cloning
-        const newToggle = toggle.cloneNode(true);
-        toggle.replaceWith(newToggle);
+    async _deleteAccount(accId) {
+        await this.db.deleteData('accounts', accId);
+        let cc = await this.db.readData('configClient');
+        if (cc.account_selected === accId) {
+            let remaining = await this.db.readAllData('accounts');
+            if (remaining.length > 0) {
+                cc.account_selected = remaining[0].ID;
+                await this.db.updateData('configClient', cc);
+                await accountSelect(remaining[0]);
+                await this.initUserAvatar();
+                await this.setupAccountView();
+                await this.initInstances();
+            } else {
+                cc.account_selected = null;
+                await this.db.updateData('configClient', cc);
+                this._closeAccountDropdown();
+                changePanel('login');
+                return;
+            }
+        }
+        document.dispatchEvent(new Event('accounts-changed'));
+        this._closeAccountDropdown();
+    }
 
-        newToggle.addEventListener('click', () => {
-            section.classList.toggle('expanded');
-            const isExpanded = section.classList.contains('expanded');
-            if (menu) menu.classList.toggle('expanded-dropdown', isExpanded);
-            const span = newToggle.querySelector('span');
-            if (span) {
-                span.textContent = isExpanded ? 'Ocultar más cuentas' : 'Cambiar de cuenta';
-            }
-            if (isExpanded) {
-                this._renderAccountList(listEl, accounts, configClient.account_selected, overlay);
-            }
-        });
+    async _switchAccount(accId) {
+        let popupSwitch = new popup();
+        popupSwitch.openPopup({ title: 'Conexión', content: 'Cargando cuenta...', color: 'var(--color)' });
+        let cc = await this.db.readData('configClient');
+        cc.account_selected = accId;
+        let instancesList = await config.getInstanceList();
+        if (instancesList.length > 0) cc.instance_select = instancesList[0].name;
+        await this.db.updateData('configClient', cc);
+        const acc = await this.db.readData('accounts', accId);
+        if (acc) await accountSelect(acc);
+        await this.initUserAvatar();
+        await this.setupAccountView();
+        await this.initInstances();
+        document.dispatchEvent(new Event('accounts-changed'));
+        popupSwitch.closePopup();
+        this._closeAccountDropdown();
     }
 
     // Helper: load avatar into any element
     _loadAvatarToEl(elId, account) {
         const el = document.getElementById(elId);
         if (!el || !account) return;
-        // Set initial gradient
-        el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-        el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (account.name ? account.name.charAt(0).toUpperCase() : '?') + '</span>';
-        // Load avatar in background
+        // Set Steve skin first
+        if (_steveSkinDataUrl) {
+            el.style.background = `url('${_steveSkinDataUrl}') center / cover`;
+            el.innerHTML = '';
+        } else {
+            el.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+            el.innerHTML = '<span style="color:#fff;font-size:16px;font-weight:700;">' + (account.name ? account.name.charAt(0).toUpperCase() : '?') + '</span>';
+        }
+        // Load real avatar in background
         this._getSkinUrl(account).then(url => {
-            if (url) {
+            if (url && url !== _steveSkinDataUrl) {
                 el.style.background = `url(${url}) center / cover`;
                 el.innerHTML = '';
             }
@@ -622,15 +793,9 @@ class Home {
                     }
                 } catch (e) {}
             }
-            // 5. Ultimate fallback: use local setve.png image
-            if (!headUrl) {
-                try {
-                    const defaultPath = path.join(__dirname, '../../images/default/setve.png');
-                    if (fs.existsSync(defaultPath)) {
-                        const buf = fs.readFileSync(defaultPath);
-                        headUrl = `data:image/png;base64,${buf.toString('base64')}`;
-                    }
-                } catch (e) {}
+            // 5. Ultimate fallback: use preloaded Steve skin
+            if (!headUrl && _steveSkinDataUrl) {
+                headUrl = _steveSkinDataUrl;
             }
             if (headUrl) {
                 this._skinCache.set(acc.ID, headUrl);
@@ -652,14 +817,18 @@ class Home {
             const item = document.createElement('div');
             const isActive = acc.ID === selectedId;
             item.className = 'dropdown-account-item' + (isActive ? ' active-account' : '');
+            const avatarStyle = _steveSkinDataUrl
+                ? `background:url('${_steveSkinDataUrl}') center/cover;background-size:cover;`
+                : `background:linear-gradient(135deg,var(--green-dark),var(--green-mid));display:flex;align-items:center;justify-content:center;`;
+            const avatarContent = _steveSkinDataUrl ? '' : `<span style="color:#fff;font-size:14px;font-weight:700;">${acc.name ? acc.name.charAt(0).toUpperCase() : '?'}</span>`;
             item.innerHTML = `
-                <div class="dropdown-account-avatar" style="background:linear-gradient(135deg,var(--green-dark),var(--green-mid));display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:14px;font-weight:700;">${acc.name ? acc.name.charAt(0).toUpperCase() : '?'}</span></div>
+                <div class="dropdown-account-avatar" style="${avatarStyle}">${avatarContent}</div>
                 <div class="dropdown-account-name">${acc.name}</div>
             `;
 
-            // Lazy load avatar
+            // Lazy load real avatar
             this._getSkinUrl(acc).then(url => {
-                if (url) {
+                if (url && url !== _steveSkinDataUrl) {
                     const av = item.querySelector('.dropdown-account-avatar');
                     if (av) {
                         av.style.background = `url(${url}) center/cover`;
@@ -806,36 +975,7 @@ class Home {
     }
 
     async setupAccountView() {
-        // Account view removed from settings.
-        // Still bind the Add Friend button (called during init).
-        const addFriendBtn = document.getElementById('add-friend-btn');
-        addFriendBtn?.replaceWith(addFriendBtn.cloneNode(true));
-        document.getElementById('add-friend-btn')?.addEventListener('click', async () => {
-            const inputEl = document.getElementById('add-friend-username');
-            const username = inputEl.value.trim();
-            if (username.length < 3) {
-                alert('El nombre debe tener al menos 3 caracteres.');
-                return;
-            }
-            if (username.includes(' ')) {
-                alert('El nombre no debe contener espacios.');
-                return;
-            }
-
-            let friends = await this.db.readAllData('friends');
-            if (friends.find(f => f.name.toLowerCase() === username.toLowerCase())) {
-                alert('Este usuario ya está en tu lista de amigos.');
-                return;
-            }
-
-            await this.db.createData('friends', {
-                name: username,
-                status: Math.random() > 0.4 ? 'online' : 'offline'
-            });
-
-            inputEl.value = '';
-            await this.loadFriendsList();
-        });
+        // Account view — no-op, social is now in social section
     }
 
     async loadAccountsSwitcherList(selectedId) {
@@ -866,7 +1006,7 @@ class Home {
                     <div class="profile-uuid">${acc.uuid}</div>
                 </div>
                 <div class="delete-profile" id="delete-${acc.ID}">
-                    <img src="assets/images/iconInterface/close.svg" width="14" height="14" alt="del">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6.4 19L5 17.6L10.6 12L5 6.4L6.4 5L12 10.6L17.6 5L19 6.4L13.4 12L19 17.6L17.6 19L12 13.4L6.4 19Z" fill="currentColor"/></svg>
                 </div>
             `;
 
@@ -951,52 +1091,7 @@ class Home {
         }
     }
 
-    async loadFriendsList() {
-        const container = document.getElementById('friends-list-container');
-        if (!container) return;
-        container.innerHTML = '';
 
-        let friends = await this.db.readAllData('friends');
-
-        // Populate with dynamic default mock friends if table is completely empty
-        if (friends.length === 0) {
-            const defaults = [
-                { name: 'MrDiego05', status: 'online' },
-                { name: 'Luuxis', status: 'online' },
-                { name: 'JuanCarlosElMinero', status: 'offline' }
-            ];
-            for (let f of defaults) {
-                await this.db.createData('friends', f);
-            }
-            friends = await this.db.readAllData('friends');
-        }
-
-        friends.forEach(f => {
-            const div = document.createElement('div');
-            div.classList.add('friend-item');
-            div.innerHTML = `
-                <div class="friend-avatar" style="background-image: url('assets/images/default/setve.png');"></div>
-                <div class="friend-name">${f.name}</div>
-                <div class="friend-status ${f.status}">
-                    <span class="status-dot"></span>
-                    <span>${f.status === 'online' ? 'Conectado' : 'Desconectado'}</span>
-                </div>
-                <div class="friend-delete-btn" title="Eliminar amigo">
-                    <img src="assets/images/iconInterface/close.svg" width="14" height="14" alt="x">
-                </div>
-            `;
-
-            // Delete friend listener
-            div.querySelector('.friend-delete-btn').addEventListener('click', async () => {
-                if (confirm(`¿Eliminar a ${f.name} de tus amigos?`)) {
-                    await this.db.deleteData('friends', f.ID);
-                    await this.loadFriendsList();
-                }
-            });
-
-            container.appendChild(div);
-        });
-    }
 
     getThemeColor(pack) {
         if (pack.themeColor) return pack.themeColor;
@@ -1016,6 +1111,8 @@ class Home {
         this._instanceStatus.clear();
         this._launching = false;
         this._launchingInstance = null;
+        // Allow search bar listener to re-register on next render
+        this._searchBarInitialized = false;
 
         // Detect creator server URL
         this._serverUrl = '';
@@ -1072,12 +1169,27 @@ class Home {
             return false;                          // not in whitelist → hidden
         });
 
+        // Keep the full list (including password-protected) for unlock lookup
+        this._fullInstancesList = [...instancesList];
+
+        // Hide password-protected instances from normal grid (show only if already installed)
+        instancesList = instancesList.filter(pack => {
+            if (!pack.instancePassword) return true; // no password → always visible
+            // Visible if already installed locally
+            const localPackDir = path.join(this.gamePath, 'instances', pack.name);
+            const hasVersion = configClient.instances_versions?.[pack.name];
+            const hasManifest = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
+            const hasZipDir = pack.zipUrl && fs.existsSync(localPackDir) && fs.readdirSync(localPackDir).length > 0;
+            return !!(hasVersion || hasManifest || hasZipDir);
+        });
+
         // Auto select first instance if none selected
         if (!currentSelect && instancesList.length > 0) {
             currentSelect = instancesList[0].name;
             configClient.instance_select = currentSelect;
             await this.db.updateData('configClient', configClient);
         } else if (instancesList.length === 0) {
+            console.warn('initInstances: empty instances list (server offline or no instances.json)');
             this.renderInstancesGrid([], 'instances-grid-installed');
             this.renderInstancesGrid([], 'instances-grid-all');
             return;
@@ -1091,16 +1203,18 @@ class Home {
             const localPackDir = path.join(this.gamePath, 'instances', pack.name);
             const hasVersion = configClient.instances_versions?.[pack.name];
             const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
-            if (hasVersion || hasManifestFile) {
+            const hasZipDir = pack.zipUrl && fs.existsSync(localPackDir) && fs.readdirSync(localPackDir).length > 0;
+            if (hasVersion || hasManifestFile || hasZipDir) {
                 installedPacks.push(pack);
             } else {
                 allPacks.push(pack);
             }
         }
 
-        // 2. Merge creator tools modpacks — only when creator server is OFFLINE
-        //    (when server is online, instancesList already includes them)
-        if (!this._serverOnline) {
+        // 2. Merge creator tools modpacks (local packs from creator tools)
+        //    Also try loading generated instances.json from userData
+        const _passwordPacks = [];
+        {
         const userDataPath = await ipcRenderer.invoke('path-user-data');
         const creatorPath = path.join(userDataPath, 'creator-modpacks.json');
         const resolvedCreatorPath = fs.existsSync(creatorPath) ? creatorPath : null;
@@ -1131,24 +1245,77 @@ class Home {
                         themeColor: 'lime',
                         playTime: '0.0h',
                         modpack_url: fs.existsSync(localManifest) ? localManifest : undefined,
+                        instancePassword: c.instancePassword || undefined,
                         whitelistActive: c.whitelistActive || false,
                         whitelist: c.whitelist || [],
+                        zipUrl: c.zipUrl || undefined,
                         poster: c.poster ? `file:///${path.resolve(c.location, c.poster).replace(/\\/g, '/')}` : null,
                         banner: c.banner ? `file:///${path.resolve(c.location, c.banner).replace(/\\/g, '/')}` : null
                     };
                     const localPackDir = path.join(this.gamePath, 'instances', pack.name);
                     const hasVersion = configClient.instances_versions?.[pack.name];
                     const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
-                    if (hasVersion || hasManifestFile) {
+                    const hasZipDir = pack.zipUrl && fs.existsSync(localPackDir) && fs.readdirSync(localPackDir).length > 0;
+                    const hasLocal = hasVersion || hasManifestFile || hasZipDir;
+                    if (hasLocal) {
                         installedPacks.push(pack);
-                    } else {
+                    } else if (!pack.instancePassword) {
                         allPacks.push(pack);
+                    } else {
+                        _passwordPacks.push(pack);
                     }
                 }
             } catch (e) {
                 console.error('Error reading creator tools modpacks:', e);
             }
         }
+
+        // 2b. Also load generated instances.json from userData (if launcher can't reach creator server)
+        try {
+            const userDataPath = await ipcRenderer.invoke('path-user-data');
+            const generatedPath = path.join(userDataPath, 'instances.json');
+            if (fs.existsSync(generatedPath)) {
+                const generated = JSON.parse(fs.readFileSync(generatedPath, 'utf8'));
+                if (Array.isArray(generated)) {
+                    for (let pack of generated) {
+                        if (typeof pack.loader === 'string') {
+                            pack.loader = { type: pack.loader, build: pack.loaderVersion || '', enable: pack.loader !== 'vanilla' };
+                        }
+                        if (!pack.name && pack.title) pack.name = pack.title.toLowerCase().replace(/\s+/g, '-');
+                        const existsInList = instancesList.some(p => p.name === pack.name);
+                        if (!existsInList) {
+                            const localPackDir = path.join(this.gamePath, 'instances', pack.name);
+                            const hasVersion = configClient.instances_versions?.[pack.name];
+                            const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
+                            const hasZipDir = pack.zipUrl && fs.existsSync(localPackDir) && fs.readdirSync(localPackDir).length > 0;
+                            const hasLocal = hasVersion || hasManifestFile || hasZipDir;
+                            if (hasLocal) {
+                                installedPacks.push(pack);
+                            } else if (!pack.instancePassword) {
+                                allPacks.push(pack);
+                            } else {
+                                _passwordPacks.push(pack);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error loading generated instances.json:', e);
+        }
+        }
+
+        // Add all password-protected creator/generated packs to full list for unlock search
+        for (const p of [...allPacks, ...installedPacks]) {
+            if (p.instancePassword && !this._fullInstancesList.some(f => f.name === p.name)) {
+                this._fullInstancesList.push(p);
+            }
+        }
+        // Also add password-protected packs that were excluded from both lists (not installed)
+        for (const p of _passwordPacks) {
+            if (!this._fullInstancesList.some(f => f.name === p.name)) {
+                this._fullInstancesList.push(p);
+            }
         }
 
         // Deduplicate: remove packs with duplicate names (prefer remote over creator-local)
@@ -1175,9 +1342,201 @@ class Home {
             }
         } catch (e) {}
 
-        // 4. Render sections
+        // 4. Store for filtering
+        this._installedPacks = installedPacks;
+        this._allPacks = allPacks;
+        this._playtimeMap = playtimeMap;
+
+        // 5. Render sections
         this.renderInstancesGrid(installedPacks, 'instances-grid-installed', playtimeMap);
         this.renderInstancesGrid(allPacks, 'instances-grid-all', playtimeMap);
+        await this.updateSidebarAccount();
+
+        // 6. Search handled by setupSearchOverlay
+    }
+
+    /* ── Search bar: name filter + password-based instance unlock ── */
+
+    _initSearchBar() { /* replaced by setupSearchOverlay */ }
+
+    _applySearch(raw) {
+        const query = (raw || '').trim().toLowerCase();
+
+        // — Name filter on visible grids —
+        const filterByName = (packs) => {
+            if (!query) return packs;
+            return packs.filter(p =>
+                (p.title || p.name || '').toLowerCase().includes(query) ||
+                (p.description || '').toLowerCase().includes(query)
+            );
+        };
+
+        this.renderInstancesGrid(
+            filterByName(this._installedPacks || []),
+            'instances-grid-installed',
+            this._playtimeMap || {}
+        );
+        this.renderInstancesGrid(
+            filterByName(this._allPacks || []),
+            'instances-grid-all',
+            this._playtimeMap || {}
+        );
+
+        // — Password check: look for a hidden instance whose password matches exactly —
+        this._renderPasswordUnlock(query);
+    }
+
+    _renderPasswordUnlock(query) {
+        // Remove any existing unlock card
+        document.getElementById('cf-password-unlock-area')?.remove();
+
+        if (!query) return;
+
+        // All instances including password-protected ones (stored in _fullInstancesList)
+        const allKnown = this._fullInstancesList || [];
+        const match = allKnown.find(p =>
+            p.instancePassword && p.instancePassword === query
+        );
+        if (!match) return;
+
+        // Don't show unlock card if the instance is already installed/visible
+        const alreadyVisible = [...(this._installedPacks || []), ...(this._allPacks || [])]
+            .some(p => p.name === match.name);
+        if (alreadyVisible) return;
+
+        const area = document.createElement('div');
+        area.id = 'cf-password-unlock-area';
+
+        const thumb = match.banner || match.poster || '';
+        const iconHtml = thumb
+            ? `<div class="cf-password-unlock-icon" style="background-image:url('${thumb}');"></div>`
+            : `<div class="cf-password-unlock-icon">${(match.title || match.name || '?').charAt(0).toUpperCase()}</div>`;
+
+        area.innerHTML = `
+            <div class="cf-password-unlock-card" id="cf-unlock-card-${match.name}">
+                ${iconHtml}
+                <div class="cf-password-unlock-info">
+                    <div class="cf-password-unlock-title">${match.title || match.name}</div>
+                    <div class="cf-password-unlock-sub" id="cf-unlock-sub-${match.name}">
+                        ${match.gameVersion || ''} · Instancia protegida desbloqueada
+                    </div>
+                    <div class="cf-password-unlock-progress" id="cf-unlock-progress-${match.name}" style="display:none;"></div>
+                </div>
+                <button class="cf-password-unlock-btn" id="cf-unlock-btn-${match.name}">
+                    Agregar instancia
+                </button>
+            </div>
+        `;
+
+        // Insert above the installed section
+        const viewport = document.querySelector('.instances-viewport-scroll');
+        const filterBar = document.getElementById('cf-filter-bar');
+        if (filterBar && viewport) {
+            filterBar.after(area);
+        } else if (viewport) {
+            viewport.prepend(area);
+        }
+
+        document.getElementById(`cf-unlock-btn-${match.name}`)
+            ?.addEventListener('click', () => this._preloadAndUnlock(match));
+    }
+
+    async _preloadAndUnlock(pack) {
+        const btn = document.getElementById(`cf-unlock-btn-${pack.name}`);
+        const sub = document.getElementById(`cf-unlock-sub-${pack.name}`);
+        const progressEl = document.getElementById(`cf-unlock-progress-${pack.name}`);
+
+        if (btn) btn.disabled = true;
+
+        const setStatus = (msg) => {
+            if (progressEl) { progressEl.style.display = 'block'; progressEl.textContent = msg; }
+        };
+
+        try {
+            setStatus('Preparando...');
+
+            // If it has a zipUrl — download and extract first
+            if (pack.zipUrl) {
+                const instancePath = path.join(this.gamePath, 'instances', pack.name);
+                if (!fs.existsSync(instancePath)) fs.mkdirSync(instancePath, { recursive: true });
+
+                let configClient = await this.db.readData('configClient');
+                const storedVersion = configClient?.instances_versions?.[pack.name] || null;
+
+                if (storedVersion !== (pack.zipVersion || 'v1')) {
+                    setStatus('Descargando modpack...');
+                    this.showDownload(pack.name, pack.title || pack.name);
+
+                    await zipHandler.downloadAndExtract(pack.zipUrl, instancePath, (downloaded, total) => {
+                        const pct = total > 0 ? ((downloaded / total) * 100).toFixed(0) : 0;
+                        setStatus(`Descargando... ${pct}%`);
+                        this.updateDownload(pack.name, downloaded, total);
+                    });
+
+                    configClient = await this.db.readData('configClient');
+                    if (!configClient.instances_versions) configClient.instances_versions = {};
+                    configClient.instances_versions[pack.name] = pack.zipVersion || 'v1';
+                    await this.db.updateData('configClient', configClient);
+                    this.finishDownload(pack.name);
+                }
+
+            } else if (pack.modpack_url) {
+                // SKCraft/manifest-based pack — pre-sync files
+                const instancePath = path.join(this.gamePath, 'instances', pack.name);
+                if (!fs.existsSync(instancePath)) fs.mkdirSync(instancePath, { recursive: true });
+
+                let configClient = await this.db.readData('configClient');
+                const storedVersion = configClient?.instances_versions?.[pack.name] || null;
+                const packBaseUrl = pack.modpack_url.replace(/\/modpack\.json$/, '');
+
+                setStatus('Verificando archivos...');
+                this.showDownload(pack.name, pack.title || pack.name);
+
+                const sync = new ModpackSync(pack.modpack_url, instancePath, {
+                    enabledFeatures: [],
+                    serverBaseUrl: packBaseUrl
+                });
+
+                const result = await sync.sync((progress, size, message) => {
+                    setStatus(message || `${progress}/${size}`);
+                    if (size > 0) this.updateDownload(pack.name, progress, size);
+                }, storedVersion);
+
+                if (result?.version) {
+                    configClient = await this.db.readData('configClient');
+                    if (!configClient.instances_versions) configClient.instances_versions = {};
+                    configClient.instances_versions[pack.name] = result.version;
+                    await this.db.updateData('configClient', configClient);
+                }
+                this.finishDownload(pack.name);
+            }
+
+            // Preload images
+            if (pack.poster || pack.banner) {
+                setStatus('Cargando imágenes...');
+                await Promise.allSettled([
+                    pack.poster ? fetch(pack.poster) : Promise.resolve(),
+                    pack.banner ? fetch(pack.banner) : Promise.resolve(),
+                ]);
+            }
+
+            setStatus('¡Listo!');
+
+            // Add to the all-packs list and re-render so it appears in the grid
+            if (!this._allPacks) this._allPacks = [];
+            if (!this._allPacks.some(p => p.name === pack.name)) {
+                this._allPacks.push(pack);
+            }
+
+            document.getElementById('cf-password-unlock-area')?.remove();
+
+            this.renderInstancesGrid(this._installedPacks || [], 'instances-grid-installed', this._playtimeMap || {});
+            this.renderInstancesGrid(this._allPacks, 'instances-grid-all', this._playtimeMap || {});
+
+        } catch (err) {
+            setStatus(`Error: ${err.message}`);
+            if (btn) btn.disabled = false;
+        }
     }
 
     renderInstancesGrid(packs, containerId, playtimeMap = {}) {
@@ -1187,10 +1546,16 @@ class Home {
 
         if (packs.length === 0) {
             const isAll = containerId === 'instances-grid-all';
+            const isInstalled = containerId === 'instances-grid-installed';
+            // Don't show empty message for "Mis Instancias" if there are truly no installed packs
+            if (isInstalled) {
+                gridContainer.innerHTML = '';
+                return;
+            }
             const msg = isAll && !this._serverOnline
                 ? 'Servidor del Creator apagado. Abrí el Creator Tools e iniciá el servidor HTTP.'
-                : 'No hay modpacks en esta sección.';
-            gridContainer.innerHTML = `<div style="grid-column: span 4; color: #64748b; font-size: 0.85em; text-align: center; padding: 20px;">${msg}</div>`;
+                : 'No hay modpacks disponibles.';
+            gridContainer.innerHTML = `<div class="cf-grid-empty">${msg}</div>`;
             return;
         }
 
@@ -1198,49 +1563,50 @@ class Home {
 
         packs.forEach(pack => {
             const card = document.createElement('div');
-            card.classList.add('modpack-grid-card');
+            card.classList.add('cf-card');
             card.dataset.instanceName = pack.name;
 
-            const totalSeconds = playtimeMap[pack.name] || 0;
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const playtimeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+            const loaderType = (pack.loader?.type || pack.loader?.loader_type || '').toLowerCase();
+            const mcVersion = pack.gameVersion || pack.loader?.minecraft_version || '';
 
             const status = this._instanceStatus.get(pack.name);
-            let statusTag = '';
-            if (status === 'downloading') statusTag = '<span class="modpack-grid-tag descargando">Descargando</span>';
-            else if (status === 'installing') statusTag = '<span class="modpack-grid-tag instalando">Instalando</span>';
-            else if (status === 'running' || status === 'playing') statusTag = '<span class="modpack-grid-tag jugando">Jugando</span>';
+            let statusLabel = '';
+            if (status === 'downloading') statusLabel = 'Descargando';
+            else if (status === 'installing') statusLabel = 'Instalando';
+            else if (status === 'running' || status === 'playing') statusLabel = 'Jugando';
 
-            // "Nuevo" tag: show if pack was created/added in the last 7 days
-            let newTag = '';
+            // "New" badge: shown for packs seen within the last 7 days
             const firstSeen = pack._firstSeen || this._getFirstSeen(pack.name);
-            if (firstSeen && (now - firstSeen) < 7 * 24 * 60 * 60 * 1000) {
-                newTag = '<span class="modpack-grid-tag nuevo">Nuevo</span>';
-            }
+            const isNew = firstSeen && (now - firstSeen) < 7 * 24 * 60 * 60 * 1000;
 
-            const tags = pack.tags || [];
-            let tagsHtml = '';
-            if (tags.length > 0) {
-                tagsHtml = `<div class="modpack-grid-tags">${tags.slice(0, 3).map(t => `<span class="modpack-grid-tag-item">${t}</span>`).join('')}${tags.length > 3 ? `<span class="modpack-grid-tag-overflow">+${tags.length - 3}</span>` : ''}</div>`;
-            }
+            // Thumbnail
+            const thumbSrc = pack.banner || pack.poster || _defaultBannerDataUrl || '';
+            const thumbStyle = thumbSrc ? `style="background-image: url('${thumbSrc}');"` : '';
 
-            const thumbSrc = pack.banner || pack.poster || '';
-            const thumbStyle = thumbSrc ? `style="background-image: url('${thumbSrc}'); background-size: cover; background-position: center;"` : '';
+            // Loader display name
+            const loaderDisplayMap = { forge: 'Forge', fabric: 'Fabric', neoforge: 'NeoForge', quilt: 'Quilt', vanilla: 'Vanilla', none: 'Vanilla' };
+            const loaderDisplay = loaderDisplayMap[loaderType] || (loaderType ? loaderType.charAt(0).toUpperCase() + loaderType.slice(1) : 'Forge');
+
+            // Description (capped)
+            const desc = (pack.description || '').slice(0, 80) + ((pack.description || '').length > 80 ? '…' : '');
+
             card.innerHTML = `
-                <div class="modpack-grid-thumb" ${thumbStyle}>
-                    ${!thumbSrc ? `<img src="assets/images/png/logo.png" width="28" height="28" alt="pack">` : ''}
-                    ${statusTag}
-                    ${newTag}
+                <div class="cf-card-thumb" ${thumbStyle}>
+                    ${!thumbSrc ? '<div class="cf-card-thumb-fallback"></div>' : ''}
+                    ${statusLabel ? `<span class="cf-card-badge cf-badge-status">${statusLabel}</span>` : ''}
+                    ${isNew ? '<span class="cf-card-badge cf-badge-new">New</span>' : ''}
                 </div>
-                <div class="modpack-grid-info">
-                    <div class="modpack-grid-info-top">
-                        <h3 class="modpack-grid-name">${pack.title || pack.name}</h3>
-                        ${totalSeconds > 0 ? `<span class="modpack-grid-playtime">${playtimeStr}</span>` : ''}
+                <div class="cf-card-body">
+                    <h3 class="cf-card-title">${pack.title || pack.name}</h3>
+                    ${desc ? `<div class="cf-card-author">${desc}</div>` : ''}
+                    <div class="cf-card-tags-row">
+                        ${mcVersion ? `<span class="cf-card-tag">${mcVersion}</span>` : ''}
+                        ${loaderDisplay ? `<span class="cf-card-tag cf-card-tag-loader">${loaderDisplay}</span>` : ''}
                     </div>
-                    ${tagsHtml}
                 </div>
             `;
+
+            card.packData = pack;
 
             card.addEventListener('click', () => {
                 this.selectInstance(pack);
@@ -1249,6 +1615,8 @@ class Home {
             gridContainer.appendChild(card);
         });
     }
+
+    /* ── Card Hover Detail Panel ── */
 
     _getFirstSeen(instanceName) {
         try {
@@ -1264,24 +1632,16 @@ class Home {
         if (status) this._instanceStatus.set(name, status);
         else this._instanceStatus.delete(name);
         const label = status === 'running' ? 'Jugando' : status === 'playing' ? 'Jugando' : status === 'downloading' ? 'Descargando' : status === 'installing' ? 'Instalando' : '';
-        document.querySelectorAll(`.modpack-grid-card[data-instance-name="${name}"]`).forEach(card => {
-            const thumb = card.querySelector('.modpack-grid-thumb');
+        document.querySelectorAll(`.cf-card[data-instance-name="${name}"]`).forEach(card => {
+            const thumb = card.querySelector('.cf-card-thumb');
             if (!thumb) return;
-            let existing = thumb.querySelector('.modpack-grid-tag');
+            let existing = thumb.querySelector('.cf-card-badge');
             if (existing) existing.remove();
             if (!label) return;
             const tag = document.createElement('span');
-            if (status === 'running' || status === 'playing') {
-                tag.className = 'modpack-grid-tag jugando';
-            } else if (status === 'downloading') {
-                tag.className = 'modpack-grid-tag descargando';
-            } else if (status === 'installing') {
-                tag.className = 'modpack-grid-tag instalando';
-            } else {
-                tag.className = 'modpack-grid-tag';
-            }
+            tag.className = 'cf-card-badge cf-badge-status';
             tag.textContent = label;
-            thumb.appendChild(tag);
+            thumb.prepend(tag);
         });
     }
 
@@ -1292,9 +1652,8 @@ class Home {
         await this.db.updateData('configClient', configClient);
 
         // Switch to detail view
-        const views = document.querySelectorAll('.dashboard-view');
-        views.forEach(v => v.classList.remove('active'));
-        document.getElementById('view-detail')?.classList.add('active');
+        this._navigateTo('view-detail', null);
+        this._pushNav('view-detail', null);
 
         const progressContainer = document.getElementById('detail-progress');
         if (this._launching) {
@@ -1309,54 +1668,82 @@ class Home {
             detailBackBtn.replaceWith(detailBackBtn.cloneNode(true));
             const newDetailBack = document.getElementById('detail-back-btn');
             newDetailBack.addEventListener('click', () => {
-                const navBtns = document.querySelectorAll('.sidebar-item.nav-btn');
-                navBtns.forEach(b => b.classList.remove('active'));
-                document.getElementById('nav-btn-instances')?.classList.add('active');
-                document.querySelectorAll('.dashboard-view').forEach(v => v.classList.remove('active'));
-                document.getElementById('view-instances')?.classList.add('active');
+                this._navigateTo('view-home', 'nav-btn-home');
+                this._pushNav('view-home', 'nav-btn-home');
+            });
+        }
+
+        // Show top back button
+        const topBackBtn = document.getElementById('top-back-btn');
+        if (topBackBtn) {
+            topBackBtn.style.display = 'flex';
+            topBackBtn.replaceWith(topBackBtn.cloneNode(true));
+            const newTopBack = document.getElementById('top-back-btn');
+            newTopBack.addEventListener('click', () => {
+                this._navigateTo('view-home', 'nav-btn-home');
+                this._pushNav('view-home', 'nav-btn-home');
             });
         }
 
         // Fill detail viewport floating card content
         document.getElementById('detail-title').textContent = pack.title || pack.name;
 
-        // Set poster as full background of the detail view + thumbnail inside card
-        const posterSrc = pack.poster || pack.banner || pack.image || '';
-        const detailView = document.getElementById('view-detail');
-        if (detailView) {
-            if (posterSrc) {
-                detailView.style.backgroundImage = `url('${posterSrc}')`;
-                detailView.style.backgroundSize = 'cover';
-                detailView.style.backgroundPosition = 'center';
-            } else {
-                detailView.style.backgroundImage = 'none';
-                detailView.style.backgroundColor = 'var(--background)';
-            }
-        }
-        const posterImg = document.getElementById('detail-poster-img');
-        if (posterImg) {
-            if (posterSrc) {
-                posterImg.src = posterSrc;
-                posterImg.style.display = '';
-                posterImg.alt = (pack.title || pack.name) + ' poster';
-                posterImg.onerror = () => {
-                    posterImg.style.display = 'none';
-                };
-            } else {
-                posterImg.style.display = 'none';
-            }
+        // Creator
+        const creatorEl = document.getElementById('detail-creator');
+        if (creatorEl) {
+            creatorEl.textContent = pack.author || pack.creator || '';
         }
 
-        // Dynamic tags
+        // Tags
         const tagsContainer = document.getElementById('detail-tags');
         if (tagsContainer) {
-            const loaderName = (pack.loader?.type || pack.loader?.loader_type || 'vanilla').toUpperCase();
-            const mcVersion = pack.gameVersion || pack.loader?.minecraft_version || '';
             const customTags = pack.tags || [];
             let tagsHtml = '';
-            if (mcVersion) tagsHtml += `<span>MC ${mcVersion}</span>`;
             customTags.forEach(t => { tagsHtml += `<span>${t}</span>`; });
             tagsContainer.innerHTML = tagsHtml;
+        }
+
+        // Description
+        const descEl = document.getElementById('detail-desc');
+        if (descEl) {
+            descEl.textContent = pack.description || '';
+        }
+
+        // Size
+        const sizeEl = document.getElementById('detail-size');
+        if (sizeEl && pack.size) {
+            const bytes = parseInt(pack.size);
+            if (!isNaN(bytes)) {
+                const gb = (bytes / (1024*1024*1024)).toFixed(2);
+                sizeEl.textContent = gb + ' GB';
+            } else {
+                sizeEl.textContent = pack.size;
+            }
+        } else if (sizeEl) {
+            sizeEl.textContent = '';
+        }
+
+        // Modpack version (not MC version)
+        const packVersionEl = document.getElementById('detail-pack-version');
+        if (packVersionEl) {
+            packVersionEl.textContent = pack.version || pack.modpack_version || '';
+        }
+
+        // Set banner image
+        const bannerSrc = pack.banner || _defaultBannerDataUrl || '';
+        const bannerImg = document.getElementById('detail-banner-img');
+        if (bannerImg) {
+            bannerImg.src = bannerSrc;
+            bannerImg.style.display = bannerSrc ? '' : 'none';
+        }
+
+        // Set poster image
+        const posterSrc = pack.poster || pack.image || _defaultPosterDataUrl || '';
+        const posterImg = document.getElementById('detail-poster-img');
+        if (posterImg) {
+            posterImg.src = posterSrc;
+            posterImg.style.display = posterSrc ? '' : 'none';
+            posterImg.alt = (pack.title || pack.name) + ' poster';
         }
 
         // Verify if already downloaded
@@ -1365,7 +1752,8 @@ class Home {
         const localPackDir = path.join(this.gamePath, 'instances', pack.name);
         const hasVersion = configClient.instances_versions?.[pack.name];
         const hasManifestFile = fs.existsSync(localPackDir) && fs.existsSync(path.join(localPackDir, 'modpack.json'));
-        hasDownloaded = hasVersion || hasManifestFile;
+        const hasZipDir = pack.zipUrl && fs.existsSync(localPackDir) && fs.readdirSync(localPackDir).length > 0;
+        hasDownloaded = hasVersion || hasManifestFile || hasZipDir;
 
         const playBtnLabel = document.querySelector('#detail-play-btn-content span');
         if (playBtnLabel) {
@@ -1473,8 +1861,8 @@ class Home {
         if (updateBtn) {
             updateBtn.onclick = async () => {
                 if (dropdown) dropdown.classList.remove('open');
-                if (!pack.modpack_url) {
-                    alert('Este modpack no tiene una URL de sincronización configurada.');
+                if (!pack.modpack_url && !pack.zipUrl) {
+                    alert('Este modpack no tiene URL de sincronización configurada.');
                     return;
                 }
                 if (this._launching) {
@@ -1487,6 +1875,23 @@ class Home {
                     }
                     return;
                 }
+
+                // ZIP update: delete and re-download
+                if (pack.zipUrl) {
+                    if (confirm('¿Re-descargar el modpack ZIP? Se reemplazarán todos los archivos.')) {
+                        try {
+                            fs.rmSync(localPackDir, { recursive: true, force: true });
+                            let cc = await this.db.readData('configClient');
+                            if (cc.instances_versions) delete cc.instances_versions[pack.name];
+                            await this.db.updateData('configClient', cc);
+                            this.startGame(pack, gamePath);
+                        } catch (err) {
+                            alert(`Error al actualizar: ${err.message}`);
+                        }
+                    }
+                    return;
+                }
+
                 try {
                     // Re-sync modpack preserving user data
                     let configClientUpd = await this.db.readData('configClient');
@@ -1741,7 +2146,7 @@ class Home {
                 enable: loaderEnabled
             },
 
-            verify: options.modpack_url ? false : (options.verify ?? true),
+            verify: (options.modpack_url || options.zipUrl) ? false : (options.verify ?? true),
             ignored: options.ignored ? [...options.ignored] : [],
 
             java: {
@@ -1813,8 +2218,78 @@ class Home {
         if (progressPct) progressPct.innerHTML = '0%';
         ipcRenderer.send('main-window-progress-load');
 
-        // 1. Sync modpack (if applicable) — SKCraft-style with feature gating and version tracking
-        if (options.modpack_url) {
+        // 1. Download ZIP pack (if applicable)
+        if (options.zipUrl) {
+            const instancePath = path.join(gamePath, 'instances', options.name);
+            const storedVersion = configClient.instances_versions?.[options.name] || null;
+
+            // Skip if already downloaded with same version
+            if (storedVersion !== (options.zipVersion || 'v1')) {
+                try {
+                    if (progressText) progressText.innerHTML = `Descargando modpack...`;
+
+                    this.showDownload(options.name, options.title || options.name);
+
+                    const instanceDir = path.join(gamePath, 'instances', options.name);
+                    if (!fs.existsSync(instanceDir)) {
+                        fs.mkdirSync(instanceDir, { recursive: true });
+                    }
+
+                    await zipHandler.downloadAndExtract(options.zipUrl, instanceDir, (downloaded, total) => {
+                        const pct = ((downloaded / total) * 100).toFixed(0);
+                        if (progressText) progressText.innerHTML = `Descargando... ${pct}%`;
+                        ipcRenderer.send('main-window-progress', { progress: downloaded, size: total });
+                        if (wavyBar) wavyBar.style.width = `${pct}%`;
+                        if (progressPct) progressPct.innerHTML = `${pct}%`;
+                        this.updateDownload(options.name, pct, 'Descargando...');
+                    });
+
+                    this.hideDownload(options.name);
+
+                    // Store version
+                    if (!configClient.instances_versions) configClient.instances_versions = {};
+                    configClient.instances_versions[options.name] = options.zipVersion || 'v1';
+                    await this.db.updateData('configClient', configClient);
+
+                    // Write .first-seen for "Nuevo" badge
+                    try {
+                        const firstSeenPath = path.join(instancePath, '.first-seen');
+                        if (!fs.existsSync(firstSeenPath)) {
+                            fs.writeFileSync(firstSeenPath, String(Date.now()));
+                        }
+                    } catch (e) {}
+
+                    await this.initInstances();
+                    await this.selectInstance(options);
+
+                    progressContainer = document.getElementById('detail-progress');
+                    progressText = document.getElementById('detail-progress-text');
+                    progressPct = document.getElementById('detail-progress-pct');
+                    if (progressContainer) progressContainer.style.display = 'flex';
+                } catch (err) {
+                    this.hideDownload(options.name);
+                    let popupError = new popup();
+                    popupError.openPopup({
+                        title: 'Error de Descarga',
+                        content: err.message,
+                        color: 'red',
+                        options: true
+                    });
+                    const playBtnErr = document.getElementById('detail-play-btn');
+                    const btnContentErr = document.getElementById('detail-play-btn-content');
+                    const btnSpinnerErr = document.getElementById('detail-play-btn-spinner');
+                    if (btnContentErr) btnContentErr.style.display = 'flex';
+                    if (btnSpinnerErr) btnSpinnerErr.style.display = 'none';
+                    if (playBtnErr) playBtnErr.disabled = false;
+                    if (progressContainer) progressContainer.style.display = 'none';
+                    this._launching = false;
+                    return;
+                }
+            }
+        }
+
+        // 2. Sync modpack (if applicable) — SKCraft-style with feature gating and version tracking
+        if (options.modpack_url && !options.zipUrl) {
             try {
                 // Ask user to select optional features before syncing
                 let enabledFeatures = configClient.instances_features?.[options.name] || [];
@@ -2027,6 +2502,7 @@ class Home {
             if (progressContainer) progressContainer.style.display = 'none';
             this._launching = false;
 
+            await this.populateRecentInstance();
             new logger(pkg.name, '#7289da').info(`Minecraft cerrado (código ${code})`);
             this.minecraftProcess = null;
         });
@@ -2077,11 +2553,16 @@ class Home {
     _calCurrentDate = new Date();
     _calSelectedDate = null;
     _calEvents = [];
+    _popupVisible = false;
 
         initCalendar() {
         this.loadCalendarEvents();
         this.renderCalendar();
         this.setupCalendarNav();
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this._popupVisible) this.hideEventPopup();
+        });
     }
 
     loadCalendarEvents() {
@@ -2093,7 +2574,9 @@ class Home {
                 const calPath = require('path').join(userDataPath, 'calendar-events.json');
                 if (require('fs').existsSync(calPath)) {
                     this._calEvents = JSON.parse(require('fs').readFileSync(calPath, 'utf8'));
-                    if (this._isCalendarViewActive()) this.renderEventsForDay(this._calSelectedDate);
+                    if (this._isCalendarViewActive() && this._calSelectedDate) {
+                        this.showEventPopup(null, this._calSelectedDate);
+                    }
                 }
             }).catch(() => {});
         } catch (e) {}
@@ -2152,15 +2635,29 @@ class Home {
                 el.classList.add('selected');
             }
 
-            if (this._calEvents.some(e => e.date === dateStr)) {
+            const dayEvents = this._calEvents.filter(e => e.date === dateStr);
+            if (dayEvents.length > 0) {
                 el.classList.add('has-event');
+                dayEvents.slice(0, 3).forEach(ev => {
+                    const label = document.createElement('div');
+                    label.className = 'cal-day-event-name';
+                    label.textContent = ev.title;
+                    el.appendChild(label);
+                });
+                if (dayEvents.length > 3) {
+                    const more = document.createElement('div');
+                    more.className = 'cal-day-event-name';
+                    more.textContent = `+${dayEvents.length - 3} más`;
+                    el.appendChild(more);
+                }
             }
 
-            el.addEventListener('click', () => {
-                document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.cal-day.selected').forEach(el2 => el2.classList.remove('selected'));
                 el.classList.add('selected');
                 this._calSelectedDate = dateStr;
-                this.renderEventsForDay(dateStr);
+                this.showEventPopup(el, dateStr);
             });
 
             grid.appendChild(el);
@@ -2193,28 +2690,73 @@ class Home {
         }
     }
 
-    renderEventsForDay(dateStr) {
-        const list = document.getElementById('cal-events-list');
-        if (!list) return;
+    showEventPopup(anchorEl, dateStr) {
+        const popup = document.getElementById('cal-popup');
+        if (!popup) return;
 
         const dayEvents = this._calEvents.filter(e => e.date === dateStr);
 
         if (dayEvents.length === 0) {
-            list.innerHTML = '<p style="font-size:12px; color:var(--text-secondary);">No hay eventos para este día.</p>';
+            this.hideEventPopup();
             return;
         }
 
-        list.innerHTML = '';
+        const [y, m, d] = dateStr.split('-');
+        const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const dateLabel = `${d} de ${months[parseInt(m)-1]} de ${y}`;
+
+        let eventsHtml = '';
         dayEvents.forEach(ev => {
-            const item = document.createElement('div');
-            item.className = 'cal-event-item';
-            item.innerHTML = `
-                <span class="event-dot"></span>
-                <span class="event-time">${ev.time || 'Todo el día'}</span>
-                <span class="event-title">${ev.title}</span>
+            eventsHtml += `
+                <div class="cal-popup-event">
+                    <span class="event-dot"></span>
+                    <div class="event-info">
+                        <div class="event-title">${ev.title}</div>
+                        <div class="event-time">${ev.time || 'Todo el día'}</div>
+                        ${ev.description ? `<div class="event-description">${ev.description}</div>` : ''}
+                    </div>
+                </div>
             `;
-            list.appendChild(item);
         });
+
+        popup.innerHTML = `
+            <div class="cal-popup-header">
+                <span class="cal-popup-date">${dateLabel}</span>
+                <button class="cal-popup-close" id="cal-popup-close">✕</button>
+            </div>
+            ${eventsHtml}
+        `;
+
+        document.getElementById('cal-popup-close').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.hideEventPopup();
+        });
+
+        let overlay = document.getElementById('cal-popup-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cal-popup-overlay';
+            overlay.className = 'calendar-popup-overlay';
+            const view = document.getElementById('view-calendar');
+            if (view) view.appendChild(overlay);
+        }
+
+        popup.classList.add('visible');
+        overlay.classList.add('visible');
+        this._popupVisible = true;
+
+        overlay.addEventListener('click', () => this.hideEventPopup());
+    }
+
+    hideEventPopup() {
+        const popup = document.getElementById('cal-popup');
+        const overlay = document.getElementById('cal-popup-overlay');
+        if (popup) {
+            popup.classList.remove('visible');
+            popup.innerHTML = '';
+        }
+        if (overlay) overlay.classList.remove('visible');
+        this._popupVisible = false;
     }
 
     /* ==========================================================================
@@ -2409,13 +2951,13 @@ class Home {
         if (avatarEl && auth) {
             const skinUrl = await this._getSkinUrl(auth);
             if (skinUrl) {
-                avatarEl.style.backgroundImage = `url(${skinUrl})`;
-                avatarEl.style.backgroundSize = 'cover';
-                avatarEl.style.backgroundPosition = 'center';
+                avatarEl.style.background = `url(${skinUrl}) center / cover`;
+                avatarEl.innerHTML = '';
+            } else if (_steveSkinDataUrl) {
+                avatarEl.style.background = `url('${_steveSkinDataUrl}') center / cover`;
                 avatarEl.innerHTML = '';
             } else {
                 avatarEl.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
-                avatarEl.style.backgroundImage = 'none';
                 avatarEl.innerHTML = '<span style="color:#fff;font-size:24px;font-weight:700;">' + (auth.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
             }
         }
@@ -2482,6 +3024,298 @@ class Home {
                 await this.db.updateData('configClient', currentConfig);
             }
         });
+    }
+
+    /* ── Floating Settings Modal ── */
+
+    openSettingsModal() {
+        const overlay = document.getElementById('settings-modal-overlay');
+        if (!overlay) return;
+        overlay.classList.add('open');
+        this._initSettingsModal();
+    }
+
+    closeSettingsModal() {
+        const overlay = document.getElementById('settings-modal-overlay');
+        if (overlay) overlay.classList.remove('open');
+    }
+
+    async _initSettingsModal() {
+        // Populate modal account info
+        let configClient = await this.db.readData('configClient');
+        let auth = configClient.account_selected
+            ? await this.db.readData('accounts', configClient.account_selected)
+            : null;
+
+        const nameEl = document.getElementById('modal-acc-active-name');
+        const typeEl = document.getElementById('modal-acc-active-type');
+        const avatarEl = document.getElementById('modal-acc-active-avatar');
+
+        if (nameEl) nameEl.textContent = auth?.name || 'Sin cuenta';
+        if (typeEl) typeEl.textContent = auth?.meta?.type || 'Offline';
+
+        if (avatarEl && auth) {
+            const skinUrl = await this._getSkinUrl(auth);
+            if (skinUrl) {
+                avatarEl.style.background = `url(${skinUrl}) center / cover`;
+                avatarEl.innerHTML = '';
+            } else if (_steveSkinDataUrl) {
+                avatarEl.style.background = `url('${_steveSkinDataUrl}') center / cover`;
+                avatarEl.innerHTML = '';
+            } else {
+                avatarEl.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green-mid))';
+                avatarEl.innerHTML = '<span style="color:#fff;font-size:24px;font-weight:700;">' + (auth.name ? auth.name.charAt(0).toUpperCase() : '?') + '</span>';
+            }
+        }
+
+        // Wire up close button
+        const closeBtn = document.getElementById('settings-modal-close');
+        if (closeBtn) {
+            closeBtn.replaceWith(closeBtn.cloneNode(true));
+            document.getElementById('settings-modal-close').addEventListener('click', () => this.closeSettingsModal());
+        }
+
+        // Close on overlay click
+        const overlay = document.getElementById('settings-modal-overlay');
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) this.closeSettingsModal();
+            });
+        }
+
+        // Bind settings controls inside the modal using querySelectorAll
+        this._bindModalSettings(configClient);
+    }
+
+    _bindModalSettings(configClient) {
+        const modal = document.getElementById('settings-modal-container');
+        if (!modal) return;
+
+        // RAM
+        const totalMem = Math.trunc(os.totalmem() / 1073741824 * 10) / 10;
+        const maxSlider = Math.max(1, Math.trunc((80 * totalMem) / 100));
+        let ram = configClient?.java_config?.java_memory || { min: 1, max: 2 };
+        const clamp = (val) => Math.round(Math.min(Math.max(val, 0.5), maxSlider) * 10) / 10;
+
+        const saveRam = async (min, max) => {
+            let cfg = await this.db.readData('configClient');
+            if (!cfg.java_config) cfg.java_config = {};
+            cfg.java_config.java_memory = { min: clamp(min), max: clamp(max) };
+            await this.db.updateData('configClient', cfg);
+        };
+
+        const modalMinInput = modal.querySelector('.ram-min-input');
+        const modalMaxInput = modal.querySelector('.ram-max-input');
+        const modalStepBtns = modal.querySelectorAll('.ram-step-btn');
+
+        if (modalMinInput) {
+            modalMinInput.value = Math.round(ram.min * 10) / 10;
+            modalMinInput.addEventListener('change', async () => {
+                let val = clamp(parseFloat(modalMinInput.value) || 1);
+                let M = clamp(parseFloat(modalMaxInput?.value) || 2);
+                if (val > M) val = M;
+                modalMinInput.value = val;
+                await saveRam(val, M);
+            });
+            modalMinInput.addEventListener('input', () => {
+                const m = clamp(parseFloat(modalMinInput.value) || 1);
+                const M = clamp(parseFloat(modalMaxInput?.value) || 2);
+                if (m > M) modalMinInput.value = M;
+            });
+        }
+
+        if (modalMaxInput) {
+            modalMaxInput.value = Math.round(ram.max * 10) / 10;
+            modalMaxInput.addEventListener('change', async () => {
+                let val = clamp(parseFloat(modalMaxInput.value) || 2);
+                let m = clamp(parseFloat(modalMinInput?.value) || 1);
+                if (val < m) val = m;
+                modalMaxInput.value = val;
+                await saveRam(m, val);
+            });
+            modalMaxInput.addEventListener('input', () => {
+                const m = clamp(parseFloat(modalMinInput?.value) || 1);
+                const M = clamp(parseFloat(modalMaxInput.value) || 2);
+                if (M < m) modalMaxInput.value = m;
+            });
+        }
+
+        modalStepBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const target = btn.dataset.target;
+                const dir = parseInt(btn.dataset.dir);
+                const inp = target === 'min' ? modalMinInput : modalMaxInput;
+                if (!inp) return;
+                let current = clamp((parseFloat(inp.value) || 1) + dir * 0.5);
+                let other = target === 'min'
+                    ? clamp(parseFloat(modalMaxInput?.value) || 2)
+                    : clamp(parseFloat(modalMinInput?.value) || 1);
+                if (target === 'min' && current > other) current = other;
+                if (target === 'max' && current < other) current = other;
+                inp.value = current;
+                await saveRam(
+                    clamp(parseFloat(modalMinInput?.value) || 1),
+                    clamp(parseFloat(modalMaxInput?.value) || 2)
+                );
+            });
+        });
+
+        // Java path
+        const javaPathText = modal.querySelector(".java-path-txt");
+        if (javaPathText) {
+            appdata().then(p => { javaPathText.textContent = `${p}/.yusup/runtime`; });
+        }
+        const javaPathInputTxt = modal.querySelector(".java-path-input-text");
+        const javaPathInputFile = modal.querySelector(".java-path-input-file");
+        const jp = configClient?.java_config?.java_path || 'Utiliser la version de java livre avec le launcher';
+        if (javaPathInputTxt) javaPathInputTxt.value = jp;
+
+        const setBtn = modal.querySelector(".java-path-set");
+        if (setBtn) {
+            setBtn.replaceWith(setBtn.cloneNode(true));
+            modal.querySelector(".java-path-set")?.addEventListener("click", async () => {
+                if (javaPathInputFile) {
+                    javaPathInputFile.value = '';
+                    javaPathInputFile.click();
+                    await new Promise((resolve) => {
+                        let interval = setInterval(() => {
+                            if (javaPathInputFile.value != '') { clearInterval(interval); resolve(); }
+                        }, 100);
+                    });
+                    if (javaPathInputFile.value.replace(".exe", '').endsWith("java") || javaPathInputFile.value.replace(".exe", '').endsWith("javaw")) {
+                        let currentConfig = await this.db.readData('configClient');
+                        let file = javaPathInputFile.files[0].path;
+                        if (javaPathInputTxt) javaPathInputTxt.value = file;
+                        currentConfig.java_config.java_path = file;
+                        await this.db.updateData('configClient', currentConfig);
+                    } else alert("El nombre del archivo debe ser java o javaw");
+                }
+            });
+        }
+
+        const resetBtn = modal.querySelector(".java-path-reset");
+        if (resetBtn) {
+            resetBtn.replaceWith(resetBtn.cloneNode(true));
+            modal.querySelector(".java-path-reset")?.addEventListener("click", async () => {
+                let currentConfig = await this.db.readData('configClient');
+                if (javaPathInputTxt) javaPathInputTxt.value = 'Utiliser la version de java livre avec le launcher';
+                currentConfig.java_config.java_path = null;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+
+        // Resolution
+        let resolution = configClient?.game_config?.screen_size || { width: 1920, height: 1080 };
+        const widthInput = modal.querySelector(".width-size");
+        const heightInput = modal.querySelector(".height-size");
+        const resetResBtn = modal.querySelector(".size-reset");
+
+        if (widthInput) {
+            widthInput.value = resolution.width;
+            widthInput.addEventListener("change", async () => {
+                let currentConfig = await this.db.readData('configClient');
+                currentConfig.game_config.screen_size.width = widthInput.value;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+        if (heightInput) {
+            heightInput.value = resolution.height;
+            heightInput.addEventListener("change", async () => {
+                let currentConfig = await this.db.readData('configClient');
+                currentConfig.game_config.screen_size.height = heightInput.value;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+        if (resetResBtn) {
+            resetResBtn.addEventListener("click", async () => {
+                let currentConfig = await this.db.readData('configClient');
+                currentConfig.game_config.screen_size = { width: '854', height: '480' };
+                if (widthInput) widthInput.value = '854';
+                if (heightInput) heightInput.value = '480';
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+
+        // Toggles — read/write directly to DB
+        const toggleCfg = {
+            'modal-setting-console': 'console',
+            'modal-setting-auto-update': 'autoUpdate',
+            'modal-setting-dedicated-gpu': 'dedicatedGPU'
+        };
+        for (const [elId, cfgKey] of Object.entries(toggleCfg)) {
+            const cb = document.getElementById(elId);
+            if (!cb) continue;
+            const stored = configClient?.launcher_config?.[cfgKey];
+            cb.checked = stored === true || stored === 'true';
+            cb.addEventListener('change', async () => {
+                let currentConfig = await this.db.readData('configClient');
+                if (!currentConfig.launcher_config) currentConfig.launcher_config = {};
+                currentConfig.launcher_config[cfgKey] = cb.checked;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+
+        // Auto-update interval — read/write directly to DB
+        const intervalSel = document.getElementById('modal-setting-auto-update-interval');
+        if (intervalSel) {
+            const stored = configClient?.launcher_config?.autoUpdateInterval || '60';
+            intervalSel.value = stored;
+            intervalSel.addEventListener('change', async () => {
+                let currentConfig = await this.db.readData('configClient');
+                if (!currentConfig.launcher_config) currentConfig.launcher_config = {};
+                currentConfig.launcher_config.autoUpdateInterval = intervalSel.value;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+
+        // Downloads
+        const maxFilesInput = modal.querySelector(".max-files");
+        const maxFilesReset = modal.querySelector(".max-files-reset");
+        const dlConfig = configClient?.launcher_config?.download_multi || 5;
+        if (maxFilesInput) {
+            maxFilesInput.value = dlConfig;
+            maxFilesInput.addEventListener("change", async () => {
+                let currentConfig = await this.db.readData('configClient');
+                currentConfig.launcher_config.download_multi = maxFilesInput.value;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+        if (maxFilesReset) {
+            maxFilesReset.addEventListener("click", async () => {
+                let currentConfig = await this.db.readData('configClient');
+                if (maxFilesInput) maxFilesInput.value = 5;
+                currentConfig.launcher_config.download_multi = 5;
+                await this.db.updateData('configClient', currentConfig);
+            });
+        }
+
+        // Close behavior
+        const closeBox = modal.querySelector(".close-box");
+        if (closeBox) {
+            let closeLauncher = configClient?.launcher_config?.closeLauncher || "close-launcher";
+            closeBox.querySelectorAll('.behavior-btn').forEach(b => b.classList.remove('active-close'));
+            const targetBtn = closeBox.querySelector('.' + closeLauncher.replace(/-/g, '-'));
+            if (targetBtn) targetBtn.classList.add('active-close');
+
+            closeBox.addEventListener("click", async e => {
+                if (e.target.classList.contains('behavior-btn')) {
+                    let activeClose = closeBox.querySelector('.active-close');
+                    if (e.target.classList.contains('active-close')) return;
+                    if (activeClose) activeClose.classList.remove('active-close');
+                    e.target.classList.add('active-close');
+
+                    let currentConfig = await this.db.readData('configClient');
+                    if (e.target.classList.contains('close-launcher')) {
+                        currentConfig.launcher_config.closeLauncher = "close-launcher";
+                    } else if (e.target.classList.contains('close-all')) {
+                        currentConfig.launcher_config.closeLauncher = "close-all";
+                    } else if (e.target.classList.contains('close-none')) {
+                        currentConfig.launcher_config.closeLauncher = "close-none";
+                    }
+                    await this.db.updateData('configClient', currentConfig);
+                }
+            });
+        }
     }
 
     async setBackground(theme) {

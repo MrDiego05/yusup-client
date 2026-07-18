@@ -57,7 +57,12 @@ class Login {
 
         document.querySelectorAll('.cancel-login').forEach(el => {
             el.addEventListener('click', () => {
-                changePanel('home');
+                const loginPanel = document.querySelector('.panel.login');
+                if (loginPanel?.classList.contains('modal-mode')) {
+                    loginPanel.classList.remove('modal-mode', 'active');
+                } else {
+                    changePanel('home');
+                }
             });
         });
     }
@@ -261,7 +266,12 @@ class Login {
         await this.db.updateData('configClient', configClient);
         await addAccount(account);
         await accountSelect(account);
-        changePanel('home');
+        const loginPanel = document.querySelector('.panel.login');
+        if (loginPanel?.classList.contains('modal-mode')) {
+            loginPanel.classList.remove('modal-mode', 'active');
+        } else {
+            changePanel('home');
+        }
         document.dispatchEvent(new CustomEvent('accounts-changed'));
     }
 }

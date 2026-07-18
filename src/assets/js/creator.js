@@ -30,6 +30,32 @@ function getLocalIP() {
     return '127.0.0.1';
 }
 
+function generateInstancesJson() {
+    if (!_dbPath) return;
+    const base = `http://${getLocalIP()}:${SERVER_PORT}`;
+    const instances = modpacks.filter(m => m.location).map(m => ({
+        name: m.id,
+        title: m.title,
+        description: m.description || '',
+        tags: m.tags || [],
+        gameVersion: m.gameVersion,
+        loader: {
+            type: m.loader,
+            build: m.loaderVersion || '',
+            enable: m.loader !== 'vanilla'
+        },
+        poster: m.poster ? `${base}/${m.id}/${m.poster}` : null,
+        banner: m.banner ? `${base}/${m.id}/${m.banner}` : null,
+        modpack_url: `${base}/${m.id}/modpack.json`,
+        zipUrl: m.zipUrl || undefined,
+        instancePassword: m.instancePassword || undefined
+    }));
+    const dbDir = path.dirname(_dbPath);
+    const outputPath = path.join(dbDir, 'instances.json');
+    fs.writeFileSync(outputPath, JSON.stringify(instances, null, 4));
+    log(`📄 instances.json generado (${instances.length} modpacks)`, 'info');
+}
+
 function startServer() {
     if (_httpServer) {
         log('El servidor ya está en ejecución.', 'error');
@@ -77,7 +103,9 @@ function startServer() {
                 },
                 poster: m.poster ? `${base}/${m.id}/${m.poster}` : null,
                 banner: m.banner ? `${base}/${m.id}/${m.banner}` : null,
-                modpack_url: `${base}/${m.id}/modpack.json`
+                modpack_url: `${base}/${m.id}/modpack.json`,
+                zipUrl: m.zipUrl || undefined,
+                instancePassword: m.instancePassword || undefined
             }));
             res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
             res.end(JSON.stringify(instances, null, 2));
@@ -153,6 +181,7 @@ function startServer() {
         document.getElementById('btn-start-server').textContent = '🛑 Detener Servidor';
         log(`🌐 Servidor HTTP iniciado en ${serverUrl}`, 'success');
         log(`   Archivo de configuración escrito: ${_serverConfigPath}`, 'info');
+        generateInstancesJson();
     });
 
     _httpServer.on('error', (err) => {
@@ -258,9 +287,12 @@ function checkForUpdates(pack) {
     }
 }
 
+let _userDataPath = null;
+
 async function ensurePaths() {
     if (_pathsInitialized) return;
     const userDataPath = await ipcRenderer.invoke('path-user-data');
+    _userDataPath = userDataPath;
     _dbPath = path.join(userDataPath, 'creator-modpacks.json');
     _serverConfigPath = path.join(userDataPath, 'creator-server.json');
     const dbDir = path.dirname(_dbPath);
@@ -307,6 +339,7 @@ async function loadDb() {
 function saveDb() {
     if (!_dbPath) return;
     fs.writeFileSync(_dbPath, JSON.stringify(modpacks, null, 4));
+    generateInstancesJson();
 }
 
 // UI Logs utility
@@ -512,6 +545,9 @@ async function buildSKCraftManifest(pack, progressCallback) {
         throw new Error('La carpeta src/ está vacía o no contiene archivos.');
     }
 
+    // CDN base URL: if set, files resolve from there; no local objects/ copy needed
+    const cdnBase = pack.cdnUrl ? pack.cdnUrl.replace(/\/+$/, '') : null;
+
     const tasks = [];
     let processed = 0;
 
@@ -523,13 +559,17 @@ async function buildSKCraftManifest(pack, progressCallback) {
         const task = {
             type: 'file',
             hash: sha1,
-            location: `objects/${file.relativePath}`,
+            // When a CDN is set, location is just the relative path — no objects/ prefix needed
+            location: cdnBase ? file.relativePath : `objects/${file.relativePath}`,
             to: file.relativePath,
             size: stat.size
         };
 
+        // .url.txt sidecar always wins; CDN base fills in for everything else
         if (file.externalUrl) {
             task.url = file.externalUrl;
+        } else if (cdnBase) {
+            task.url = `${cdnBase}/${file.relativePath}`;
         }
 
         if (file.feature) {
@@ -548,6 +588,8 @@ async function buildSKCraftManifest(pack, progressCallback) {
         name: pack.id,
         title: pack.title,
         gameVersion: pack.gameVersion,
+        // baseUrl lets ModpackSync resolve relative locations without explicit task.url
+        baseUrl: cdnBase || undefined,
         features: features.length > 0 ? features : undefined,
         tasks,
         launch: {}
@@ -619,11 +661,15 @@ document.getElementById('btn-new-pack').addEventListener('click', () => {
     document.getElementById('new-title').value = '';
     document.getElementById('new-description').value = '';
     document.getElementById('new-tags').value = '';
+    document.querySelectorAll('.creator-tag-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('new-tags-display').innerHTML = '';
     document.getElementById('new-game-version').value = '1.20.1';
     document.getElementById('new-loader').value = 'neoforge';
     document.getElementById('new-loader-version').innerHTML = '<option value="">Cargando...</option>';
     selectedNewLocation = null;
-    document.getElementById('new-location-path').textContent = 'No seleccionada';
+    document.getElementById('new-cdn-url').value = '';
+    document.getElementById('new-zip-url').value = '';
+    document.getElementById('new-instance-password').value = '';
     // Clear banner/poster
     selectedBannerPath = null;
     selectedPosterPath = null;
@@ -639,17 +685,37 @@ document.getElementById('btn-new-pack').addEventListener('click', () => {
     updateLoaderVersions();
 });
 
+// ── Tag button helpers ──
+
+function syncTagsInput() {
+    const active = document.querySelectorAll('.creator-tag-btn.active');
+    const tags = Array.from(active).map(b => b.dataset.tag);
+    document.getElementById('new-tags').value = tags.join(', ');
+    const display = document.getElementById('new-tags-display');
+    display.innerHTML = tags.map(t => `<span style="background:#333; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">${t}</span>`).join('');
+}
+
+function syncTagFromInput() {
+    const val = document.getElementById('new-tags').value;
+    const tags = val ? val.split(',').map(t => t.trim()).filter(Boolean) : [];
+    document.querySelectorAll('.creator-tag-btn').forEach(btn => {
+        btn.classList.toggle('active', tags.includes(btn.dataset.tag));
+    });
+    syncTagsInput();
+}
+
+document.querySelectorAll('.creator-tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        syncTagsInput();
+    });
+});
+
 document.getElementById('btn-cancel-new').addEventListener('click', () => {
     modalNewPack.style.display = 'none';
 });
 
-document.getElementById('btn-select-new-location').addEventListener('click', async () => {
-    const folder = await ipcRenderer.invoke('select-directory');
-    if (folder) {
-        selectedNewLocation = folder.replace(/\\/g, '/');
-        document.getElementById('new-location-path').textContent = selectedNewLocation;
-    }
-});
+
 
 // Banner file picker
 let selectedBannerPath = null;
@@ -745,23 +811,27 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
     const loaderVer = document.getElementById('new-loader-version').value.trim();
     const description = document.getElementById('new-description').value.trim();
     const tagsRaw = document.getElementById('new-tags').value.trim();
+    const cdnUrl = document.getElementById('new-cdn-url').value.trim().replace(/\/+$/, '') || null;
+    const zipUrl = document.getElementById('new-zip-url').value.trim() || null;
+    const instancePassword = document.getElementById('new-instance-password').value.trim() || null;
 
-    if (!id || !title || !selectedNewLocation) {
-        log('Error: Todos los campos del nuevo modpack son requeridos.', 'error');
-        alert('Por favor, rellena todos los campos e indica la carpeta.');
+    if (!id || !title) {
+        log('Error: El ID y el título son requeridos.', 'error');
+        alert('Por favor, rellena el ID y el título.');
         return;
     }
 
+    const packLocation = selectedNewLocation || path.join(_userDataPath, 'modpacks', id).replace(/\\/g, '/');
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
 
     // Copy banner/poster images to the modpack folder
     // Only overwrite if user explicitly selected new ones
     let bannerFile, posterFile;
     if (selectedBannerPath) {
-        bannerFile = copyImageToModpack(selectedBannerPath, selectedNewLocation, 'banner.png');
+        bannerFile = copyImageToModpack(selectedBannerPath, packLocation, 'banner.png');
     }
     if (selectedPosterPath) {
-        posterFile = copyImageToModpack(selectedPosterPath, selectedNewLocation, 'poster.png');
+        posterFile = copyImageToModpack(selectedPosterPath, packLocation, 'poster.png');
     }
 
     const newPack = {
@@ -772,7 +842,10 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
         gameVersion: gameVer,
         loader,
         loaderVersion: loaderVer,
-        location: selectedNewLocation,
+        location: packLocation,
+        cdnUrl,
+        zipUrl,
+        instancePassword,
         banner: bannerFile ?? (editingPackId ? modpacks.find(m => m.id === editingPackId)?.banner : null),
         poster: posterFile ?? (editingPackId ? modpacks.find(m => m.id === editingPackId)?.poster : null)
     };
@@ -793,9 +866,9 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
         newPack.whitelistActive = false;
         modpacks.push(newPack);
         log(`Modpack guardado: ${title}`, 'success');
-        if (!fs.existsSync(selectedNewLocation)) {
-            fs.mkdirSync(selectedNewLocation, { recursive: true });
-            fs.mkdirSync(path.join(selectedNewLocation, 'mods'), { recursive: true });
+        if (!fs.existsSync(packLocation)) {
+            fs.mkdirSync(packLocation, { recursive: true });
+            fs.mkdirSync(path.join(packLocation, 'mods'), { recursive: true });
         }
     }
 
@@ -805,6 +878,8 @@ document.getElementById('btn-save-new').addEventListener('click', () => {
     // Reset image state after save
     selectedBannerPath = null;
     selectedPosterPath = null;
+    document.getElementById('new-cdn-url').value = '';
+    document.getElementById('new-instance-password').value = '';
     document.getElementById('new-banner-input').value = '';
     document.getElementById('new-banner-path').textContent = 'No seleccionada';
     document.getElementById('new-banner-preview').style.display = 'none';
@@ -852,11 +927,14 @@ document.getElementById('btn-modify').addEventListener('click', () => {
     document.getElementById('new-title').value = pack.title;
     document.getElementById('new-description').value = pack.description || '';
     document.getElementById('new-tags').value = (pack.tags || []).join(', ');
+    syncTagFromInput();
     document.getElementById('new-game-version').value = pack.gameVersion;
     document.getElementById('new-loader').value = pack.loader;
     document.getElementById('new-loader-version').innerHTML = '<option value="">Cargando...</option>';
     selectedNewLocation = pack.location;
-    document.getElementById('new-location-path').textContent = pack.location;
+    document.getElementById('new-cdn-url').value = pack.cdnUrl || '';
+    document.getElementById('new-zip-url').value = pack.zipUrl || '';
+    document.getElementById('new-instance-password').value = pack.instancePassword || '';
     // Reset file inputs so change event always fires
     document.getElementById('new-banner-input').value = '';
     document.getElementById('new-poster-input').value = '';
@@ -1158,16 +1236,23 @@ document.getElementById('btn-build').addEventListener('click', async () => {
             };
             manifest = await buildSKCraftManifest(pack, progressCallback);
 
-            // Copy files alongside manifest for local serving
-            const objectsDir = path.join(pack.location, 'objects');
-            if (!fs.existsSync(objectsDir)) fs.mkdirSync(objectsDir, { recursive: true });
+            if (pack.cdnUrl) {
+                // Files live on the CDN — no local objects/ copy needed
+                log(`🌐 CDN configurado: archivos resueltos desde ${pack.cdnUrl}`, 'info');
+                log(`ℹ️  Subí el contenido de src/ al CDN antes de distribuir el modpack.`, 'info');
+            } else {
+                // Copy files alongside manifest for local serving via server.js
+                const objectsDir = path.join(pack.location, 'objects');
+                if (!fs.existsSync(objectsDir)) fs.mkdirSync(objectsDir, { recursive: true });
 
-            for (const task of manifest.tasks) {
-                const srcFile = path.join(srcDir, task.to);
-                const objPath = path.join(objectsDir, task.to);
-                const objDir = path.dirname(objPath);
-                if (!fs.existsSync(objDir)) fs.mkdirSync(objDir, { recursive: true });
-                fs.copyFileSync(srcFile, objPath);
+                for (const task of manifest.tasks) {
+                    if (task.url) continue; // already has an explicit external URL
+                    const srcFile = path.join(srcDir, task.to);
+                    const objPath = path.join(objectsDir, task.to);
+                    const objDir = path.dirname(objPath);
+                    if (!fs.existsSync(objDir)) fs.mkdirSync(objDir, { recursive: true });
+                    if (fs.existsSync(srcFile)) fs.copyFileSync(srcFile, objPath);
+                }
             }
 
             const jsonOutPath = path.join(pack.location, 'modpack.json');
@@ -1203,6 +1288,7 @@ document.getElementById('btn-build').addEventListener('click', async () => {
                 throw new Error('La carpeta mods/ está vacía.');
             }
 
+            const cdnBase = pack.cdnUrl ? pack.cdnUrl.replace(/\/+$/, '') : null;
             const tasks = [];
             let processed = 0;
 
@@ -1211,14 +1297,16 @@ document.getElementById('btn-build').addEventListener('click', async () => {
                 const sha1 = await calculateSHA1(file.fullPath);
                 const stat = fs.statSync(file.fullPath);
 
-                tasks.push({
+                const task = {
                     type: 'file',
                     hash: sha1,
                     location: file.relPath,
                     to: file.relPath,
                     size: stat.size
-                });
+                };
+                if (cdnBase) task.url = `${cdnBase}/${file.relPath}`;
 
+                tasks.push(task);
                 processed++;
                 compileProgress.value = Math.round((processed / legacyFiles.length) * 100);
             }
@@ -1231,12 +1319,17 @@ document.getElementById('btn-build').addEventListener('click', async () => {
                 name: pack.id,
                 title: pack.title,
                 gameVersion: pack.gameVersion,
+                baseUrl: cdnBase || undefined,
                 tasks
             };
 
             const jsonOutPath = path.join(pack.location, 'modpack.json');
             fs.writeFileSync(jsonOutPath, JSON.stringify(manifest, null, 4));
 
+            if (cdnBase) {
+                log(`🌐 CDN configurado: mods resueltos desde ${cdnBase}`, 'info');
+                log(`ℹ️  Subí el contenido de mods/ al CDN antes de distribuir el modpack.`, 'info');
+            }
             log(`¡Compilación completada!`, 'success');
             log(`Se procesaron ${legacyFiles.length} archivos.`, 'success');
         }
@@ -1260,7 +1353,115 @@ function findPackFiles(pack) {
 
 // Install a single pack into the launcher (reusable)
 async function installPackInLauncher(pack) {
+    // zipUrl: no necesita src/mods/manifest, solo registrar y el launcher descarga
+    if (pack.zipUrl) {
+        log(`Instalando "${pack.title}" desde ZIP URL...`, 'info');
+        progressStatus.textContent = `Registrando ${pack.id} (ZIP)...`;
+        const Store = require('electron-store');
+        const appDataPath = await ipcRenderer.invoke('appData');
+        const store = new Store({ name: 'launcher-data', cwd: path.dirname(_dbPath) });
+        const configClient = store.get('configClient', []);
+        const configObj = Array.isArray(configClient) ? configClient[0] : configClient;
+        const gamePath = configObj?.gamePath || path.join(appDataPath, '.yusup');
+        const launcherDataDir = path.join(gamePath, 'instances');
+        if (!fs.existsSync(launcherDataDir)) fs.mkdirSync(launcherDataDir, { recursive: true });
+        const instanceDir = path.join(launcherDataDir, pack.id);
+        if (!fs.existsSync(instanceDir)) fs.mkdirSync(instanceDir, { recursive: true });
+        // Copy poster/banner
+        if (pack.banner) {
+            const srcBanner = path.join(pack.location, pack.banner);
+            if (fs.existsSync(srcBanner)) fs.copyFileSync(srcBanner, path.join(instanceDir, pack.banner));
+        }
+        if (pack.poster) {
+            const srcPoster = path.join(pack.location, pack.poster);
+            if (fs.existsSync(srcPoster)) fs.copyFileSync(srcPoster, path.join(instanceDir, pack.poster));
+        }
+        // Register in creator-modpacks.json
+        await ensurePaths();
+        let creatorModpacks = [];
+        if (fs.existsSync(_dbPath)) {
+            try { creatorModpacks = JSON.parse(fs.readFileSync(_dbPath, 'utf8')); } catch (e) { creatorModpacks = []; }
+        }
+        const existingIdx = creatorModpacks.findIndex(m => m.id === pack.id);
+        const entry = {
+            id: pack.id, title: pack.title, description: pack.description || '', tags: pack.tags || [],
+            gameVersion: pack.gameVersion, loader: pack.loader, loaderVersion: pack.loaderVersion,
+            location: instanceDir, whitelist: pack.whitelist || [], whitelistActive: pack.whitelistActive || false,
+            banner: pack.banner || null, poster: pack.poster || null,
+            cdnUrl: pack.cdnUrl || null, zipUrl: pack.zipUrl || null, instancePassword: pack.instancePassword || null
+        };
+        if (existingIdx >= 0) creatorModpacks[existingIdx] = entry;
+        else creatorModpacks.push(entry);
+        fs.writeFileSync(_dbPath, JSON.stringify(creatorModpacks, null, 4));
+        const modIdx = modpacks.findIndex(m => m.id === pack.id);
+        if (modIdx >= 0) {
+            modpacks[modIdx].banner = entry.banner;
+            modpacks[modIdx].poster = entry.poster;
+            modpacks[modIdx].location = entry.location;
+            modpacks[modIdx].zipUrl = entry.zipUrl;
+            modpacks[modIdx].instancePassword = entry.instancePassword;
+        }
+        log(`✅ "${pack.title}" instalado en el launcher (${instanceDir})`, 'success');
+        return;
+    }
+
     const packFiles = findPackFiles(pack);
+    const existingManifestPath = path.join(pack.location, 'modpack.json');
+    const hasExistingManifest = fs.existsSync(existingManifestPath);
+
+    // Si no hay src/ ni mods/ pero ya existe modpack.json compilado (CDN mode), lo usamos directamente
+    if (!packFiles && hasExistingManifest) {
+        log(`Instalando "${pack.title}" desde manifest existente (CDN)...`, 'info');
+        progressStatus.textContent = `Copiando manifest de ${pack.id}...`;
+        const Store = require('electron-store');
+        const appDataPath = await ipcRenderer.invoke('appData');
+        const store = new Store({ name: 'launcher-data', cwd: path.dirname(_dbPath) });
+        const configClient = store.get('configClient', []);
+        const configObj = Array.isArray(configClient) ? configClient[0] : configClient;
+        const gamePath = configObj?.gamePath || path.join(appDataPath, '.yusup');
+        const launcherDataDir = path.join(gamePath, 'instances');
+        if (!fs.existsSync(launcherDataDir)) fs.mkdirSync(launcherDataDir, { recursive: true });
+        const instanceDir = path.join(launcherDataDir, pack.id);
+        if (!fs.existsSync(instanceDir)) fs.mkdirSync(instanceDir, { recursive: true });
+        fs.copyFileSync(existingManifestPath, path.join(instanceDir, 'modpack.json'));
+        log(`🌐 CDN activo: archivos se descargarán desde ${pack.cdnUrl || 'el servidor'} en el primer lanzamiento.`, 'info');
+        // Copy poster/banner
+        if (pack.banner) {
+            const srcBanner = path.join(pack.location, pack.banner);
+            if (fs.existsSync(srcBanner)) fs.copyFileSync(srcBanner, path.join(instanceDir, pack.banner));
+        }
+        if (pack.poster) {
+            const srcPoster = path.join(pack.location, pack.poster);
+            if (fs.existsSync(srcPoster)) fs.copyFileSync(srcPoster, path.join(instanceDir, pack.poster));
+        }
+        // Register in creator-modpacks.json
+        await ensurePaths();
+        let creatorModpacks = [];
+        if (fs.existsSync(_dbPath)) {
+            try { creatorModpacks = JSON.parse(fs.readFileSync(_dbPath, 'utf8')); } catch (e) { creatorModpacks = []; }
+        }
+        const existingIdx = creatorModpacks.findIndex(m => m.id === pack.id);
+        const entry = {
+            id: pack.id, title: pack.title, description: pack.description || '', tags: pack.tags || [],
+            gameVersion: pack.gameVersion, loader: pack.loader, loaderVersion: pack.loaderVersion,
+            location: instanceDir, whitelist: pack.whitelist || [], whitelistActive: pack.whitelistActive || false,
+            banner: pack.banner || null, poster: pack.poster || null,
+            cdnUrl: pack.cdnUrl || null, instancePassword: pack.instancePassword || null
+        };
+        if (existingIdx >= 0) creatorModpacks[existingIdx] = entry;
+        else creatorModpacks.push(entry);
+        fs.writeFileSync(_dbPath, JSON.stringify(creatorModpacks, null, 4));
+        const modIdx = modpacks.findIndex(m => m.id === pack.id);
+        if (modIdx >= 0) {
+            modpacks[modIdx].banner = entry.banner;
+            modpacks[modIdx].poster = entry.poster;
+            modpacks[modIdx].location = entry.location;
+            modpacks[modIdx].instancePassword = entry.instancePassword;
+        }
+        log(`✅ "${pack.title}" instalado en el launcher (${instanceDir})`, 'success');
+        return;
+    }
+
     if (!packFiles) {
         throw new Error(`No existe src/ ni mods/ en ${pack.location}`);
     }
@@ -1306,15 +1507,18 @@ async function installPackInLauncher(pack) {
 
         if (legacyFiles.length === 0) throw new Error(`La carpeta mods/ de ${pack.id} está vacía.`);
 
+        const cdnBase = pack.cdnUrl ? pack.cdnUrl.replace(/\/+$/, '') : null;
         const tasks = [];
         for (const file of legacyFiles) {
             const sha1 = await calculateSHA1(file.fullPath);
             const stat = fs.statSync(file.fullPath);
-            tasks.push({ type: 'file', hash: sha1, location: file.relPath, to: file.relPath, size: stat.size });
+            const task = { type: 'file', hash: sha1, location: file.relPath, to: file.relPath, size: stat.size };
+            if (cdnBase) task.url = `${cdnBase}/${file.relPath}`;
+            tasks.push(task);
         }
         const version = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' +
             Math.random().toString(36).slice(2, 8);
-        manifest = { version, name: pack.id, title: pack.title, gameVersion: pack.gameVersion, tasks };
+        manifest = { version, name: pack.id, title: pack.title, gameVersion: pack.gameVersion, baseUrl: cdnBase || undefined, tasks };
         compileProgress.value = 100;
     }
 
@@ -1343,21 +1547,30 @@ async function installPackInLauncher(pack) {
     fs.copyFileSync(jsonOutPath, path.join(instanceDir, 'modpack.json'));
 
     if (packFiles.type === 'src') {
-        const objectsDir = path.join(pack.location, 'objects');
-        if (fs.existsSync(objectsDir)) {
-            copyRecursive(objectsDir, path.join(instanceDir, 'objects'));
+        if (pack.cdnUrl) {
+            // Files come from the CDN — nothing to copy locally
+            log(`🌐 CDN activo: archivos se descargarán desde ${pack.cdnUrl} en el primer lanzamiento.`, 'info');
         } else {
-            for (const task of manifest.tasks) {
-                if (task.url) continue;
-                const srcFile = path.join(packFiles.path, task.to);
-                const destFile = path.join(instanceDir, task.to);
-                const destDir = path.dirname(destFile);
-                if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-                fs.copyFileSync(srcFile, destFile);
+            const objectsDir = path.join(pack.location, 'objects');
+            if (fs.existsSync(objectsDir)) {
+                copyRecursive(objectsDir, path.join(instanceDir, 'objects'));
+            } else {
+                for (const task of manifest.tasks) {
+                    if (task.url) continue;
+                    const srcFile = path.join(packFiles.path, task.to);
+                    const destFile = path.join(instanceDir, task.to);
+                    const destDir = path.dirname(destFile);
+                    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+                    if (fs.existsSync(srcFile)) fs.copyFileSync(srcFile, destFile);
+                }
             }
         }
     } else {
-        copyRecursive(packFiles.path, path.join(instanceDir, 'mods'));
+        if (pack.cdnUrl) {
+            log(`🌐 CDN activo: mods se descargarán desde ${pack.cdnUrl} en el primer lanzamiento.`, 'info');
+        } else {
+            copyRecursive(packFiles.path, path.join(instanceDir, 'mods'));
+        }
     }
 
     // 2.5 Copy poster/banner images to instance directory
@@ -1386,7 +1599,9 @@ async function installPackInLauncher(pack) {
         id: pack.id, title: pack.title, description: pack.description || '', tags: pack.tags || [],
         gameVersion: pack.gameVersion, loader: pack.loader, loaderVersion: pack.loaderVersion,
         location: instanceDir, whitelist: pack.whitelist || [], whitelistActive: pack.whitelistActive || false,
-        banner: pack.banner || null, poster: pack.poster || null
+        banner: pack.banner || null, poster: pack.poster || null,
+        cdnUrl: pack.cdnUrl || null,
+        instancePassword: pack.instancePassword || null
     };
 
     if (existingIdx >= 0) creatorModpacks[existingIdx] = entry;
@@ -1399,6 +1614,7 @@ async function installPackInLauncher(pack) {
         modpacks[modIdx].banner = entry.banner;
         modpacks[modIdx].poster = entry.poster;
         modpacks[modIdx].location = entry.location;
+        modpacks[modIdx].instancePassword = entry.instancePassword;
     }
 
     log(`✅ "${pack.title}" instalado en el launcher (${instanceDir})`, 'success');
@@ -1548,6 +1764,7 @@ function renderCalendarEventsTable() {
             <td style="padding:8px 12px;">${dateStr}</td>
             <td style="padding:8px 12px;">${ev.time || 'Todo el día'}</td>
             <td style="padding:8px 12px;">${ev.title}</td>
+            <td style="padding:8px 12px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${ev.description || ''}</td>
             <td style="padding:8px 12px;"><button class="cal-event-del" data-idx="${idx}" style="background:none; border:none; color:#666; cursor:pointer; font-size:16px;">×</button></td>
         `;
         tr.querySelector('.cal-event-del').addEventListener('click', () => {
@@ -1569,6 +1786,7 @@ document.getElementById('btn-calendar')?.addEventListener('click', async () => {
     document.getElementById('cal-event-date').value = today;
     document.getElementById('cal-event-time').value = '';
     document.getElementById('cal-event-title').value = '';
+    document.getElementById('cal-event-desc').value = '';
     document.getElementById('modal-calendar').style.display = 'flex';
 });
 
@@ -1577,15 +1795,17 @@ document.getElementById('btn-cal-add')?.addEventListener('click', () => {
     const date = document.getElementById('cal-event-date').value;
     const time = document.getElementById('cal-event-time').value;
     const title = document.getElementById('cal-event-title').value.trim();
+    const description = document.getElementById('cal-event-desc').value.trim();
     if (!date || !title) {
         log('❌ Completá la fecha y el título del evento.', 'error');
         return;
     }
-    _calendarEvents.push({ date, time, title });
+    _calendarEvents.push({ date, time, title, description });
     saveCalendarEvents();
     renderCalendarEventsTable();
     document.getElementById('cal-event-title').value = '';
-    log(`📅 Evento "${title}" agregado al calendario.`, 'success');
+    document.getElementById('cal-event-desc').value = '';
+    log(`📅 Evento "${title}" agregado.`, 'success');
 });
 
 // Close calendar modal
@@ -1593,11 +1813,230 @@ document.getElementById('btn-close-cal')?.addEventListener('click', () => {
     document.getElementById('modal-calendar').style.display = 'none';
 });
 
+/* ==========================================================================
+   BADGE MANAGEMENT (via Social Server API)
+   ========================================================================== */
+
+let _badgeSocialUrl = '';
+let _badgeAdminKey = '';
+let _badgeIsAuth = false;
+
+// Badge button in toolbar
+document.getElementById('btn-badges')?.addEventListener('click', () => {
+    document.getElementById('modal-badges').style.display = 'flex';
+    loadBadgeList();
+});
+
+document.getElementById('btn-close-badges')?.addEventListener('click', () => {
+    document.getElementById('modal-badges').style.display = 'none';
+});
+
+// Users known button
+document.getElementById('btn-users')?.addEventListener('click', async () => {
+    const tbody = document.getElementById('users-table');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="3" style="padding:12px;text-align:center;color:#999;font-size:11px;">Cargando...</td></tr>';
+    document.getElementById('modal-users').style.display = 'flex';
+    try {
+        const appDataPath = await ipcRenderer.invoke('appData');
+        const knownPath = path.join(appDataPath, '.yusup', 'known-users.json');
+        let known = [];
+        if (fs.existsSync(knownPath)) {
+            known = JSON.parse(fs.readFileSync(knownPath, 'utf8'));
+        }
+        tbody.innerHTML = '';
+        if (known.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="padding:12px;text-align:center;color:#999;font-size:11px;">No hay usuarios registrados aún.</td></tr>';
+            return;
+        }
+        known.sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin));
+        known.forEach(u => {
+            const tr = document.createElement('tr');
+            const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+            const typeLabel = u.type === 'Xbox' ? 'Microsoft' : u.type;
+            tr.innerHTML = `<td style="padding:8px 12px;">${u.name}</td><td style="padding:8px 12px;">${typeLabel}</td><td style="padding:8px 12px;">${lastLogin}</td>`;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="3" style="padding:12px;text-align:center;color:#999;font-size:11px;">Error al cargar usuarios.</td></tr>';
+    }
+});
+
+document.getElementById('btn-close-users')?.addEventListener('click', () => {
+    document.getElementById('modal-users').style.display = 'none';
+});
+
+// Connect to social server
+document.getElementById('btn-badge-connect')?.addEventListener('click', async () => {
+    _badgeSocialUrl = document.getElementById('badge-social-url').value.trim().replace(/\/+$/, '');
+    if (!_badgeSocialUrl) {
+        document.getElementById('badge-auth-status').textContent = 'Ingresá una URL';
+        return;
+    }
+    try {
+        const res = await fetch(`${_badgeSocialUrl}/status`);
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('badge-auth-status').textContent = `✅ Conectado (${data.online || 0} online)`;
+            document.getElementById('badge-auth-status').style.color = '#333';
+        } else {
+            document.getElementById('badge-auth-status').textContent = '❌ No se pudo conectar';
+            document.getElementById('badge-auth-status').style.color = '#999';
+        }
+    } catch (e) {
+        document.getElementById('badge-auth-status').textContent = '❌ Error de conexión';
+        document.getElementById('badge-auth-status').style.color = '#999';
+    }
+});
+
+// Authenticate as admin
+document.getElementById('btn-badge-auth')?.addEventListener('click', async () => {
+    if (!_badgeSocialUrl) {
+        document.getElementById('badge-auth-status').textContent = 'Conectá al servidor primero';
+        return;
+    }
+    _badgeAdminKey = document.getElementById('badge-admin-key').value.trim();
+    try {
+        const res = await fetch(`${_badgeSocialUrl}/api/social/admin/verify`, {
+            headers: { 'X-Admin-Key': _badgeAdminKey }
+        });
+        const data = await res.json();
+        if (data.is_admin) {
+            _badgeIsAuth = true;
+            document.getElementById('badge-auth-status').textContent = '✅ Autenticado como admin';
+            document.getElementById('badge-auth-status').style.color = '#333';
+            document.getElementById('badge-manager').style.display = 'block';
+            document.getElementById('badge-admin-key-section').style.display = 'none';
+            document.getElementById('badge-social-url-section').style.display = 'none';
+            loadBadgeList();
+            loadOnlineUsers();
+        } else {
+            document.getElementById('badge-auth-status').textContent = '❌ Admin key inválida';
+            document.getElementById('badge-auth-status').style.color = '#999';
+        }
+    } catch (e) {
+        document.getElementById('badge-auth-status').textContent = '❌ Error';
+        document.getElementById('badge-auth-status').style.color = '#999';
+    }
+});
+
+async function badgeFetch(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (_badgeAdminKey) headers['X-Admin-Key'] = _badgeAdminKey;
+    const res = await fetch(`${_badgeSocialUrl}${path}`, { ...options, headers });
+    return res.json();
+}
+
+async function loadBadgeList() {
+    if (!_badgeSocialUrl) return;
+    try {
+        const data = await badgeFetch('/api/social/badges');
+        const tbody = document.getElementById('badge-table');
+        const select = document.getElementById('badge-assign-select');
+        if (!tbody || !select) return;
+        tbody.innerHTML = '';
+        select.innerHTML = '<option value="">Sin badge</option>';
+        for (const b of (data.badges || [])) {
+            tbody.innerHTML += `
+                <tr>
+                    <td style="padding:8px 12px;font-size:1.2em;">${b.icon || '⭐'}</td>
+                    <td style="padding:8px 12px;">${b.name}</td>
+                    <td style="padding:8px 12px;"><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:${b.color};border:1px solid #ccc;"></span> ${b.color}</td>
+                    <td style="padding:8px 12px;"><button class="tool-btn" data-badge-id="${b.id}" style="font-size:0.8em;padding:4px 8px;">Eliminar</button></td>
+                </tr>
+            `;
+            select.innerHTML += `<option value="${b.id}" data-icon="${b.icon || '⭐'}" data-color="${b.color}">${b.icon || '⭐'} ${b.name}</option>`;
+        }
+        // Delete badge handlers
+        tbody.querySelectorAll('[data-badge-id]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (confirm('¿Eliminar este badge?')) {
+                    await badgeFetch(`/api/social/badges/${btn.dataset.badgeId}`, { method: 'DELETE' });
+                    loadBadgeList();
+                }
+            });
+        });
+    } catch (e) {
+        log(`Error al cargar badges: ${e.message}`, 'error');
+    }
+}
+
+async function loadOnlineUsers() {
+    if (!_badgeSocialUrl) return;
+    try {
+        const data = await badgeFetch('/api/social/users/online');
+        const container = document.getElementById('badge-online-users');
+        if (!container) return;
+        const users = data.users || [];
+        if (users.length === 0) {
+            container.innerHTML = 'No hay usuarios conectados.';
+            return;
+        }
+        container.innerHTML = users.map(u =>
+            `<div style="padding:4px 0;">🟢 ${u.minecraft_name}${u.current_instance ? ` — jugando ${u.current_instance}` : ''}</div>`
+        ).join('');
+    } catch (e) {
+        // silent
+    }
+}
+
+// Create badge
+document.getElementById('btn-badge-create')?.addEventListener('click', async () => {
+    const name = document.getElementById('badge-name').value.trim();
+    const icon = document.getElementById('badge-icon').value.trim() || '⭐';
+    const color = document.getElementById('badge-color').value;
+    if (!name) {
+        log('❌ El nombre del badge es requerido', 'error');
+        return;
+    }
+    const result = await badgeFetch('/api/social/badges', {
+        method: 'POST',
+        body: JSON.stringify({ name, icon, color })
+    });
+    if (result.id) {
+        log(`✅ Badge "${name}" creado`, 'success');
+        document.getElementById('badge-name').value = '';
+        document.getElementById('badge-icon').value = '';
+        loadBadgeList();
+    } else {
+        log(`❌ Error: ${result.error || 'desconocido'}`, 'error');
+    }
+});
+
+// Assign badge to user
+document.getElementById('btn-badge-assign')?.addEventListener('click', async () => {
+    const userName = document.getElementById('badge-assign-user').value.trim();
+    const badgeId = document.getElementById('badge-assign-select').value;
+    if (!userName) {
+        document.getElementById('badge-assign-status').textContent = 'Ingresá un nombre de jugador';
+        return;
+    }
+    // First search user
+    const search = await badgeFetch(`/api/social/users/search?q=${encodeURIComponent(userName)}`);
+    const user = (search.users || []).find(u => u.minecraft_name.toLowerCase() === userName.toLowerCase());
+    if (!user) {
+        document.getElementById('badge-assign-status').textContent = '❌ Jugador no encontrado en el servidor social';
+        return;
+    }
+    const result = await badgeFetch(`/api/social/users/${user.id}/badge`, {
+        method: 'PUT',
+        body: JSON.stringify({ badge_id: badgeId ? parseInt(badgeId) : null })
+    });
+    if (result.ok) {
+        document.getElementById('badge-assign-status').textContent = `✅ Badge ${badgeId ? 'asignado' : 'removido'} a ${user.minecraft_name}`;
+        document.getElementById('badge-assign-user').value = '';
+        loadOnlineUsers();
+    } else {
+        document.getElementById('badge-assign-status').textContent = '❌ Error al asignar';
+    }
+});
+
 // Start up
 (async () => {
     await loadDb();
     await ensurePaths();
     renderModpacks();
+    generateInstancesJson();
     log('Yusup Modpack Creator cargado correctamente.', 'success');
     log('--- SERVIDOR HTTP ---', 'info');
     log(`Puerto: ${SERVER_PORT}`, 'info');

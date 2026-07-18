@@ -9,12 +9,12 @@ const fs = require('fs');
 const path = require('path');
 const { ipcRenderer } = require('electron');
 
+const RAW_BASE = 'https://raw.githubusercontent.com/mrdiego05/yusup-client/main';
+const DOCS_BASE = `${RAW_BASE}/docs`;
+
 class Config {
     async getRemoteBaseUrl() {
-        try {
-            return await ipcRenderer.invoke('get-remote-url');
-        } catch (e) {}
-        return 'https://mrdiego05.github.io/yusup-client';
+        return RAW_BASE;
     }
 
     async GetConfig() {
@@ -31,40 +31,57 @@ class Config {
             client_id: "00000000-0000-0000-0000-000000000000"
         };
 
+        // 1. Try remote
         try {
-            const remoteUrl = await this.getRemoteBaseUrl();
-            const res = await nodeFetch(`${remoteUrl}/config.json`);
+            const res = await nodeFetch(`${DOCS_BASE}/config.json`);
             if (res.ok) {
                 const remote = await res.json();
                 return { ...defaults, ...remote };
             }
-        } catch (e) {
-            // fallback to hardcoded defaults
-        }
+        } catch (e) {}
+
+        // 2. Fallback: local file
+        try {
+            const base = path.dirname(require('url').fileURLToPath(import.meta.url));
+            const localPath = path.join(base, '..', '..', '..', '..', 'config.json');
+            if (fs.existsSync(localPath)) {
+                const data = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+                return { ...defaults, ...data };
+            }
+        } catch (e) {}
+
         return defaults;
     }
 
     async getInstanceList() {
+        // 1. Try creator-server.json (local server running via server.js)
         try {
-            const userDataPath = await ipcRenderer.invoke('path-user-data');
-            const serverConfigPath = path.join(userDataPath, 'creator-server.json');
+            const serverConfigPath = path.join(
+                await ipcRenderer.invoke('path-user-data'),
+                'creator-server.json'
+            );
             if (fs.existsSync(serverConfigPath)) {
-                try {
-                    const serverConfig = JSON.parse(fs.readFileSync(serverConfigPath, 'utf8'));
-                    if (serverConfig.url) {
-                        const instances = await nodeFetch(`${serverConfig.url}/instances.json`).then(r => r.json());
+                const sc = JSON.parse(fs.readFileSync(serverConfigPath, 'utf8'));
+                if (sc.url) {
+                    const res = await nodeFetch(`${sc.url}/instances.json`);
+                    if (res.ok) {
+                        const instances = await res.json();
                         if (Array.isArray(instances) && instances.length > 0) return instances;
                     }
-                } catch (e) {}
-            }
-
-            const remoteUrl = await this.getRemoteBaseUrl();
-            const res = await nodeFetch(`${remoteUrl}/instances.json`);
-            if (res.ok) {
-                const instances = await res.json();
-                return Array.isArray(instances) ? instances : [];
+                }
             }
         } catch (e) {}
+
+        // 2. Try remote GitHub Pages instances.json
+        try {
+            const res = await nodeFetch(`${DOCS_BASE}/instances.json`);
+            if (res.ok) {
+                const instances = await res.json();
+                if (Array.isArray(instances) && instances.length > 0) return instances;
+            }
+        } catch (e) {}
+
+        // 3. No instances available
         return [];
     }
 
@@ -92,7 +109,7 @@ class Config {
                 }).catch(() => resolve(this.getDefaultNews()));
             });
         } else {
-            return resolve(this.getDefaultNews());
+            return this.getDefaultNews();
         }
     }
 
@@ -100,7 +117,7 @@ class Config {
         return [
             {
                 title: "Actualizacion 1.0",
-                content: "¡Bienvenido a Yusup Client! Los modpacks se sirven desde el servidor del Creator.",
+                content: "¡Bienvenido a Yusup Client! Los modpacks se sirven desde el repositorio.",
                 author: "Yusup Client",
                 publish_date: new Date().toISOString()
             }

@@ -3,18 +3,13 @@
     font-family: 'Google Sans Flex', sans-serif;
 }
 
-h1 { font-size: 28px; }
-h2 { font-size: 24px; }
-h3 { font-size: 16px; }
-p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
-
 .settings .container {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     box-sizing: border-box;
 }
 
@@ -25,7 +20,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     border-radius: 40px;
     width: 780px;
     height: 520px;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.06);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.06);
     overflow: hidden;
     box-sizing: border-box;
 }
@@ -38,7 +33,6 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     padding: 30px 16px;
     box-sizing: border-box;
 }
@@ -48,7 +42,6 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     font-size: 22px;
     font-weight: 600;
     margin: 10px 0 32px 0;
-    font-family: 'Google Sans Flex', sans-serif;
     user-select: none;
 }
 
@@ -71,15 +64,15 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     cursor: pointer;
     border: none;
     background: transparent;
-    color: #1A1A1A;
+    color: #1a1a1a;
     opacity: 0.6;
     box-sizing: border-box;
     user-select: none;
 }
 
 .nav-settings-btn:hover {
-    background: #FFFFFF;
-    color: #1A1A1A;
+    background: #fff;
+    color: #1a1a1a;
     opacity: 1;
 }
 
@@ -90,16 +83,16 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .close-main-btn {
-    background: #E0E0E0 !important;
-    color: #666666 !important;
-    border: 1px solid #CCCCCC !important;
+    background: #e0e0e0 !important;
+    color: #666 !important;
+    border: 1px solid #ccc !important;
     margin-top: auto !important;
     opacity: 1 !important;
 }
 
 .close-main-btn:hover {
-    background: #CCCCCC !important;
-    color: #333333 !important;
+    background: #ccc !important;
+    color: #333 !important;
 }
 
 .settings-viewport {
@@ -137,7 +130,6 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     border-left: 3.5px solid var(--green-mid);
     padding-left: 10px;
     width: fit-content;
-    box-sizing: border-box;
 }
 
 .settings-elements-box {
@@ -155,7 +147,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 .setting-text {
     font-size: 12px;
     line-height: 1.5;
-    color: #1A1A1A;
+    color: #1a1a1a;
     opacity: 0.7;
 }
 
@@ -178,15 +170,134 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .ram-info-block {
     font-size: 12px;
-    color: #1A1A1A;
+    color: #1a1a1a;
     opacity: 0.7;
     line-height: 1.5;
 }
 
+.ram-input-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.ram-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ram-input-group label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
+}
+
+.ram-input-group input {
+    width: 80px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.ram-input-group input:focus {
+    border-color: #999;
+    outline: none;
+}
+
+.ram-stepper-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.ram-input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ram-input-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.ram-stepper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.ram-step-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: #e0e0e0;
+    color: #1a1a1a;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.ram-step-btn:hover {
+    background: #ccc;
+}
+
+.ram-input {
+    width: 70px;
+    height: 34px;
+    border: none;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    background: #e8e8e8;
+    color: #1a1a1a;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.ram-input:focus {
+    background: #f5f5f5;
+}
+
+.java-path-txt {
+    font-family: monospace;
+    font-size: 12px;
+    color: #1a1a1a;
+    opacity: 0.5;
+    background: #f0f0f0;
+    padding: 3px 6px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 4px;
+    word-break: break-all;
+}
+
 .java-path-input-text {
-    background: #F0F0F0;
-    border: 1px solid #CCCCCC;
-    color: #1A1A1A;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #1a1a1a;
     padding: 10px 16px;
     border-radius: 100px;
     width: 55%;
@@ -208,27 +319,27 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .java-path-btn {
     padding: 10px 16px;
-    background: #E0E0E0;
-    border: 1px solid #CCCCCC;
+    background: #e0e0e0;
+    border: 1px solid #ccc;
     border-radius: 100px;
-    color: #1A1A1A;
+    color: #1a1a1a;
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
 }
 
 .java-path-btn:hover {
-    background: #CCCCCC;
+    background: #ccc;
 }
 
 .java-path-reset {
-    background: #E0E0E0 !important;
-    color: #666666 !important;
-    border-color: #CCCCCC !important;
+    background: #e0e0e0 !important;
+    color: #666 !important;
+    border-color: #ccc !important;
 }
 
 .java-path-reset:hover {
-    background: #CCCCCC !important;
+    background: #ccc !important;
 }
 
 .input-size-element {
@@ -238,9 +349,9 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .input-resolution {
-    background: #F0F0F0;
-    border: 1px solid #CCCCCC;
-    color: #1A1A1A;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #1a1a1a;
     padding: 10px;
     border-radius: 100px;
     text-align: center;
@@ -252,12 +363,12 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .input-resolution:focus {
-    border-color: #999999;
-    background: #FFFFFF;
+    border-color: #999;
+    background: #fff;
 }
 
 .size-cross {
-    color: #1A1A1A;
+    color: #1a1a1a;
     opacity: 0.4;
     font-weight: 500;
     font-size: 16px;
@@ -265,23 +376,23 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .size-btn {
     padding: 10px 16px;
-    background: #E0E0E0;
-    border: 1px solid #CCCCCC;
+    background: #e0e0e0;
+    border: 1px solid #ccc;
     border-radius: 100px;
-    color: #1A1A1A;
+    color: #1a1a1a;
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
 }
 
 .size-btn:hover {
-    background: #CCCCCC;
+    background: #ccc;
 }
 
 .input-max-files {
-    background: #F0F0F0;
-    border: 1px solid #CCCCCC;
-    color: #1A1A1A;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #1a1a1a;
     padding: 10px;
     border-radius: 100px;
     text-align: center;
@@ -293,11 +404,11 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .input-max-files:focus {
-    border-color: #999999;
+    border-color: #999;
 }
 
 .files-label {
-    color: #1A1A1A;
+    color: #1a1a1a;
     opacity: 0.7;
     font-weight: 500;
     font-size: 12px;
@@ -305,26 +416,26 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .max-files-btn {
     padding: 10px 16px;
-    background: #E0E0E0;
-    border: 1px solid #CCCCCC;
+    background: #e0e0e0;
+    border: 1px solid #ccc;
     border-radius: 100px;
-    color: #1A1A1A;
+    color: #1a1a1a;
     font-weight: 500;
     font-size: 12px;
     cursor: pointer;
 }
 
 .max-files-btn:hover {
-    background: #CCCCCC;
+    background: #ccc;
 }
 
 .close-btn {
     font-size: 12px !important;
     width: 30% !important;
     text-align: center;
-    border: 1px solid #CCCCCC !important;
-    background: #E0E0E0 !important;
-    color: #1A1A1A !important;
+    border: 1px solid #ccc !important;
+    background: #e0e0e0 !important;
+    color: #1a1a1a !important;
     border-radius: 100px !important;
     padding: 12px 8px !important;
     cursor: pointer;
@@ -332,145 +443,15 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .close-btn:hover {
-    background: #CCCCCC !important;
-    color: #1A1A1A !important;
+    background: #ccc !important;
+    color: #1a1a1a !important;
 }
 
 .active-close {
-    border-color: #555555 !important;
-    background: #D9D9D9 !important;
-    color: #333333 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.content-scroll::-webkit-scrollbar {
-    width: 6px;
-}
-
-.content-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.content-scroll::-webkit-scrollbar-thumb {
-    background: #CCCCCC;
-    border-radius: 10px;
-}
-
-.content-scroll::-webkit-scrollbar-thumb:hover {
-    background: #999999;
-}
-
-.ram-stepper-row {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-.ram-input-box {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.ram-input-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #666666;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.ram-stepper {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    border: 1px solid #CCCCCC;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #F5F5F5;
-}
-
-.ram-step-btn {
-    width: 34px;
-    height: 34px;
-    border: none;
-    background: #E0E0E0;
-    color: #1A1A1A;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit;
-    line-height: 1;
-}
-
-.ram-step-btn:hover {
-    background: #CCCCCC;
-}
-
-.ram-input {
-    width: 70px;
-    height: 34px;
-    border: none;
-    border-left: 1px solid #CCCCCC;
-    border-right: 1px solid #CCCCCC;
-    background: #E8E8E8;
-    color: #1A1A1A;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-    -moz-appearance: textfield;
-}
-
-.ram-input::-webkit-outer-spin-button,
-.ram-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.ram-input:focus {
-    background: #F5F5F5;
-}
-
-.ram-input-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 12px;
-}
-
-.ram-input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.ram-input-group label {
-    font-size: 11px;
-    color: #666666;
-    font-weight: 500;
-}
-
-.ram-input-group input {
-    width: 80px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid #CCCCCC;
-    background: #F5F5F5;
-    color: #1A1A1A;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-}
-
-.ram-input-group input:focus {
-    border-color: #999999;
-    outline: none;
+    border-color: #555 !important;
+    background: #d9d9d9 !important;
+    color: #333 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .theme-box {
@@ -482,9 +463,9 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     flex: 1;
     padding: 10px 16px;
     border-radius: 10px;
-    border: 1px solid #CCCCCC;
-    background: #F5F5F5;
-    color: #1A1A1A;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    color: #1a1a1a;
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
@@ -493,7 +474,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .theme-option:hover {
-    background: #E0E0E0;
+    background: #e0e0e0;
 }
 
 .theme-option.theme-active {
@@ -506,17 +487,17 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     width: 100%;
     padding: 10px 12px;
     border-radius: 10px;
-    border: 1px solid #CCCCCC;
-    background: #F5F5F5;
-    color: #1A1A1A;
-    font-family: 'Consolas', 'Monaco', monospace;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    font-family: Consolas, Monaco, monospace;
     font-size: 12px;
     resize: vertical;
     box-sizing: border-box;
 }
 
 .jvm-args-input:focus {
-    border-color: #999999;
+    border-color: #999;
     outline: none;
 }
 
@@ -524,9 +505,9 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     align-self: flex-start;
     padding: 6px 14px;
     border-radius: 8px;
-    border: 1px solid #CCCCCC;
-    background: #F5F5F5;
-    color: #1A1A1A;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    color: #1a1a1a;
     font-family: inherit;
     font-size: 12px;
     font-weight: 500;
@@ -535,7 +516,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .jvm-args-btn:hover {
-    background: #E0E0E0;
+    background: #e0e0e0;
 }
 
 .settings-accounts-list {
@@ -551,7 +532,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     gap: 14px;
     padding: 14px 16px;
     border-radius: 16px;
-    background: #E0E0E0;
+    background: #e0e0e0;
     border: 1px solid transparent;
     cursor: pointer;
 }
@@ -573,11 +554,11 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
-    border: 2px solid #CCCCCC;
+    border: 2px solid #ccc;
 }
 
 .settings-account-card.active .settings-account-avatar {
-    border-color: #555555;
+    border-color: #555;
 }
 
 .settings-account-info {
@@ -591,7 +572,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 .settings-account-name {
     font-size: 14px;
     font-weight: 600;
-    color: #1A1A1A;
+    color: #1a1a1a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -599,13 +580,13 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .settings-account-status {
     font-size: 12px;
-    color: #666666;
+    color: #666;
     opacity: 0.7;
 }
 
 .settings-account-detail {
     font-size: 11px;
-    color: #666666;
+    color: #666;
     opacity: 0.6;
     line-height: 1.3;
 }
@@ -622,7 +603,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
     border-radius: 50%;
     border: none;
     background: transparent;
-    color: #1A1A1A;
+    color: #1a1a1a;
     opacity: 0.4;
     cursor: pointer;
     display: flex;
@@ -633,6 +614,23 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .settings-account-delete:hover {
     opacity: 1;
-    background: #E0E0E0;
-    color: #666666;
+    background: #e0e0e0;
+    color: #666;
+}
+
+.content-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.content-scroll::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }

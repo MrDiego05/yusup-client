@@ -1,31 +1,60 @@
-[UNHANDLED REJECTION] TypeError: this.renderQuickAccess is not a function
-TypeError: this.renderQuickAccess is not a function
-    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:34:20)
+[UNHANDLED REJECTION] TypeError: this._renderLocalFriendsFallback is not a function
+TypeError: this._renderLocalFriendsFallback is not a function
+    at Home.loadFriendsList (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1345:40)
+    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:74:20)
 
-[UNHANDLED REJECTION] TypeError: this.renderQuickAccess is not a function
-TypeError: this.renderQuickAccess is not a function
-    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:34:20)
+[UNHANDLED REJECTION] TypeError: this._renderLocalFriendsFallback is not a function
+TypeError: this._renderLocalFriendsFallback is not a function
+    at Home.loadFriendsList (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1345:40)
+    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:74:20)
 
-[UNHANDLED REJECTION] TypeError: this.renderQuickAccess is not a function
-TypeError: this.renderQuickAccess is not a function
-    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:34:20)
+[UNHANDLED REJECTION] TypeError: this._renderLocalFriendsFallback is not a function
+TypeError: this._renderLocalFriendsFallback is not a function
+    at Home.loadFriendsList (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1345:40)
+    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:74:20)
 
-[UNHANDLED REJECTION] TypeError: this.renderQuickAccess is not a function
-TypeError: this.renderQuickAccess is not a function
-    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:34:20)
+[UNHANDLED REJECTION] TypeError: this._renderLocalFriendsFallback is not a function
+TypeError: this._renderLocalFriendsFallback is not a function
+    at Home.loadFriendsList (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1345:40)
+    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:74:20)
 
-[UNHANDLED REJECTION] TypeError: this.renderQuickAccess is not a function
-TypeError: this.renderQuickAccess is not a function
-    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:34:20)
+[UNHANDLED REJECTION] TypeError: this._renderLocalFriendsFallback is not a function
+TypeError: this._renderLocalFriendsFallback is not a function
+    at Home.loadFriendsList (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1345:40)
+    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:74:20)
 
-[UNHANDLED REJECTION] TypeError: this.accounts is not a function
-TypeError: this.accounts is not a function
-    at Settings.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/settings.js:16:14)
-    at Launcher.createPanels (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:169:25)
-    at Launcher.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/launcher.js:36:14)
+[UNHANDLED REJECTION] TypeError: this._renderLocalFriendsFallback is not a function
+TypeError: this._renderLocalFriendsFallback is not a function
+    at Home.loadFriendsList (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1345:40)
+    at Home.init (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:74:20)
 
-[UNHANDLED REJECTION] TypeError: Cannot set properties of null (setting 'onclick')
-TypeError: Cannot set properties of null (setting 'onclick')
-    at Home.setupLauncherControls (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1370:59)
-    at Home.selectInstance (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1322:14)
+[RENDERER ERROR] Uncaught TypeError: this._hideCardHover is not a function at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1667:26
+TypeError: this._hideCardHover is not a function
+    at HTMLButtonElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1667:26)
+
+[RENDERER ERROR] Uncaught TypeError: this._hideCardHover is not a function at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22
+TypeError: this._hideCardHover is not a function
+    at HTMLDivElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22)
+
+[RENDERER ERROR] Uncaught TypeError: this._hideCardHover is not a function at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22
+TypeError: this._hideCardHover is not a function
+    at HTMLDivElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22)
+
+[RENDERER ERROR] Uncaught TypeError: this._hideCardHover is not a function at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22
+TypeError: this._hideCardHover is not a function
+    at HTMLDivElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22)
+
+[RENDERER ERROR] Uncaught TypeError: this._hideCardHover is not a function at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22
+TypeError: this._hideCardHover is not a function
+    at HTMLDivElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22)
+
+[RENDERER ERROR] Uncaught TypeError: this._hideCardHover is not a function at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22
+TypeError: this._hideCardHover is not a function
+    at HTMLDivElement.<anonymous> (file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:1678:22)
+
+[RENDERER ERROR] Uncaught SyntaxError: Unexpected token 'catch' at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:813:7
+SyntaxError: Unexpected token 'catch'
+
+[RENDERER ERROR] Uncaught SyntaxError: Missing catch or finally after try at file:///C:/Users/Diego/Documents/Proyects/yusup-client/src/assets/js/panels/home.js:730:5
+SyntaxError: Missing catch or finally after try
 

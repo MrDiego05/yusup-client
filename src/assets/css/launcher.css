@@ -1,45 +1,25 @@
 @import 'font.css';
 @import 'panels/login.css';
 @import 'panels/home.css';
-@import 'panels/settings.css';
-
-:root {
-    --green-dark: #192E03;
-    --green-light: #F7FEE7;
-    --green-mid: #D8F999;
-    --green-pale: #ECFCCA;
-    --green-background: #ECFCCA
-}
 
 body {
-    margin: 0px;
+    background: #F5F4F0;
+    margin: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
     user-select: none;
-    color: var(--green-dark);
-    background-color: var(--green-background);
     font-family: 'Google Sans Flex', sans-serif;
-    font-weight: 400;
+    font-weight: 500;
     box-sizing: border-box;
 }
-
-h1, h2, h3, h4, p, span {
-    font-family: 'Google Sans Flex', sans-serif;
-}
-h1 { font-size: 28px; }
-h2 { font-size: 24px; }
-h3 { font-size: 16px; }
-p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 img {
     -webkit-user-drag: none;
     user-select: none;
 }
 
-* {
-    outline: none;
-}
+* { outline: none; }
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -49,28 +29,21 @@ input::-webkit-inner-spin-button {
 
 .dragbar {
     position: fixed;
-    top: 0px;
-    left: 0px;
+    top: 0;
+    right: 60px;
     width: 100%;
-    height: 26px;
+    height: 20px;
     -webkit-app-region: drag;
-    z-index: 11;
+    z-index: 1000;
 }
-
-
 
 .loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: 100;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #FFFFFF;
 }
 
 .loading-overlay.hidden {
@@ -88,10 +61,9 @@ input::-webkit-inner-spin-button {
 .loading-bar-track {
     width: 316px;
     height: 10px;
-    background: #E0E0E0;
+    background: #2a2a2a;
     border-radius: 10px;
     overflow: hidden;
-    margin: 0px;
 }
 
 .loading-bar-fill {
@@ -103,11 +75,9 @@ input::-webkit-inner-spin-button {
 
 .popup {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: 10;
     display: none;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
@@ -115,7 +85,7 @@ input::-webkit-inner-spin-button {
 .popup-tab {
     width: 40%;
     padding: 15px;
-    background: #FFFFFF;
+    background: #fff;
     border-radius: 15px;
     z-index: 10;
 }
@@ -123,7 +93,7 @@ input::-webkit-inner-spin-button {
 .popup-title {
     text-align: center;
     font-size: 2rem;
-    border-bottom: solid 4px #1A1A1A;
+    border-bottom: solid 4px #1a1a1a;
     margin-bottom: 1rem;
 }
 
@@ -135,13 +105,13 @@ input::-webkit-inner-spin-button {
 
 .popup-button {
     background: none;
-    color: #1A1A1A;
-    border: solid 4px #999999;
+    color: #1a1a1a;
+    border: solid 4px #999;
     border-radius: 10px;
     padding: 0.3rem 4rem;
-    font-size: inherit;
     font-weight: bold;
     margin: 15px 10px;
+    cursor: pointer;
 }
 
 .popup-button:hover {
@@ -158,14 +128,13 @@ input::-webkit-inner-spin-button {
 
 .panel {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     opacity: 0;
     z-index: 0;
     pointer-events: none;
 }
 
-.active {
+.panel.active {
     opacity: 1;
     z-index: 1;
     pointer-events: all;

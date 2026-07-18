@@ -1,5 +1,6 @@
 {
     "version": "20260604-6keftz",
+    "baseUrl": "https://mrdiego05.github.io/yusup-client",
     "name": "test-neoforge",
     "title": "Test Neoforge",
     "gameVersion": "1.20.2",

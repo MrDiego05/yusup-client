@@ -16,18 +16,6 @@
     border: 1px solid var(--green-pale);
 }
 
-:root {
-    --green-dark: #192E03;
-    --green-light: #F7FEE7;
-    --green-mid: #D8F999;
-    --green-pale: #ECFCCA;
-}
-
-h1 { font-size: 28px; }
-h2 { font-size: 24px; }
-h3 { font-size: 16px; }
-p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
-
 .login-home,
 .login-offline,
 .login-AZauth,
@@ -37,7 +25,7 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .login-text {
     font-size: 16px;
-    color: #1A1A1A;
+    color: #1a1a1a;
 }
 
 .connect,
@@ -57,15 +45,15 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 
 .connect:hover,
 .cancel:hover {
-    background: #333333;
+    background: #333;
 }
 
 .input-login .email,
 .input-login .password,
 .A2F {
-    color: #1A1A1A;
-    background: #F0F0F0;
-    border: 1px solid #CCCCCC;
+    color: #1a1a1a;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
     border-radius: 100px;
     width: 50%;
     padding: 0.4rem 1rem;
@@ -77,14 +65,14 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 .input-login .email:focus,
 .input-login .password:focus,
 .A2F:focus {
-    border-color: #999999;
+    border-color: #999;
     outline: none;
 }
 
 .switch-btn {
-    background: #F0F0F0;
-    color: #666666;
-    border: 1px solid #CCCCCC;
+    background: #f0f0f0;
+    color: #666;
+    border: 1px solid #ccc;
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
@@ -95,6 +83,6 @@ p, span, button, li, a, label, input, select, textarea { font-size: 12px; }
 }
 
 .switch-btn:hover {
-    background: #E0E0E0;
-    color: #333333;
+    background: #e0e0e0;
+    color: #333;
 }

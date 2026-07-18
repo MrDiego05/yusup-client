@@ -1,5 +1,3 @@
-/* Icons */
-
 @font-face {
     font-family: 'Icons';
     src: url('../fonts/Icons.woff2') format('woff2');
@@ -35,102 +33,24 @@
     -webkit-font-smoothing: antialiased;
 }
 
-.icon-close:before {
-    font-family: "Icons";
-    content: "\e90e";
-}
+.icon-close:before { font-family: "Icons"; content: "\e90e"; }
+.icon-minimize:before { font-family: "Icons"; content: "\e90b"; }
+.icon-maximize:before { font-family: "Icons"; content: "\e90c"; }
+.icon-restore-down:before { font-family: "Icons"; content: "\e90d"; }
+.icon-account-add:before { font-family: "Icons"; content: "\e901"; }
+.icon-account-delete:before { font-family: "Icons"; content: "\e902"; }
+.icon-settings:before { font-family: "Icons"; content: "\e909"; }
+.icon-monitor:before { font-family: "Icons"; content: "\e90a"; }
+.icon-arrow:before { font-family: "Social-icons"; content: "\e002"; }
 
-.icon-minimize:before {
-    font-family: "Icons";
-    content: "\e90b"
-}
-
-.icon-maximize:before {
-    font-family: "Icons";
-    content: "\e90c";
-}
-
-.icon-restore-down:before {
-    font-family: "Icons";
-    content: "\e90d";
-}
-
-.icon-account-add:before {
-    font-family: "Icons";
-    content: "\e901";
-}
-
-.icon-account-delete:before {
-    font-family: "Icons";
-    content: "\e902";
-}
-
-.icon-settings:before {
-    font-family: "Icons";
-    content: "\e909";
-}
-
-.icon-monitor:before {
-    font-family: "Icons";
-    content: "\e90a";
-}
-
-.icon-arrow:before {
-    font-family: "Social-icons";
-    content: "\e002";
-}
-
-.icon-discord {
-    background-image: url('../images/svgs/discord.png');
-    background-size: contain;
-}
-
-.icon-facebook {
-    background-image: url('../images/svgs/facebook.png');
-    background-size: contain;
-}
-
-.icon-github {
-    background-image: url('../images/svgs/github.png');
-    background-size: contain;
-}
-
-.icon-instagram {
-    background-image: url('../images/svgs/instagram.png');
-    background-size: contain;
-}
-
-.icon-reddit {
-    background-image: url('../images/svgs/reddit.png');
-    background-size: contain;
-}
-
-.icon-telegram {
-    background-image: url('../images/svgs/telegram.png');
-    background-size: contain;
-}
-
-.icon-twitch {
-    background-image: url('../images/svgs/twitch.png');
-    background-size: contain;
-}
-
-.icon-twitter {
-    background-image: url('../images/svgs/twitter.png');
-    background-size: contain;
-}
-
-.icon-youtube {
-    background-image: url('../images/svgs/youtube.png');
-    background-size: contain;
-}
-
-.icon-tiktok {
-    background-image: url('../images/svgs/tiktok.png');
-    background-size: contain;
-}
-
-.icon-web {
-    background-image: url('../images/svgs/web.png');
-    background-size: contain;
-}
+.icon-discord { background-image: url('../images/svgs/discord.png'); background-size: contain; }
+.icon-facebook { background-image: url('../images/svgs/facebook.png'); background-size: contain; }
+.icon-github { background-image: url('../images/svgs/github.png'); background-size: contain; }
+.icon-instagram { background-image: url('../images/svgs/instagram.png'); background-size: contain; }
+.icon-reddit { background-image: url('../images/svgs/reddit.png'); background-size: contain; }
+.icon-telegram { background-image: url('../images/svgs/telegram.png'); background-size: contain; }
+.icon-twitch { background-image: url('../images/svgs/twitch.png'); background-size: contain; }
+.icon-twitter { background-image: url('../images/svgs/twitter.png'); background-size: contain; }
+.icon-youtube { background-image: url('../images/svgs/youtube.png'); background-size: contain; }
+.icon-tiktok { background-image: url('../images/svgs/tiktok.png'); background-size: contain; }
+.icon-web { background-image: url('../images/svgs/web.png'); background-size: contain; }

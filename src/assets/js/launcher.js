@@ -34,6 +34,7 @@ class Launcher {
         await this.initConfigClient();
         this.showLoading('Paneles', 'Cargando interfaz del launcher', 40);
         this.createPanels(Login, Home, Settings);
+        this.inlineSvgIcons();
         this.showLoading('Instancias', 'Cargando catálogo de modpacks', 60);
         this.startLauncher();
     }
@@ -144,7 +145,6 @@ class Launcher {
             let accIdx = 0;
             for (let account of accounts) {
                 accIdx++;
-                this.showLoading('Cuentas', `Verificando cuenta ${accIdx}/${accounts.length}: ${account.name}`, 60 + Math.round((accIdx / accounts.length) * 25));
                 let account_ID = account.ID
                 if (account.error) {
                     await this.db.deleteData('accounts', account_ID)
@@ -288,6 +288,33 @@ class Launcher {
             this.hideLoading();
             changePanel('login');
         }
+    }
+
+    inlineSvgIcons() {
+        const imgs = document.querySelectorAll('img[src$=".svg"]');
+        imgs.forEach(img => {
+            const src = img.getAttribute('src');
+            if (!src) return;
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const svgPath = path.resolve(path.join(__dirname, '..', '..', '..', src));
+                if (fs.existsSync(svgPath)) {
+                    let svgContent = fs.readFileSync(svgPath, 'utf8');
+                    svgContent = svgContent.replace(/fill="#([^"]+)"/gi, 'fill="currentColor"');
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = svgContent;
+                    const svgEl = wrapper.querySelector('svg');
+                    if (svgEl) {
+                        svgEl.style.width = img.getAttribute('width') || '24px';
+                        svgEl.style.height = img.getAttribute('height') || '24px';
+                        svgEl.style.display = 'block';
+                        svgEl.style.flexShrink = '0';
+                        img.replaceWith(svgEl);
+                    }
+                }
+            } catch (e) {}
+        });
     }
 }
 

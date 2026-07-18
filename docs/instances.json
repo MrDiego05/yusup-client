@@ -1,0 +1,70 @@
+[
+    {
+        "name": "chuckyforge",
+        "title": "CHUCKY FORGE",
+        "description": "",
+        "tags": [],
+        "gameVersion": "1.16.5",
+        "loader": {
+            "type": "forge",
+            "build": "36.2.34",
+            "enable": true
+        },
+        "poster": null,
+        "banner": null,
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/chuckyforge.json"
+    },
+    {
+        "name": "chuckygames",
+        "title": "Chucky Games v1.0",
+        "description": "",
+        "tags": [
+            "terror",
+            "cooperativo",
+            "scary"
+        ],
+        "gameVersion": "1.20.1",
+        "loader": {
+            "type": "fabric",
+            "build": "0.19.2",
+            "enable": true
+        },
+        "poster": null,
+        "banner": null,
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/chuckygames.json"
+    },
+    {
+        "name": "desafiomine",
+        "title": "DesafioMiine",
+        "description": "",
+        "tags": [],
+        "gameVersion": "1.21.1",
+        "loader": {
+            "type": "neoforge",
+            "build": "20.4.167",
+            "enable": true
+        },
+        "poster": null,
+        "banner": null,
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/desafiomine.json"
+    },
+    {
+        "name": "test-neoforge",
+        "title": "Test Neoforge",
+        "description": "",
+        "tags": [
+            "neoforge",
+            "omaiga",
+            "increible"
+        ],
+        "gameVersion": "1.20.2",
+        "loader": {
+            "type": "neoforge",
+            "build": "20.2.3-beta",
+            "enable": true
+        },
+        "poster": null,
+        "banner": null,
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/test-neoforge.json"
+    }
+]

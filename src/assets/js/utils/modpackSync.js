@@ -101,12 +101,30 @@ class ModpackSync {
         }
 
         this.manifest = manifest;
+        if (manifest.baseUrl) {
+            this.serverBaseUrl = manifest.baseUrl.replace(/\/+$/, '');
+        }
         const tasks = manifest.tasks || [];
 
         if (storedVersion && storedVersion === manifest.version) {
-            progressCallback(100, 100, "El modpack ya está actualizado.");
-            this.saveManifest(manifest);
-            return { updated: false, version: manifest.version };
+            // Verify local file integrity — if all files exist and match SHA1, skip
+            let allValid = true;
+            for (const task of tasks) {
+                if (task.type !== 'file') continue;
+                if (!this.shouldIncludeTask(task)) continue;
+                const localPath = path.join(this.instancePath, task.to);
+                if (task.userFile && fs.existsSync(localPath)) continue;
+                if (!fs.existsSync(localPath)) { allValid = false; break; }
+                try {
+                    const localHash = await this.calculateSHA1(localPath);
+                    if (localHash !== task.hash) { allValid = false; break; }
+                } catch (e) { allValid = false; break; }
+            }
+            if (allValid) {
+                progressCallback(100, 100, "El modpack ya está actualizado.");
+                this.saveManifest(manifest);
+                return { updated: false, version: manifest.version };
+            }
         }
 
         const filesToDownload = [];
@@ -157,6 +175,8 @@ class ModpackSync {
         const protectedFiles = new Set([
             path.resolve(this.instancePath, 'modpack.json'),
             path.resolve(this.instancePath, 'launcher_profiles.json'),
+            path.resolve(this.instancePath, 'poster.png'),
+            path.resolve(this.instancePath, 'banner.png'),
         ]);
 
         for (const localFile of allLocalFiles) {
