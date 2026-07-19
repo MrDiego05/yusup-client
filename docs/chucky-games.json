@@ -1,0 +1,79 @@
+{
+    "version": "20260719-debho8",
+    "name": "chucky-games",
+    "title": "Chucky Games",
+    "gameVersion": "1.12.2",
+    "tasks": [
+        {
+            "type": "file",
+            "hash": "245235d5c67daff00ee658ee1f88ae8c3e4584b8",
+            "location": "mods/BetterFps-1.4.8.jar",
+            "to": "mods/BetterFps-1.4.8.jar",
+            "size": 155196
+        },
+        {
+            "type": "file",
+            "hash": "604a546425adbb62f2afa1a9cdb95651af0c7e03",
+            "location": "mods/cfm-6.3.0-mc1.12.2.jar",
+            "to": "mods/cfm-6.3.0-mc1.12.2.jar",
+            "size": 2418326
+        },
+        {
+            "type": "file",
+            "hash": "0b52ae06c251073ef046e9528ccb1ccfb3168e68",
+            "location": "mods/cgm-0.15.3-mc1.12.2.jar",
+            "to": "mods/cgm-0.15.3-mc1.12.2.jar",
+            "size": 814386
+        },
+        {
+            "type": "file",
+            "hash": "0f1b93d986e81ce228acdf9bea25caa1bae25dc4",
+            "location": "mods/CreativeCore_v1.10.70_mc1.12.2.jar",
+            "to": "mods/CreativeCore_v1.10.70_mc1.12.2.jar",
+            "size": 1320474
+        },
+        {
+            "type": "file",
+            "hash": "3955d2e062c784c4ef76057f9070f5c12fe2f09c",
+            "location": "mods/CustomMainMenu-MC1.12.2-2.0.9.1.jar",
+            "to": "mods/CustomMainMenu-MC1.12.2-2.0.9.1.jar",
+            "size": 132251
+        },
+        {
+            "type": "file",
+            "hash": "a5469076df8b1d9db4e483131dc94e270b8bc7cd",
+            "location": "mods/CustomNPCs_1.12.2-(05Jul20).jar",
+            "to": "mods/CustomNPCs_1.12.2-(05Jul20).jar",
+            "size": 9911871
+        },
+        {
+            "type": "file",
+            "hash": "2028fa47c9b0cf2904d3179d86ce9054009af6a0",
+            "location": "mods/EnhancedVisuals_v1.4.4_mc1.12.2.jar",
+            "to": "mods/EnhancedVisuals_v1.4.4_mc1.12.2.jar",
+            "size": 4725314
+        },
+        {
+            "type": "file",
+            "hash": "0bc9cb77f1e71d4edf98a40135e0762e6c9f9c35",
+            "location": "mods/obfuscate-0.4.2-1.12.2.jar",
+            "to": "mods/obfuscate-0.4.2-1.12.2.jar",
+            "size": 129099
+        },
+        {
+            "type": "file",
+            "hash": "ca3aea3a09ce215906c346fe190907fe0347b0c4",
+            "location": "mods/OptiFine_1.12.2_HD_U_G5.jar",
+            "to": "mods/OptiFine_1.12.2_HD_U_G5.jar",
+            "size": 2669107
+        },
+        {
+            "type": "file",
+            "hash": "d0483ac68cbeea22d6a2c46984c4cc7de4d3ce42",
+            "location": "mods/tlskincape1.12.2-1.4.jar",
+            "to": "mods/tlskincape1.12.2-1.4.jar",
+            "size": 193898
+        }
+    ],
+    "baseUrl": "https://mrdiego05.github.io/yusup-client"
+}
