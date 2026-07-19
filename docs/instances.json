@@ -66,5 +66,27 @@
         "poster": null,
         "banner": null,
         "modpack_url": "https://mrdiego05.github.io/yusup-client/test-neoforge.json"
+    },
+    {
+        "name": "chucky-games",
+        "title": "Chucky Games",
+        "description": "Evento de terror donde tendras que escapar de un muñeco diabolico",
+        "tags": [
+            "Adventure",
+            "Exploration",
+            "Horror",
+            "Multiplayer"
+        ],
+        "gameVersion": "1.12.2",
+        "loader": {
+            "type": "forge",
+            "build": "1.12.2-14.23.5.2859",
+            "enable": true
+        },
+        "poster": "https://mrdiego05.github.io/yusup-client/chucky-games/poster.png",
+        "banner": "https://mrdiego05.github.io/yusup-client/chucky-games/banner.png",
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/chucky-games.json",
+        "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=sjPMD5ArD6IDktHW%2FLpp04WtRzlmtxZjOvA%2F7NV6olpaaQ%2BHzyE1wL5zu7hrcR3UFP5%2BZrDnW7pjt6IcEnKrYg%3D%3D&expiry=tN2uoJNVCxEs3mMXXCqPz2wfyJZX3JJoOzJIneifouc%3D&mac=964b103bbb9ab084c40b8af7109d4bb72319f79ab793bf9b33672eb6bed080e6",
+        "instancePassword": "chucky"
     }
 ]
