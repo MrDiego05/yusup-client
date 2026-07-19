@@ -80,7 +80,7 @@
         "gameVersion": "1.12.2",
         "loader": {
             "type": "forge",
-            "build": "1.12.2-14.23.5.2859",
+            "build": "",
             "enable": true
         },
         "poster": "https://mrdiego05.github.io/yusup-client/chucky-games/poster.png",
@@ -88,5 +88,27 @@
         "modpack_url": "https://mrdiego05.github.io/yusup-client/chucky-games.json",
         "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=sjPMD5ArD6IDktHW%2FLpp04WtRzlmtxZjOvA%2F7NV6olpaaQ%2BHzyE1wL5zu7hrcR3UFP5%2BZrDnW7pjt6IcEnKrYg%3D%3D&expiry=tN2uoJNVCxEs3mMXXCqPz2wfyJZX3JJoOzJIneifouc%3D&mac=964b103bbb9ab084c40b8af7109d4bb72319f79ab793bf9b33672eb6bed080e6",
         "instancePassword": "chucky"
+    },
+    {
+        "name": "test-fabric",
+        "title": "Test Fabric",
+        "description": "un test del modpack de fabric",
+        "tags": [
+            "Adventure",
+            "Exploration",
+            "Tech",
+            "Building"
+        ],
+        "gameVersion": "1.20.1",
+        "loader": {
+            "type": "fabric",
+            "build": "0.19.3",
+            "enable": true
+        },
+        "poster": "https://mrdiego05.github.io/yusup-client/test-fabric/poster.png",
+        "banner": "https://mrdiego05.github.io/yusup-client/test-fabric/banner.png",
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/test-fabric.json",
+        "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=veNVDINGyRUVi3vU%2FSmP51eiOs%2B6k7HQLaT6KQ7MaZMy2DlGb4oepxE%2BZkrKcWAP%2BJsvEOn1L5CLkzxJ%2FGlPNw%3D%3D&expiry=LvTtPyHB3zyjh3I2X4zFYMOi5Z2y%2F7Q7yDPnc8QbYdY%3D&mac=e7c9f8414428e8494c8c3234a3fa405c8a515a4bda9d9f29296eaac8f8c450e1",
+        "instancePassword": "pas123"
     }
 ]
