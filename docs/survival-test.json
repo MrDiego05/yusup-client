@@ -1,0 +1,30 @@
+{
+    "version": "20260720-lhndka",
+    "name": "survival-test",
+    "title": "SURVIVAL TEST",
+    "gameVersion": "1.21.1",
+    "tasks": [
+        {
+            "type": "file",
+            "hash": "8fa17df26d3650416bc124be7a264bc1566a3b26",
+            "location": "mods/BetterF3-11.0.3-NeoForge-1.21.1.jar",
+            "to": "mods/BetterF3-11.0.3-NeoForge-1.21.1.jar",
+            "size": 481646
+        },
+        {
+            "type": "file",
+            "hash": "fee0be3ffe494189733ceaeb7163a38b03098ea5",
+            "location": "mods/explosiveenhancement-neoforge-1.21.1-1.1.2.jar",
+            "to": "mods/explosiveenhancement-neoforge-1.21.1-1.1.2.jar",
+            "size": 86058
+        },
+        {
+            "type": "file",
+            "hash": "edbc169c78f9f1cdf5233e996f12b21e7e1cdf18",
+            "location": "mods/formationsoverworld-1.0.5-mc1.21+.jar",
+            "to": "mods/formationsoverworld-1.0.5-mc1.21+.jar",
+            "size": 873370
+        }
+    ],
+    "baseUrl": "https://mrdiego05.github.io/yusup-client"
+}
