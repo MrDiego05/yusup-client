@@ -83,10 +83,10 @@
             "build": "",
             "enable": true
         },
-        "icon": "https://mrdiego05.github.io/yusup-client/chucky-games/icon.png",
-        "poster": "https://mrdiego05.github.io/yusup-client/chucky-games/poster.png",
-        "banner": "https://mrdiego05.github.io/yusup-client/chucky-games/banner.png",
-        "modpack_url": "https://mrdiego05.github.io/yusup-client/chucky-games.json",
+        "icon": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/chucky-games/icon.png",
+        "poster": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/chucky-games/poster.png",
+        "banner": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/chucky-games/banner.png",
+        "modpack_url": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/chucky-games.json",
         "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=sjPMD5ArD6IDktHW%2FLpp04WtRzlmtxZjOvA%2F7NV6olpaaQ%2BHzyE1wL5zu7hrcR3UFP5%2BZrDnW7pjt6IcEnKrYg%3D%3D&expiry=tN2uoJNVCxEs3mMXXCqPz2wfyJZX3JJoOzJIneifouc%3D&mac=964b103bbb9ab084c40b8af7109d4bb72319f79ab793bf9b33672eb6bed080e6",
         "instancePassword": "chucky"
     },
@@ -128,10 +128,10 @@
             "build": "21.1.240",
             "enable": true
         },
-        "icon": "https://mrdiego05.github.io/yusup-client/survival-test/icon.png",
-        "poster": "https://mrdiego05.github.io/yusup-client/survival-test/poster.png",
-        "banner": "https://mrdiego05.github.io/yusup-client/survival-test/banner.png",
-        "modpack_url": "https://mrdiego05.github.io/yusup-client/survival-test.json",
+        "icon": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-test/icon.png",
+        "poster": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-test/poster.png",
+        "banner": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-test/banner.png",
+        "modpack_url": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-test.json",
         "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=KEY2NOZHGPHLJb1N05RWKTdwSegeRUGdzoBJ0vQ4Uddl0RnZhTdt5g%2BDx88CVJQrwjvfprERUrZwQnmxG8Ierg%3D%3D&expiry=C8F4jVXjT1dUqaPF2KWRQUTNhA%2BUz6Of9z3zoPd9doU%3D&mac=87e13d80a138369591cb6cf52dd75be81298663a015df262f69af39517ac4376",
         "instancePassword": "pas12"
     }
