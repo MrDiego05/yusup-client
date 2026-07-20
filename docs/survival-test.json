@@ -1,5 +1,5 @@
 {
-    "version": "20260720-lhndka",
+    "version": "20260720-qwymr6",
     "name": "survival-test",
     "title": "SURVIVAL TEST",
     "gameVersion": "1.21.1",
@@ -26,5 +26,5 @@
             "size": 873370
         }
     ],
-    "baseUrl": "https://mrdiego05.github.io/yusup-client"
+    "baseUrl": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-test"
 }
