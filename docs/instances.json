@@ -83,6 +83,7 @@
             "build": "",
             "enable": true
         },
+        "icon": "https://mrdiego05.github.io/yusup-client/chucky-games/icon.png",
         "poster": "https://mrdiego05.github.io/yusup-client/chucky-games/poster.png",
         "banner": "https://mrdiego05.github.io/yusup-client/chucky-games/banner.png",
         "modpack_url": "https://mrdiego05.github.io/yusup-client/chucky-games.json",
@@ -105,10 +106,33 @@
             "build": "0.19.3",
             "enable": true
         },
+        "icon": "https://mrdiego05.github.io/yusup-client/test-fabric/icon.png",
         "poster": "https://mrdiego05.github.io/yusup-client/test-fabric/poster.png",
         "banner": "https://mrdiego05.github.io/yusup-client/test-fabric/banner.png",
         "modpack_url": "https://mrdiego05.github.io/yusup-client/test-fabric.json",
         "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=veNVDINGyRUVi3vU%2FSmP51eiOs%2B6k7HQLaT6KQ7MaZMy2DlGb4oepxE%2BZkrKcWAP%2BJsvEOn1L5CLkzxJ%2FGlPNw%3D%3D&expiry=LvTtPyHB3zyjh3I2X4zFYMOi5Z2y%2F7Q7yDPnc8QbYdY%3D&mac=e7c9f8414428e8494c8c3234a3fa405c8a515a4bda9d9f29296eaac8f8c450e1",
         "instancePassword": "pas123"
+    },
+    {
+        "name": "survival-test",
+        "title": "SURVIVAL TEST",
+        "description": "test de modpack neoforge",
+        "tags": [
+            "Hardcore",
+            "Vanilla+",
+            "Optimized"
+        ],
+        "gameVersion": "1.21.1",
+        "loader": {
+            "type": "neoforge",
+            "build": "21.1.240",
+            "enable": true
+        },
+        "icon": "https://mrdiego05.github.io/yusup-client/survival-test/icon.png",
+        "poster": "https://mrdiego05.github.io/yusup-client/survival-test/poster.png",
+        "banner": "https://mrdiego05.github.io/yusup-client/survival-test/banner.png",
+        "modpack_url": "https://mrdiego05.github.io/yusup-client/survival-test.json",
+        "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=KEY2NOZHGPHLJb1N05RWKTdwSegeRUGdzoBJ0vQ4Uddl0RnZhTdt5g%2BDx88CVJQrwjvfprERUrZwQnmxG8Ierg%3D%3D&expiry=C8F4jVXjT1dUqaPF2KWRQUTNhA%2BUz6Of9z3zoPd9doU%3D&mac=87e13d80a138369591cb6cf52dd75be81298663a015df262f69af39517ac4376",
+        "instancePassword": "pas12"
     }
 ]
