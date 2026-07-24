@@ -134,5 +134,27 @@
         "modpack_url": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-test.json",
         "zipUrl": "https://22-3-20-6winter-base-582a-yusup-client.yusupstudio00.workers.dev/download.aspx?file=KEY2NOZHGPHLJb1N05RWKTdwSegeRUGdzoBJ0vQ4Uddl0RnZhTdt5g%2BDx88CVJQrwjvfprERUrZwQnmxG8Ierg%3D%3D&expiry=C8F4jVXjT1dUqaPF2KWRQUTNhA%2BUz6Of9z3zoPd9doU%3D&mac=87e13d80a138369591cb6cf52dd75be81298663a015df262f69af39517ac4376",
         "instancePassword": "pas12"
+    },
+    {
+        "name": "survival-zack",
+        "title": "SurvivalZACK",
+        "description": "aaa",
+        "tags": [
+            "RPG",
+            "Fantasy",
+            "Horror"
+        ],
+        "gameVersion": "1.20.1",
+        "loader": {
+            "type": "forge",
+            "build": "1.20.1-47.4.9",
+            "enable": true
+        },
+        "icon": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-zack/icon.png",
+        "poster": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-zack/poster.png",
+        "banner": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-zack/banner.png",
+        "version": "24-07-26-16:01:39",
+        "modpack_url": "https://raw.githubusercontent.com/MrDiego05/yusup-client/main/docs/survival-zack.json",
+        "instancePassword": "zack123"
     }
 ]
